@@ -1,0 +1,18 @@
+version: "3.7"
+
+services:
+  db:
+    platform: linux/x86_64
+    image: mysql:latest
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: mutillidae
+  www:
+    depends_on:
+      - db
+    image: php:7.4.18-apache
+    volumes:
+      - "./www/:/var/www/html"
+    ports:
+      - 80:80
+      - 443:443
