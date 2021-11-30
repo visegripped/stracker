@@ -16,3 +16,8 @@ services:
     ports:
       - 80:80
       - 443:443
+    environment:
+      PHP__display_errors: 'On'
+      PHP_php5enmod: 'php_mysql'
+      PHP__date.timezone: '"Europe/Dublin"'
+      PHP__short_open_tag: 'On'
