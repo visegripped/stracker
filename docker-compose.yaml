@@ -25,15 +25,14 @@ services:
       PHP_php5enmod: 'php_mysql'
       PHP__date.timezone: '"America/Los_Angeles"'
       PHP__short_open_tag: 'On'
-  phpmyadmin:
-      image: phpmyadmin/phpmyadmin
-      links: 
-          - db:db
-      ports:
-          - 8000:80
-      environment:
-          MYSQL_USER: test
-          MYSQL_PASSWORD: pass
-          MYSQL_ROOT_PASSWORD: test_pass 
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - 8000:8080
+    depends_on:
+      - db
+    environment:
+      ADMINER_DEFAULT_SERVER: db
 volumes:
   my-datavolume:
