@@ -16,7 +16,7 @@ services:
       - db
     image: php:7.4.18-apache
     volumes:
-      - "./www/:/var/www/html"
+      - "./public_html/:/var/www/html"
     ports:
       - 80:80
       - 443:443
@@ -25,5 +25,15 @@ services:
       PHP_php5enmod: 'php_mysql'
       PHP__date.timezone: '"America/Los_Angeles"'
       PHP__short_open_tag: 'On'
+  phpmyadmin:
+      image: phpmyadmin/phpmyadmin
+      links: 
+          - db:db
+      ports:
+          - 8000:80
+      environment:
+          MYSQL_USER: test
+          MYSQL_PASSWORD: pass
+          MYSQL_ROOT_PASSWORD: test_pass 
 volumes:
   my-datavolume:
