@@ -8,9 +8,6 @@ function getCsv($csv) {
             $num = count($data);
             $row++;
             array_push($dataArray, $data);
-            // for ($c=0; $c < $num; $c++) {
-            //     echo $data[$c] . "<br />\n";
-            // }
         }
         fclose($handle);
     }

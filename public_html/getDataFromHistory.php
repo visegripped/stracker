@@ -10,11 +10,10 @@ function getDataFromHistory($history) {
     $eodPrices = array();
     $deltas = array();
     $theData = array();
-    // skip the header row.
-    for($i = 1; $i < $historyCount; $i++ ) {
+    for($i = 0; $i < $historyCount; $i++ ) {
         $row = $history[$i];
-        $date = $row[0];
-        $eod = $row[4];
+        $date = $row['date'];
+        $eod = $row['eod'];
         array_push($eodPrices, $eod);
 
         if($i > 20) {
