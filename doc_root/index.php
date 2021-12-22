@@ -4,6 +4,7 @@
     include "includes/stracker/getDataFromHistory.php";
     include "includes/stracker/writeHistoryToDB.php";
     include "includes/stracker/mysql.php";
+    include "includes/stracker/trackNewSymbol.php";
 
 // The contents of this file should get moved over to cron.php
 
@@ -32,13 +33,13 @@ function handleDailies() {
         $symbol = $row[0];
         $price = $row[1];
         $tradeTime = $row[2];
+        $companyName = $row[3];
         if(tableExists($symbol, $db)) {
             echo "$symbol ended at $price traded on ".csvDateTimeToDate($tradeTime).".  Get this data in to DB.<br>";
             // TODO - need to get the last 50 rows of data and use that to generate the next row, then add it.
         } elseif($symbol) {
             echo "$symbol is not presently tracked.  adding...";
-            createSymbolTable($symbol, $db);
-            addHistoricalData($symbol, $db);
+            trackNewSymbol($symbol, $companyName, $db);
             echo " success!<br>";
         } else {
             echo "symbol was blank.<br>";
