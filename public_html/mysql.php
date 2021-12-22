@@ -20,38 +20,32 @@ function dbConnect() {
       } catch (Exception $ex) { exit($ex->getMessage()); }
 }
 
+function tableExists($tableId, $db) {
+  $query = "SHOW TABLES LIKE '".$tableId."'";
+  $is_table=$db->query($query);
+   return $is_table->rowCount();
+}
 
 
-// (C) SELECT USERS
-// $stmt = $pdo->prepare("SELECT * FROM `users`");
-// $stmt->execute();
-// while ($row = $stmt->fetch()) { print_r($row); }
-// if ($stmt !== null) { $stmt = null; }
-// if ($pdo !== null) { $pdo = null; }
-
-// // (TEST) TOTAL TIME TAKEN
-// $taken = microtime(true) - $taken;
-
-
-
-// CREATE TABLE `INTU` (
-//   `eodp` decimal(10,2) NOT NULL,
-//   `ma20` decimal(10,2) NOT NULL,
-//   `ma50` decimal(10,2) NOT NULL,
-//   `delta` decimal(10,2) NOT NULL,
-//   `deltaMA5` decimal(10,2) NOT NULL,
-//   `deltaMA10` decimal(10,2) NOT NULL,
-//   `deltaMA20` decimal(10,2) NOT NULL,
-//   `P0` tinyint NOT NULL,
-//   `P1` tinyint NOT NULL,
-//   `P2` tinyint NOT NULL,
-//   `M1` decimal(10,2) NOT NULL,
-//   `M2` decimal(10,2) NOT NULL,
-//   `M3` decimal(10,2) NOT NULL,
-//   `date` date NOT NULL,
-//   PRIMARY KEY (`date`)
-// ) 
-
-// https://docs.google.com/spreadsheets/d/e/2PACX-1vQ3rO63DKTu9lmgHNKxWEYZ-sGoeG7LS6sJ9s38rOvoReHbmkxliThJB7FDQzZsl7_Cb0bF8hhHP01Q/pubhtml
+function createSymbolTable($symbol, $db) {
+  $statement = "CREATE TABLE $symbol(
+    EOD decimal(10,2) NOT NULL,
+    MA20 decimal(10,2) NULL,
+    MA50 decimal(10,2) NULL,
+    delta decimal(10,2) NULL,
+    deltaMA5 decimal(10,2) NULL,
+    deltaMA10 decimal(10,2) NULL,
+    deltaMA20 decimal(10,2) NULL,
+    P0 tinyint NOT NULL,
+    P1 tinyint NOT NULL,
+    P2 tinyint NOT NULL,
+    M1 decimal(10,2) NULL,
+    M2 decimal(10,2) NULL,
+    M3 decimal(10,2) NULL,
+    date date NOT NULL,
+    PRIMARY KEY (date)
+  )";
+  $db->exec($statement);
+}
 
 ?>
