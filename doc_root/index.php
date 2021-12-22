@@ -1,9 +1,9 @@
 <?php
-    include "getCsv.php";
-    include "formatCsv.php";
-    include "getDataFromHistory.php";
-    include "writeHistoryToDB.php";
-    include "mysql.php";
+    include "includes/stracker/getCsv.php";
+    include "includes/stracker/formatCsv.php";
+    include "includes/stracker/getDataFromHistory.php";
+    include "includes/stracker/writeHistoryToDB.php";
+    include "includes/stracker/mysql.php";
 
 // The contents of this file should get moved over to cron.php
 
@@ -25,7 +25,7 @@ function csvDateTimeToDate($dateTime) {
 
 
 function handleDailies() {
-    include "passwords.php";
+    include "includes/stracker/passwords.php";
     $priceList = getCsv($dailyEodPriceCsv);
     $db = dbConnect();
     foreach($priceList as $row) {
@@ -39,7 +39,7 @@ function handleDailies() {
             echo "$symbol is not presently tracked.  adding...";
             createSymbolTable($symbol, $db);
             addHistoricalData($symbol, $db);
-            echo " success!<br>"
+            echo " success!<br>";
         } else {
             echo "symbol was blank.<br>";
         }
