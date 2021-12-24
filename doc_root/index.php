@@ -16,14 +16,29 @@ function addHistoricalData($symbol, $db) {
     $formattedStockData = formatHistoryCsv($stockData);
     $history = getDataFromHistory($formattedStockData);
     writeHistoryToDB($symbol, $history, $db);
-    // print_r($history);
 }
 
 function csvDateTimeToDate($dateTime) {
-    $myDateTime = DateTime::createFromFormat('m/d/Y h:i:s', $dateTime);
-    return $myDateTime->format('Y-m-d');
+    if($dateTime) {
+        $date = explode(' ', $dateTime)[0];
+        $date = str_replace('/', '-', $date);
+        return $date;
+    }
 }
 
+function getEodHistory($symbol, $maxRows = 50, $pdo) {
+    $history = array();
+    $query = "select date, EOD from $symbol ORDER by date DESC LIMIT $maxRows";
+    $stmt = $pdo->query($query);
+    while ($row = $stmt->fetch()) {
+        $thisDate = array(
+            "date" => $row['date'],
+            "eod" => $row['EOD']
+        );
+        array_push($history, $thisDate);
+    }
+    return array_reverse($history); // fetches last X days, but need them in chronological order.
+}
 
 function handleDailies() {
     include "includes/stracker/passwords.php";
@@ -36,7 +51,10 @@ function handleDailies() {
         $companyName = $row[3];
         if(tableExists($symbol, $db)) {
             echo "$symbol ended at $price traded on ".csvDateTimeToDate($tradeTime).".  Get this data in to DB.<br>";
-            // TODO - need to get the last 50 rows of data and use that to generate the next row, then add it.
+            $recentHistory = getEodHistory($symbol, 75, $db);
+            $history = getDataFromHistory($recentHistory);
+            $mostRecentDayOfHistory = end($history);
+            writeHistoryToDB($symbol, array($mostRecentDayOfHistory), $db);
         } elseif($symbol) {
             echo "$symbol is not presently tracked.  adding...";
             trackNewSymbol($symbol, $companyName, $db);
