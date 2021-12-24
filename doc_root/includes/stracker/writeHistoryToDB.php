@@ -7,10 +7,11 @@ function writeHistoryToDB($symbol, $history, $pdo) {
             try {
                 $stmt->execute($row);
             } catch(PDOException $e) {
-                if ($e->getCode() == 1062) {
+                if ($e->getCode() == 23000) {
                     // EOD already exists for date. expected as this script may be run twice between trading days.
                 } else {
                     // not good.  need reporting around this at some point.
+                    echo "something went wrong.  Error: $e";
                 }
             }
         }

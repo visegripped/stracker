@@ -20,8 +20,8 @@ function addHistoricalData($symbol, $db) {
 
 function csvDateTimeToDate($dateTime) {
     if($dateTime) {
-        $date = explode(' ', $dateTime)[0];
-        $date = str_replace('/', '-', $date);
+        $date = DateTime::createFromFormat('m/d/Y', explode(' ', $dateTime)[0]);
+        $date = $date->format('Y-m-d');
         return $date;
     }
 }
@@ -50,10 +50,16 @@ function handleDailies() {
         $tradeTime = $row[2];
         $companyName = $row[3];
         if(tableExists($symbol, $db)) {
-            echo "$symbol ended at $price traded on ".csvDateTimeToDate($tradeTime).".  Get this data in to DB.<br>";
+            // echo "$symbol ended at $price traded on ".csvDateTimeToDate($tradeTime).".  Get this data in to DB.<br>";
             $recentHistory = getEodHistory($symbol, 75, $db);
+            array_push($recentHistory, array(
+                "date"=> csvDateTimeToDate($tradeTime),
+                "eod"=> $price
+            ));
             $history = getDataFromHistory($recentHistory);
             $mostRecentDayOfHistory = end($history);
+            // print_r($mostRecentDayOfHistory);
+            // echo "<br>";
             writeHistoryToDB($symbol, array($mostRecentDayOfHistory), $db);
         } elseif($symbol) {
             echo "$symbol is not presently tracked.  adding...";
