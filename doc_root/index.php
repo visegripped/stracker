@@ -50,7 +50,7 @@ function handleDailies() {
         $tradeTime = $row[2];
         $companyName = $row[3];
         if(tableExists($symbol, $db)) {
-            // echo "$symbol ended at $price traded on ".csvDateTimeToDate($tradeTime).".  Get this data in to DB.<br>";
+            echo "$symbol ended at $price traded on ".csvDateTimeToDate($tradeTime).".  Get this data in to DB.<br>";
             $recentHistory = getEodHistory($symbol, 75, $db);
             array_push($recentHistory, array(
                 "date"=> csvDateTimeToDate($tradeTime),
