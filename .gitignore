@@ -1,6 +1,7 @@
 passwords.php
 secretSauce.php
 reference-material/
+node_modules/*
 
 # Windows image file caches
 Thumbs.db

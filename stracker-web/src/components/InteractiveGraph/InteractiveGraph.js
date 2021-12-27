@@ -5,7 +5,7 @@ import Graph from '../Graph/Graph';
 import styles from './styles.css';
 
 export const InteractiveGraph = ({ symbol }) => {
-    const [dataPoints, setDataPoint ] = useState({});
+    const [dataPoints, setDataPoint ] = useState({'EOD': true});
     const doStuff = ( id, val ) => {
         const updatedValue = { [id] : val };
         setDataPoint({
