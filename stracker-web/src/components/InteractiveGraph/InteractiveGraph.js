@@ -4,7 +4,6 @@ import Chooser from '../Chooser/Chooser';
 import Graph from '../Graph/Graph';
 import styles from './styles.css';
 
-
 export const InteractiveGraph = ({ symbol }) => {
     const [dataPoints, setDataPoint ] = useState({});
     const doStuff = ( id, val ) => {
@@ -14,12 +13,11 @@ export const InteractiveGraph = ({ symbol }) => {
             ...updatedValue
         });
     }
-    console.log(' -> this state: ', dataPoints );
     return <div>
-        <section>
+        <section className={styles.mainCol}>
             <Graph symbol={symbol} enabledDataPoints={dataPoints} />
         </section>
-        <section>
+        <section className={styles.sidebar}>
             <Chooser enabledDataPoints={dataPoints} clickHandler={doStuff} />
         </section>
     </div>

@@ -6,7 +6,7 @@ const Label = ({ id, clickHandler }) => {
 }
 
 export const Chooser = ( { clickHandler, enabledDataPoints }) => {
-    const dataPoints = ['EOD', 'MA20', 'MA50', 'delta', 'deltaMA5', 'deltaMA10', 'deltaMA20', 'P0', 'P1', 'P2', 'M1', 'M2', 'M3'];
+    const dataPoints = ['EOD', 'MA20', 'MA50', 'delta', 'deltaMA5', 'deltaMA10', 'deltaMA20', 'M1', 'M2', 'M3'];
     const labels = [];
     dataPoints.forEach((dataPoint) => {
         labels.push(<Label key={dataPoint} id={dataPoint} clickHandler={clickHandler} />);
