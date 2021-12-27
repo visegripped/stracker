@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { useState } from 'react';
 import Select from 'react-select'; // https://react-select.com/home
 import symbolJson from './sample.json';
 
@@ -13,15 +12,12 @@ const formatSymbols = (symbols = []) => {
     return data;
 }
 
-export const SymbolChooser = () => {
-    const [symbol, setSymbol ] = useState('');
-    const changeSymbol =  (event) => {
-        setSymbol(event.value);
-    };
+export const SymbolChooser = ({ symbolChangeHandler }) => {
+
     const options = formatSymbols(symbolJson.symbols);
 
     return <div>
-        <Select onChange={changeSymbol}  options={options} />
+        <Select onChange={symbolChangeHandler}  options={options} />
     </div>
 }
 
