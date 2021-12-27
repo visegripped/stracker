@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState } from 'react';
-import Chooser from '../Chooser/Chooser';
+import Chooser from '../PlotChooser/PlotChooser';
 import Graph from '../Graph/Graph';
 import styles from './styles.css';
 
