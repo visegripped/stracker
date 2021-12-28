@@ -1,5 +1,5 @@
 <?php
-include "../includes/stracker/mysql.php";
+include "../../includes/stracker/mysql.php";
 // header('Content-Type: application/json; charset=utf-8');
 
 
@@ -23,10 +23,12 @@ function getSymbols($pdo) {
 
 $db = dbConnect();
 if($task == 'history') {
-    $data = getHistory('AAPL', 100, $db);
+    $data = getHistory($symbol, 100, $db);
     $data = array_reverse($data);
 } else if($task == 'symbols') {
     $data = getSymbols($db);
+} else {
+    $data = '{"err":"no/invalid task defined or required params are not present.  (symbol = ['.$symbol.'])"}';
 }
 
 

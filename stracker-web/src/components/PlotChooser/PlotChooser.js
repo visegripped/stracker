@@ -2,7 +2,7 @@
 import styles from './styles.css';
 
 const Label = ({ id, clickHandler, isChecked }) => {
-    return <label className={styles.label}><input type='checkbox' checked={isChecked} onClick={(e) => clickHandler(id, e.target.checked)} /> { id }</label>
+    return <label className={styles.label}><input type='checkbox' defaultChecked={isChecked} onClick={(e) => clickHandler(id, e.target.checked)} /> { id }</label>
 }
 
 export const Chooser = ( { clickHandler, enabledDataPoints }) => {

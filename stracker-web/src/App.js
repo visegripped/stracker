@@ -8,7 +8,6 @@ function App() {
   const changeSymbol =  (event) => {
       setSymbol(event.value);
   };
-
   return (
     <div className="App">
       <header className="App-header">

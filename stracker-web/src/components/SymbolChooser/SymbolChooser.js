@@ -1,8 +1,7 @@
 
 import React from 'react';
+import { useEffect, useState } from 'react';
 import Select from 'react-select'; // https://react-select.com/home
-import symbolJson from './sample.json';
-
 
 const formatSymbols = (symbols = []) => {
     const data = [];
@@ -13,11 +12,19 @@ const formatSymbols = (symbols = []) => {
 }
 
 export const SymbolChooser = ({ symbolChangeHandler }) => {
-
-    const options = formatSymbols(symbolJson.symbols);
+    let [symbols, setSymbols] = useState({});
+    useEffect(() => {
+        fetch("/stracker/api.php?task=symbols")
+        .then(response => response.json())
+        .then(data => {
+          setSymbols(formatSymbols(data));
+        }).catch((e) => {
+            console.log(' ERROR! ', e); // need to handle this better.
+        });
+      },[]);
 
     return <div>
-        <Select onChange={symbolChangeHandler}  options={options} />
+        <Select onChange={symbolChangeHandler}  options={symbols} />
     </div>
 }
 
