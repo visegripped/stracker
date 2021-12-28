@@ -1,11 +1,11 @@
 <?php
-    include "includes/stracker/getCsv.php";
-    include "includes/stracker/formatCsv.php";
-    include "includes/stracker/getDataFromHistory.php";
-    include "includes/stracker/writeHistoryToDB.php";
-    include "includes/stracker/mysql.php";
-    include "includes/stracker/trackNewSymbol.php";
-
+    include "../../includes/stracker/getCsv.php";
+    include "../../includes/stracker/formatCsv.php";
+    include "../../includes/stracker/getDataFromHistory.php";
+    include "../../includes/stracker/writeHistoryToDB.php";
+    include "../../includes/stracker/mysql.php";
+    include "../../includes/stracker/trackNewSymbol.php";
+    include "../../includes/stracker/passwords.php";
 // The contents of this file should get moved over to cron.php
 
 function addHistoricalData($symbol, $db) {
@@ -40,8 +40,8 @@ function getEodHistory($symbol, $maxRows = 50, $pdo) {
     return array_reverse($history); // fetches last X days, but need them in chronological order.
 }
 
-function handleDailies() {
-    include "includes/stracker/passwords.php";
+function handleDailies($dailyEodPriceCsv) {
+    
     $priceList = getCsv($dailyEodPriceCsv);
     $db = dbConnect();
     foreach($priceList as $row) {
@@ -71,6 +71,6 @@ function handleDailies() {
     }
 }
 
-handleDailies();
+handleDailies($dailyEodPriceCsv);
 
  ?>

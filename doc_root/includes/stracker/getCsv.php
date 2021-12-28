@@ -13,7 +13,7 @@ function getCsv($csv) {
             fclose($handle);
         }
     } else {
-        echo "something went wrong attempting to fetch csv: '$csv'";
+        echo "something went wrong attempting to fetch csv: ['$csv']";
     }
 
     return $dataArray;
