@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 // import styles from './styles.css';
 // sample: https://codesandbox.io/s/tot3i?file=/src/App.js:92-496
 import {
@@ -94,6 +94,11 @@ const getData = (enabledDataPoints = { EOD: true }, historicalData = []) => {
 };
 
 export const Graph = ({ symbol, enabledDataPoints, history }) => {
+
+  useEffect(() => {
+    console.log(`UseEffect for Graph was triggered. tracking symbol: ${symbol}.`);
+  }, [symbol]);
+
   const formattedHistory = getData(enabledDataPoints, history);
   const options = {
     responsive: true,

@@ -5,10 +5,10 @@ import './App.css';
 
 function App() {
   const lsSymbol = localStorage.getItem('symbol') || '';
-  console.log(' - - - - > lsSymbol: ', lsSymbol);
   const [symbol, setSymbol ] = useState(lsSymbol);
   const [history, setHistory ] = useState([]);
 
+  
   const changeSymbol =  (event) => {
       const newSymbol = event.value;
       setSymbol(newSymbol);

@@ -14,6 +14,7 @@ const formatSymbols = (symbols = []) => {
 export const SymbolChooser = ({ symbolChangeHandler }) => {
     let [symbols, setSymbols] = useState({});
     useEffect(() => {
+        console.log(' -> useEffect for symbolChooser was triggered.')
         fetch("./api.php?task=symbols")
         .then(response => response.json())
         .then(data => {

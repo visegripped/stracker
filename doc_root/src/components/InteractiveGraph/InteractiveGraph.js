@@ -1,5 +1,5 @@
 import React from "react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Chooser from "../PlotChooser/PlotChooser";
 import Graph from "../Graph/Graph";
 import "./styles.css";
@@ -17,7 +17,7 @@ export const InteractiveGraph = ({ symbol, history }) => {
     localStorage.setItem('dataPoints', JSON.stringify(updatedDataPoints));
   };
   return (
-    <div class="interactiveGraph--Container">
+    <div className="interactiveGraph--Container">
       <section className="interactiveGraph--mainCol">
         <Graph symbol={symbol} enabledDataPoints={dataPoints} history={history} />
       </section>
