@@ -1,4 +1,8 @@
-.mainCol {
+.interactiveGraph--Container {
+    display: flex;
+    justify-content: space-between;
+}
+
+.interactiveGraph--mainCol {
     width: 70%;
-    background: green;
 }

@@ -1,8 +1,8 @@
 
-import styles from './styles.css';
+import './styles.css';
 
 const Label = ({ id, clickHandler, isChecked }) => {
-    return <label className={styles.label}><input type='checkbox' defaultChecked={isChecked} onClick={(e) => clickHandler(id, e.target.checked)} /> { id }</label>
+    return <label className='plotChooser--label'><input type='checkbox' defaultChecked={isChecked} onClick={(e) => clickHandler(id, e.target.checked)} /> { id }</label>
 }
 
 export const Chooser = ( { clickHandler, enabledDataPoints }) => {
@@ -11,8 +11,8 @@ export const Chooser = ( { clickHandler, enabledDataPoints }) => {
     dataPoints.forEach((dataPoint) => {
         labels.push(<Label key={dataPoint} id={dataPoint} clickHandler={clickHandler} isChecked={enabledDataPoints[dataPoint]} />);
     })
-    return <fieldset>
-        <legend>Data Points:</legend>
+    return <fieldset className='plotChooser--fieldset'>
+        <legend className='plotChooser--legend'>Data Points:</legend>
         {labels}
     </fieldset>
 }

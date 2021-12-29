@@ -1,29 +1,28 @@
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Chooser from "../PlotChooser/PlotChooser";
 import Graph from "../Graph/Graph";
-import styles from "./styles.css";
+import "./styles.css";
 
 export const InteractiveGraph = ({ symbol, history }) => {
-    useEffect(() => {
-        console.log(`UseEffect for interactiveGraph was triggered.`);
-        console.log(' -> history? ', history);
-      }, [history]);
-  const [dataPoints, setDataPoint] = useState({ EOD: true });
-  const doStuff = (id, val) => {
+  const lsDataPoints = JSON.parse(localStorage.getItem('dataPoints')) || {EOD: true};
+  const [dataPoints, setDataPoints] = useState(lsDataPoints);
+  const updateDataPoint = (id, val) => {
     const updatedValue = { [id]: val };
-    setDataPoint({
+    const updatedDataPoints = {
       ...dataPoints,
       ...updatedValue,
-    });
+    }
+    setDataPoints(updatedDataPoints);
+    localStorage.setItem('dataPoints', JSON.stringify(updatedDataPoints));
   };
   return (
-    <div>
-      <section className={styles.mainCol}>
+    <div class="interactiveGraph--Container">
+      <section className="interactiveGraph--mainCol">
         <Graph symbol={symbol} enabledDataPoints={dataPoints} history={history} />
       </section>
-      <section className={styles.sidebar}>
-        <Chooser enabledDataPoints={dataPoints} clickHandler={doStuff} />
+      <section className="interactiveGraph--sidebar">
+        <Chooser enabledDataPoints={dataPoints} clickHandler={updateDataPoint} />
       </section>
     </div>
   );

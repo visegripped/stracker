@@ -1,15 +1,18 @@
 import InteractiveGraph from './components/InteractiveGraph/InteractiveGraph';
 import SymbolChooser from './components/SymbolChooser';
 import { useState } from 'react';
+import './App.css';
 
 function App() {
-
-  const [symbol, setSymbol ] = useState('');
+  const lsSymbol = localStorage.getItem('symbol') || '';
+  console.log(' - - - - > lsSymbol: ', lsSymbol);
+  const [symbol, setSymbol ] = useState(lsSymbol);
   const [history, setHistory ] = useState([]);
 
   const changeSymbol =  (event) => {
       const newSymbol = event.value;
       setSymbol(newSymbol);
+      localStorage.setItem('symbol', newSymbol);
       fetch(`./api.php?task=history&symbol=${newSymbol}&ts=${Date.now()}`) // date is here to cache-bust
       .then((response) => response.json())
       .then((data) => {
@@ -21,9 +24,12 @@ function App() {
       });
   };
   return (
-    <div className="App">
-      <header className="App-header">
-        <SymbolChooser symbolChangeHandler={changeSymbol} />
+    <div className="app">
+      <header className="app--header">
+        <div className='app--logo'>Stracker</div>
+        <div className="app--symbolChooser">
+          <SymbolChooser symbolChangeHandler={changeSymbol} />
+        </div>
       </header>
       <main>
         <InteractiveGraph symbol={symbol} history={history} />
