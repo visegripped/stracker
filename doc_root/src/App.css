@@ -1,0 +1,16 @@
+.app--header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.app--logo {
+  font-size: 36px;
+  font-weight: 600;
+  font-style: italic;
+  letter-spacing: -1px;
+  color: #666;
+}
+
+.app--symbolChooser {
+  width: 40%;
+}

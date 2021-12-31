@@ -1,7 +1,5 @@
 <?php
 include "../../includes/stracker/mysql.php";
-// header('Content-Type: application/json; charset=utf-8');
-
 
 $task = $_GET['task'];
 $symbol = $_GET['symbol'];
@@ -15,11 +13,10 @@ function getHistory($symbol, $maxRows = 50, $pdo) {
 
 
 function getSymbols($pdo) {
-    $query = "select symbol, name from symbols ORDER by symbol ASC";
+    $query = "select symbol, name from _symbols ORDER by symbol ASC";
     $stmt = $pdo->query($query);
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 }
-
 
 $db = dbConnect();
 if($task == 'history') {
@@ -30,8 +27,6 @@ if($task == 'history') {
 } else {
     $data = '{"err":"no/invalid task defined or required params are not present.  (symbol = ['.$symbol.'])"}';
 }
-
-
 
 $data = json_encode($data);
 header('Content-type: application/json');
