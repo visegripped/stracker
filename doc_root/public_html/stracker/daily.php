@@ -40,27 +40,43 @@ function getEodHistory($symbol, $maxRows = 50, $pdo) {
     return array_reverse($history); // fetches last X days, but need them in chronological order.
 }
 
+function recordAlerts($date, $alerts, $pdo) {
+    $alertsAsJson = json_encode($alerts);
+    $query = "INSERT INTO _alertHistory (date, alerts) VALUES (?,?) on duplicate key update date=date, alerts=alerts";
+    $pdo->prepare($query)->execute([$date, $alertsAsJson]);
+}
+
 function handleDailies($dailyEodPriceCsv) {
-    
-    $priceList = getCsv($dailyEodPriceCsv);
+    $alerts = array();
+    $trackedSymbolData = getCsv($dailyEodPriceCsv);
     $db = dbConnect();
-    foreach($priceList as $row) {
+    foreach($trackedSymbolData as $row) {
         $symbol = $row[0];
         $price = $row[1];
-        $tradeTime = $row[2];
+        $tradeDate = csvDateTimeToDate($row[2]);
         $companyName = $row[3];
         if(tableExists($symbol, $db)) {
-            echo "$symbol ended at $price traded on ".csvDateTimeToDate($tradeTime).".  Get this data in to DB.<br>";
+            echo "Tracked symbol [$symbol] ended at $price traded on ".$tradeDate.".<br>";
             $recentHistory = getEodHistory($symbol, 75, $db);
-            array_push($recentHistory, array(
-                "date"=> csvDateTimeToDate($tradeTime),
-                "eod"=> $price
-            ));
+            $lastDateFromHistory = end($recentHistory)['date'];
+
+            // this condition could happen if the daily script was run twice on the same date.
+            if($lastDateFromHistory == $tradeDate) {
+                echo " -> tracked day is already in history [$lastDateFromHistory]. do not add.<br>";
+            } else {
+                array_push($recentHistory, array(
+                    "date"=> $tradeDate,
+                    "eod"=> $price
+                ));
+            }
+
             $history = getDataFromHistory($recentHistory);
             $mostRecentDayOfHistory = end($history);
-            // print_r($mostRecentDayOfHistory);
-            // echo "<br>";
             writeHistoryToDB($symbol, array($mostRecentDayOfHistory), $db);
+            $alertState = signalAlignment($history);
+            if($alertState) {
+                $alerts[$symbol] = $alertState;
+            }
         } elseif($symbol) {
             echo "$symbol is not presently tracked.  adding...";
             trackNewSymbol($symbol, $companyName, $db);
@@ -68,9 +84,16 @@ function handleDailies($dailyEodPriceCsv) {
         } else {
             echo "symbol was blank.<br>";
         }
+        // die(); // here for testing only.
     }
+    if(count($alerts)) {
+        recordAlerts($tradeDate, $alerts, $db);
+    }
+    echo "<br><h3>Alerts:</h3><br>";
+    print_r($alerts);
 }
 
 handleDailies($dailyEodPriceCsv);
 
  ?>
+ 

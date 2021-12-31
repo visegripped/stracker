@@ -14,39 +14,44 @@ function getDataFromHistory($history) {
         $row = $history[$i];
         $date = $row['date'];
         $eod = $row['eod'];
-        array_push($eodPrices, $eod);
 
-        if($i > 20) {
-            $MA20 = calcMA($eodPrices, 20);
-            $delta = $eod - $MA20;
-            array_push($deltas, $delta);
+        if(is_numeric($eod)) {
+            array_push($eodPrices, $eod);
+
+            if($i > 20) {
+                $MA20 = calcMA($eodPrices, 20);
+                $delta = $eod - $MA20;
+                array_push($deltas, $delta);
+            }
+            if($i > 25) {
+                $deltaMA5 = calcMA($deltas, 5); //D1
+                $deltaMA10 = calcMA($deltas, 10); //D2
+                $deltaMA20 = calcMA($deltas, 20); //D3
+                $M1 = $MA20 + $deltaMA5; // MA20 + D1
+                $M2 = $MA20 + $deltaMA10; // MA20 + D2
+                $M3 = $MA20 + $deltaMA20; // MA20 + D3
+            }
+            if($i > 50) {
+                $MA50 = calcMA($eodPrices, 50);
+            }
+            $todaysData = array(
+                "date" => $date,
+                "eod" => $eod,
+                "delta" => $delta,
+                "deltaMA5" => $deltaMA5,
+                "deltaMA10" => $deltaMA10,
+                "deltaMA20" => $deltaMA20,
+                "MA20" => $MA20,
+                "MA50" => $MA50,
+                "M1" => $M1,
+                "M2" => $M2,
+                "M3" => $M3,
+            );
+    
+            $todaysData = array_merge($todaysData, alertsForDay($todaysData));
+            
+            array_push($theData, $todaysData);
         }
-        if($i > 25) {
-            $deltaMA5 = calcMA($deltas, 5); //D1
-            $deltaMA10 = calcMA($deltas, 10); //D2
-            $deltaMA20 = calcMA($deltas, 20); //D3
-            $M1 = $MA20 + $deltaMA5; // MA20 + D1
-            $M2 = $MA20 + $deltaMA10; // MA20 + D2
-            $M3 = $MA20 + $deltaMA20; // MA20 + D3
-        }
-        if($i > 50) {
-            $MA50 = calcMA($eodPrices, 50);
-        }
-        $todaysData = array(
-            "date" => $date,
-            "eod" => $eod,
-            "delta" => $delta,
-            "deltaMA5" => $deltaMA5,
-            "deltaMA10" => $deltaMA10,
-            "deltaMA20" => $deltaMA20,
-            "MA20" => $MA20,
-            "MA50" => $MA50,
-            "M1" => $M1,
-            "M2" => $M2,
-            "M3" => $M3,
-        );       
-        $todaysData = array_merge($todaysData, alertsForDay($todaysData));
-        array_push($theData, $todaysData);
     }
     return $theData;
 }
