@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 // import styles from './styles.css';
 // sample: https://codesandbox.io/s/tot3i?file=/src/App.js:92-496
 import {
@@ -13,7 +13,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 
-const formatHistoryAsDatasets = (history) => {
+const formatHistoryAsDatasets = (history = []) => {
   const dataSets = {
     date: [],
     EOD: [],
@@ -30,22 +30,25 @@ const formatHistoryAsDatasets = (history) => {
     M2: [],
     M3: [],
   };
-  history.forEach((row) => {
-    dataSets["date"].push(row["date"]);
-    dataSets["EOD"].push(row["EOD"]);
-    dataSets["MA20"].push(row["MA20"]);
-    dataSets["MA50"].push(row["MA50"]);
-    dataSets["M1"].push(row["M1"]);
-    dataSets["M2"].push(row["M2"]);
-    dataSets["M3"].push(row["M3"]);
-    dataSets["delta"].push(row["delta"]);
-    dataSets["deltaMA5"].push(row["deltaMA5"]);
-    dataSets["deltaMA10"].push(row["deltaMA10"]);
-    dataSets["deltaMA20"].push(row["deltaMA20"]);
-    dataSets["P0"].push(row["P0"]);
-    dataSets["P1"].push(row["P1"]);
-    dataSets["P2"].push(row["P2"]);
-  });
+
+  if(history.length) {
+    history.forEach((row) => {
+      dataSets["date"].push(row["date"]);
+      dataSets["EOD"].push(row["EOD"]);
+      dataSets["MA20"].push(row["MA20"]);
+      dataSets["MA50"].push(row["MA50"]);
+      dataSets["M1"].push(row["M1"]);
+      dataSets["M2"].push(row["M2"]);
+      dataSets["M3"].push(row["M3"]);
+      dataSets["delta"].push(row["delta"]);
+      dataSets["deltaMA5"].push(row["deltaMA5"]);
+      dataSets["deltaMA10"].push(row["deltaMA10"]);
+      dataSets["deltaMA20"].push(row["deltaMA20"]);
+      dataSets["P0"].push(row["P0"]);
+      dataSets["P1"].push(row["P1"]);
+      dataSets["P2"].push(row["P2"]);
+    });
+  }
   return dataSets;
 };
 
@@ -93,12 +96,7 @@ const getData = (enabledDataPoints = { EOD: true }, historicalData = []) => {
   };
 };
 
-export const Graph = ({ symbol, enabledDataPoints, history }) => {
-
-  useEffect(() => {
-    console.log(`UseEffect for Graph was triggered. tracking symbol: ${symbol}.`);
-  }, [symbol]);
-
+export const Graph = ({ symbol, symbolName, enabledDataPoints, history }) => {
   const formattedHistory = getData(enabledDataPoints, history);
   const options = {
     responsive: true,
@@ -113,7 +111,7 @@ export const Graph = ({ symbol, enabledDataPoints, history }) => {
       },
       title: {
         display: true,
-        text: `History for ${symbol}`,
+        text: `History for ${symbolName} [${symbol}]`,
       },
     },
   };
