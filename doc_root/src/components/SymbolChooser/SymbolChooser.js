@@ -2,6 +2,7 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
 import Select from 'react-select'; // https://react-select.com/home
+import apiEndpoints from '../../endpoints.json';
 
 const formatSymbols = (symbols = []) => {
     const data = [];
@@ -14,8 +15,8 @@ const formatSymbols = (symbols = []) => {
 export const SymbolChooser = ({ symbolChangeHandler }) => {
     let [symbols, setSymbols] = useState({});
     useEffect(() => {
-        console.log(' -> useEffect for symbolChooser was triggered.')
-        fetch("./api.php?task=symbols")
+        console.log(' -> useEffect for symbolChooser was triggered. endpoint: ', apiEndpoints.symbols)
+        fetch(apiEndpoints.symbols)
         .then(response => response.json())
         .then(data => {
           setSymbols(formatSymbols(data));

@@ -1,6 +1,7 @@
 import InteractiveGraph from './components/InteractiveGraph/InteractiveGraph';
 import SymbolChooser from './components/SymbolChooser';
 import { useState } from 'react';
+import apiEndpoints from './endpoints.json';
 import './App.css';
 
 function App() {
@@ -13,7 +14,7 @@ function App() {
       const newSymbol = event.value;
       setSymbol(newSymbol);
       localStorage.setItem('symbol', newSymbol);
-      fetch(`./api.php?task=history&symbol=${newSymbol}&ts=${Date.now()}`) // date is here to cache-bust
+      fetch(`${apiEndpoints.history}&symbol=${newSymbol}`)
       .then((response) => response.json())
       .then((data) => {
         console.log(`Historical data for ${newSymbol} was fetched`);
