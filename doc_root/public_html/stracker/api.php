@@ -1,5 +1,6 @@
 <?php
 include "../../includes/stracker/mysql.php";
+include "../../includes/stracker/apiHeaders.php";
 
 $task = $_GET['task'];
 $symbol = $_GET['symbol'];
@@ -30,5 +31,7 @@ if($task == 'history') {
 
 $data = json_encode($data);
 header('Content-type: application/json');
+
+
 print($data);
 ?>
