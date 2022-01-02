@@ -4,29 +4,35 @@ import { useEffect, useState } from 'react';
 import Select from 'react-select'; // https://react-select.com/home
 import apiEndpoints from '../../endpoints.json';
 
-const formatSymbols = (symbols = []) => {
-    const data = [];
-    symbols.forEach((symbol) => {
-        data.push({value: symbol.symbol, label: symbol.name});
-    });
-    return data;
-}
-
-export const SymbolChooser = ({ symbolChangeHandler }) => {
+export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
     let [symbols, setSymbols] = useState({});
+    const selectedOption = {
+        value: symbol,
+        label: symbolName,
+    };
+
+    const handleDataResponse = (symbols = []) => {
+        const data = [];
+        symbols.forEach((symbol) => {
+            const option = {value: symbol.symbol, label: symbol.name};
+            data.push(option);
+        });
+        return data;
+    }
+
     useEffect(() => {
-        console.log(' -> useEffect for symbolChooser was triggered. endpoint: ', apiEndpoints.symbols)
+        console.log(' - fetch symbol list');
         fetch(apiEndpoints.symbols)
         .then(response => response.json())
         .then(data => {
-          setSymbols(formatSymbols(data));
+          setSymbols(handleDataResponse(data));
         }).catch((e) => {
             console.log(' ERROR! ', e); // TODO -> need to handle this better.
         });
-      },[]);
+      },[symbol]);
 
     return <div>
-        <Select onChange={symbolChangeHandler}  options={symbols} />
+        <Select onChange={symbolChangeHandler} defaultValue={selectedOption} options={symbols} />
     </div>
 }
 
