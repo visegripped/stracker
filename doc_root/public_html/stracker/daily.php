@@ -19,7 +19,7 @@ function addHistoricalData($symbol, $db) {
 }
 
 function csvDateTimeToDate($dateTime) {
-    if($dateTime) {
+    if($dateTime && strtotime($dateTime)) {
         $date = DateTime::createFromFormat('m/d/Y', explode(' ', $dateTime)[0]);
         $date = $date->format('Y-m-d');
         return $date;
@@ -48,14 +48,18 @@ function recordAlerts($date, $alerts, $pdo) {
 
 function handleDailies($dailyEodPriceCsv) {
     $alerts = array();
+    $errors = array();
     $trackedSymbolData = getCsv($dailyEodPriceCsv);
     $db = dbConnect();
+
     foreach($trackedSymbolData as $row) {
         $symbol = $row[0];
         $price = $row[1];
         $tradeDate = csvDateTimeToDate($row[2]);
         $companyName = $row[3];
-        if(tableExists($symbol, $db)) {
+        if(!is_numeric($price)) {
+            array_push($errors, "Symbol $symbol had a non-numeric price: $price. TradeDate: $tradeDate and company name: $companyName.");
+        } elseif(tableExists($symbol, $db)) {
             echo "Tracked symbol [$symbol] ended at $price traded on ".$tradeDate.".<br>";
             $recentHistory = getEodHistory($symbol, 75, $db);
             $lastDateFromHistory = end($recentHistory)['date'];
@@ -89,8 +93,21 @@ function handleDailies($dailyEodPriceCsv) {
     if(count($alerts)) {
         recordAlerts($tradeDate, $alerts, $db);
     }
+    
+    if(count($errors)) {
+        $message = implode("\r", $errors);
+        $message = wordwrap($message, 70, "\r\n");
+        $headers = "From: stracker-errors@visegripped.com";
+        mail($errorEmail, 'Stracker errors', $message, $headers);
+    }
+    
     echo "<br><h3>Alerts:</h3><br>";
     print_r($alerts);
+    echo "<br><h3>Errors:</h3><br>";
+    print_r($errors);
+
+
+
 }
 
 handleDailies($dailyEodPriceCsv);
