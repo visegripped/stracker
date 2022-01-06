@@ -94,20 +94,17 @@ function handleDailies($dailyEodPriceCsv) {
         recordAlerts($tradeDate, $alerts, $db);
     }
     
+    echo "<br><h3>Alerts:</h3><br>";
+    print_r($alerts);
+    
     if(count($errors)) {
+        echo "<br><h3>Errors:</h3><br>";
+        print_r($errors);
         $message = implode("\r", $errors);
         $message = wordwrap($message, 70, "\r\n");
         $headers = "From: stracker-errors@visegripped.com";
         mail($errorEmail, 'Stracker errors', $message, $headers);
     }
-    
-    echo "<br><h3>Alerts:</h3><br>";
-    print_r($alerts);
-    echo "<br><h3>Errors:</h3><br>";
-    print_r($errors);
-
-
-
 }
 
 handleDailies($dailyEodPriceCsv);
