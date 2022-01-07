@@ -1,17 +1,25 @@
-
+import React, { useContext } from "react";
+import { AppContext } from "../../context/AppContext";
 import './Messages.styles.css';
 
-const MessageTemplate = ({ classification, message, state}) => {
-  return <div className={`${classification} message`} aria-hidden={state === 'hidden' ? true: false}>
-    {message}
-    <button>X</button>
+export const MessageTemplate = ({ classification, message}) => {
+  return <div className={`message ${classification}`}>
+      <pre className="message--pre">{message}</pre>
+    <button className={`button message--button message--button--${classification}`}>X</button>
     </div>
 }
 
 export const Messages = () => {
-    return <div>
+  const [App, setApp] = useContext(AppContext);
+  const { messages } = App;
+  const messageList = []
 
-    </div>
+  messages.forEach(({ message, classification }) => {
+    messageList.push(<MessageTemplate message={message} classification={classification} />);
+  })
+    return <section className="messagesContainer">
+      {messageList}
+    </section>
 }
 
 export default Messages;

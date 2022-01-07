@@ -3,7 +3,11 @@ import React, { useState, createContext } from "react";
 const AppContext = createContext();
 
 function AppProvider(props) {
-  const [App, setApp] = useState({}); //this should be false, eventually.
+  const [App, setApp] = useState({
+    auth: false,
+    messages: [],
+  }); //this should be false, eventually.
+  console.log(' - - - - - - > app: ', App);
   const updateApp = (id, val) => {
     const updatedValue = { [id]: val };
     const updatedApp = {

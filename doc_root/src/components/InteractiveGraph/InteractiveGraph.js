@@ -1,12 +1,15 @@
 import React from "react";
-import { useState, useEffect } from "react";
-import Chooser from "../PlotChooser/PlotChooser";
+import { useState, useEffect, useContext } from "react";
+import { AppContext } from "../../context/AppContext";
+import PlotChooser from "../PlotChooser/PlotChooser";
 import Graph from "../Graph/Graph";
 import "./styles.css";
-import apiEndpoints from '../../endpoints.json';
+import apiEndpoints from "../../endpoints.json";
 
 export const InteractiveGraph = ({ symbol, symbolName }) => {
   const [history, setHistory] = useState([]);
+  const [App, setApp] = useContext(AppContext);
+  const { messages } = App;
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
@@ -22,14 +25,22 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   };
 
   useEffect(() => {
-    fetch(`${apiEndpoints.history}&symbol=${symbol}`)
+    const url = `${apiEndpoints.history}&symbol=${symbol}`;
+    fetch(url)
       .then((response) => response.json())
       .then((data) => {
         console.log(`Historical data for ${symbol} was fetched`);
         setHistory(data);
       })
       .catch((e) => {
-        console.log(" ERROR! ", e); // TODO -> need to handle this better.
+        messages.push({
+          message: `The request to fetch the list of symbols has failed. Please try again later.
+          If this error persists, contact the site administrator.
+          Error details: ${e}
+          URL: ${url}`,
+          classification: "error",
+        });
+        setApp('messages', messages);
       });
   }, [symbol]);
 
@@ -44,7 +55,7 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
         />
       </section>
       <section className="interactiveGraph--sidebar">
-        <Chooser
+        <PlotChooser
           enabledDataPoints={dataPoints}
           clickHandler={updateDataPoint}
         />

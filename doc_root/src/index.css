@@ -1,15 +1,26 @@
 body {
   margin: 10px;
-  font-family: 'Tahoma', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-  font-weight: 400;
-  font-size: 18px;
   background: #efefef;
+  font-size: 16px;
+}
+
+body, pre {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: #333;
+  font-family: 'Tahoma', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  font-weight: 400;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.button {
+  border: 1px solid #CCC;
+  background: #FFF;
+  font-size: 16px;
+  padding: 4px 8px;
+  border-radius: 4px;
 }

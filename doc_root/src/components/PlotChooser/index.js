@@ -1,3 +1,3 @@
 import Chooser from './PlotChooser';
 
-export default Chooser;
+export default PlotChooser;
