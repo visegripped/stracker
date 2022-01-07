@@ -2,5 +2,5 @@
     "symbolsBak": "./api.php?task=symbols",
     "symbols": "http://localshost/public_html/stracker/api.php?task=symbols",
     "historyBak": "./api.php?task=history",
-    "history": "http://localshost/public_html/stracker/api.php?task=history"
+    "history": "http://localhost/public_html/stracker/api.php?task=history"
 }
