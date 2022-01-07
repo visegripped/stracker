@@ -1,0 +1,21 @@
+.message {
+  padding: 20px;
+  text-align: left;
+  border: 1px solid;
+  color: #333;
+}
+
+.message.info {
+  background: lightblue;
+  border-color: darkblue;
+}
+
+.message.warn {
+  background: lightgoldenrodyellow;
+  border-color: darkorange
+}
+
+.message.error {
+  background: lightpink;
+  border-color: darkred;
+}

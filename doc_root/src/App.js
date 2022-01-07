@@ -1,5 +1,6 @@
 import InteractiveGraph from './components/InteractiveGraph/InteractiveGraph';
 import SymbolChooser from './components/SymbolChooser';
+import Messages from './components/Messages';
 import { useState, useEffect } from 'react';
 import './App.css';
 
