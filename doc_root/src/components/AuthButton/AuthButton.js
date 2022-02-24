@@ -1,22 +1,17 @@
-import React, { useContext} from 'react';
-import { AuthContext } from '../../context/AuthContext';
-import './styles.css';
+import React, { useContext } from "react";
+import { AppContext } from "../../context/AppContext";
+import "./styles.css";
 
 export const AuthButton = () => {
-    const [Auth, setAuth] = useContext(AuthContext);
-    const AuthText = (Auth) ? 'login' : 'logout';
+  const [App, setApp] = useContext(AppContext);
+  const AuthText = App.auth ? "login" : "logout";
 
-    const toggleAuthState = (e) => {
-		e.preventDefault();
-		setAuth(!(Auth));
-	}
-
-    return (
-      <button onClick={toggleAuthState}>
-          {AuthText}
-      </button>
-    );
+  const toggleAuthState = (e) => {
+    e.preventDefault();
+    setApp("auth", !App.auth);
   };
-  
-  export default AuthButton;
-  
+
+  return <button onClick={toggleAuthState}>{AuthText}</button>;
+};
+
+export default AuthButton;
