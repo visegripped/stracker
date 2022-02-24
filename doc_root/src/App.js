@@ -7,7 +7,7 @@ import Messages from './components/Messages';
 import "./App.css";
 
 function App() {
-  const lsSymbol = localStorage.getItem("symbol") || "";
+  const lsSymbol = localStorage.getItem("symbol") || "AAPL";
   const lsSymbolName = localStorage.getItem("symbolName") || "";
   const [symbol, setSymbol] = useState(lsSymbol);
   const [symbolName, setSymbolName] = useState(lsSymbolName);

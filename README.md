@@ -9,6 +9,7 @@ Local development
 
 
 App is available at: http://localhost/
+Stracker is available at: http://localhost/public_html/stracker/
 PHPMyAdmin is available at: http://localhost:8000/index.php
 
 
