@@ -9,7 +9,7 @@ import apiEndpoints from "../../endpoints.json";
 export const InteractiveGraph = ({ symbol, symbolName }) => {
   const [history, setHistory] = useState([]);
   const [App, setApp] = useContext(AppContext);
-  const { messages } = App;
+  const { isAuthenticated, messages } = App;
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
@@ -46,7 +46,7 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
 
   return (
     <div className="interactiveGraph--Container">
-      <section className="interactiveGraph--mainCol">
+      {isAuthenticated ? <><section className="interactiveGraph--mainCol">
         <Graph
           symbol={symbol}
           symbolName={symbolName}
@@ -59,7 +59,7 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
           enabledDataPoints={dataPoints}
           clickHandler={updateDataPoint}
         />
-      </section>
+      </section></> : <h2>Please log in</h2>}
     </div>
   );
 };

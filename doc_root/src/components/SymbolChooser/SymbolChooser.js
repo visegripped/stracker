@@ -1,11 +1,14 @@
 
 import React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
+import { AppContext } from "../../context/AppContext";
 import Select from 'react-select'; // https://react-select.com/home
 import apiEndpoints from '../../endpoints.json';
 
 export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
     let [symbols, setSymbols] = useState({});
+    const [App] = useContext(AppContext);
+    const { isAuthenticated } = App;
     const selectedOption = {
         value: symbol,
         label: symbolName,
@@ -32,7 +35,7 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
       },[symbol]);
 
     return <div>
-        <Select onChange={symbolChangeHandler} defaultValue={selectedOption} options={symbols} />
+        {isAuthenticated ? <Select onChange={symbolChangeHandler} defaultValue={selectedOption} options={symbols} /> : <></>}
     </div>
 }
 

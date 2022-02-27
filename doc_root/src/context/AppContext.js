@@ -3,11 +3,13 @@ import React, { useState, createContext } from "react";
 const AppContext = createContext();
 
 function AppProvider(props) {
+  const accessToken = sessionStorage.getItem('accessToken') || undefined;
+  console.log(' -> initial auth state: ', !!(accessToken));
   const [App, setApp] = useState({
-    auth: false,
+    accessToken,
+    isAuthenticated: !!(accessToken),
     messages: [],
-  }); //this should be false, eventually.
-  console.log(' - - - - - - > app: ', App);
+  });
   const updateApp = (id, val) => {
     const updatedValue = { [id]: val };
     const updatedApp = {
