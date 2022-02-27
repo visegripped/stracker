@@ -1,17 +1,70 @@
 import React, { useContext } from "react";
+import { GoogleLogin, GoogleLogout } from "react-google-login";
 import { AppContext } from "../../context/AppContext";
 import "./styles.css";
 
+// heavily borrowed from https://dev.to/sivaneshs/add-google-login-to-your-react-apps-in-10-mins-4del
+
+const clientId =
+  "451536185848-p0c132ugq4jr7r08k4m6odds43qk6ipj.apps.googleusercontent.com";
+
+
+
 export const AuthButton = () => {
   const [App, setApp] = useContext(AppContext);
-  const AuthText = App.auth ? "login" : "logout";
+  const { isAuthenticated } = App;
+  console.log(' -> The App: ', App);
 
-  const toggleAuthState = (e) => {
-    e.preventDefault();
-    setApp("auth", !App.auth);
+  const setAccessToken = (accessToken) => {
+    sessionStorage.setItem('accessToken', accessToken);
+    setApp("accessToken",accessToken);
+    setApp("isAuthenticated",!!(accessToken));
   };
 
-  return <button onClick={toggleAuthState}>{AuthText}</button>;
+  const onLoginSuccess = (authResponse) => {
+    console.log("Auth Success: currentUser:", authResponse);
+    setAccessToken(authResponse.accessToken);
+    refreshAuthTokenBeforeExpiration(authResponse);
+  };
+
+  const onLoginFailure = (authResponse) => {
+    setApp('messages', authResponse);
+  };
+
+  const onLogoutSuccess = (authResponse) => {
+    setApp('messages', 'Your have been logged out');
+    setAccessToken(undefined);
+    console.log('Logout made successfully', authResponse);
+  };
+
+  const refreshAuthTokenBeforeExpiration = (res) => {
+    // Timing to renew access token
+    let durationBetweenAutoRefresh = (res.tokenObj.expires_in || 3600 - 5 * 60) * 1000;
+    const refreshToken = async () => {
+      const newAuthRes = await res.reloadAuthResponse();
+      durationBetweenAutoRefresh = (newAuthRes.expires_in || 3600 - 5 * 60) * 1000;
+      // sessionStorage.setItem('authToken', newAuthRes.id_token);
+      setAccessToken(newAuthRes.accessToken);
+      setTimeout(refreshToken, durationBetweenAutoRefresh);
+    };
+    setTimeout(refreshToken, durationBetweenAutoRefresh);
+  };
+
+  return (
+    isAuthenticated ? 
+    <GoogleLogout
+        clientId={clientId}
+        buttonText='Logout'
+        onLogoutSuccess={onLogoutSuccess}
+      ></GoogleLogout> : <GoogleLogin
+      clientId={clientId}
+      buttonText='Login'
+      onSuccess={onLoginSuccess}
+      onFailure={onLoginFailure}
+      cookiePolicy={"single_host_origin"}
+      isSignedIn={true}
+    />
+  );
 };
 
 export default AuthButton;
