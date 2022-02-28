@@ -9,7 +9,7 @@ import apiEndpoints from "../../endpoints.json";
 export const InteractiveGraph = ({ symbol, symbolName }) => {
   const [history, setHistory] = useState([]);
   const [App, setApp] = useContext(AppContext);
-  const { isAuthenticated, messages } = App;
+  const { isAuthenticated, messages, accessToken } = App;
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
@@ -25,7 +25,7 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   };
 
   useEffect(() => {
-    const url = `${apiEndpoints.history}&symbol=${symbol}`;
+    const url = `${apiEndpoints.history}&symbol=${symbol}&token=${accessToken}`;
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
