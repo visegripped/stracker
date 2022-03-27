@@ -2,6 +2,7 @@ import React from "react";
 import { useState, useEffect, useContext } from "react";
 import { AppContext } from "../../context/AppContext";
 import PlotChooser from "../PlotChooser/PlotChooser";
+import DateChooser from "../DateChooser/DateChooser";
 import Graph from "../Graph/Graph";
 import "./styles.css";
 import apiEndpoints from "../../endpoints.json";
@@ -13,6 +14,26 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
+
+  const lsStartDate = localStorage.getItem("startDate");
+  const lsEndDate = localStorage.getItem("endDate");
+  let defaultStartDate;
+
+  if(lsStartDate) {
+    defaultStartDate = new Date(`${lsStartDate}`);
+  }
+  else {
+    defaultStartDate = new Date();
+    defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
+  }
+  const defaultEndDate = lsEndDate ? new Date(`${lsEndDate}`) : new Date();
+
+  const formatDate = (date) => {
+    return `${date.getFullYear()}${date.getMonth().toString().padStart(2,'0')}${date.getDate()}`;
+  }
+
+  const [startDate, setStartDate] = useState(defaultStartDate);
+  const [endDate, setEndDate] = useState(defaultEndDate);
   const [dataPoints, setDataPoints] = useState(lsDataPoints);
   const updateDataPoint = (id, val) => {
     const updatedValue = { [id]: val };
@@ -24,8 +45,18 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
     localStorage.setItem("dataPoints", JSON.stringify(updatedDataPoints));
   };
 
+  const updateStartDate = (date) => {
+    setStartDate(date)
+    localStorage.setItem("startDate", date);
+  }
+
+  const updateEndDate = (date) => {
+    setEndDate(date)
+    localStorage.setItem("endDate", date);
+  }
+
   useEffect(() => {
-    const url = `${apiEndpoints.history}&symbol=${symbol}`;
+    const url = `${apiEndpoints.history}&symbol=${symbol}&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
@@ -42,7 +73,7 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
         });
         setApp('messages', messages);
       });
-  }, [symbol]);
+  }, [symbol, startDate, endDate]);
 
   return (
     <div className="interactiveGraph--Container">
@@ -59,6 +90,7 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
           enabledDataPoints={dataPoints}
           clickHandler={updateDataPoint}
         />
+        <DateChooser startDate={startDate} endDate={endDate} updateStartDate={updateStartDate} updateEndDate={updateEndDate} />
       </section></> : <h2>Please log in</h2>}
     </div>
   );
