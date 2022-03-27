@@ -15,18 +15,18 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
     EOD: true,
   };
 
-  const lsStartDate = JSON.parse(localStorage.getItem("startDate"));
-  const lsEndDate = JSON.parse(localStorage.getItem("endDate"));
+  const lsStartDate = localStorage.getItem("startDate");
+  const lsEndDate = localStorage.getItem("endDate");
   let defaultStartDate;
 
   if(lsStartDate) {
-    defaultStartDate = new Date(`${lsStartDate}T00:00:00`);
+    defaultStartDate = new Date(`${lsStartDate}`);
   }
   else {
     defaultStartDate = new Date();
     defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
   }
-  const defaultEndDate = lsEndDate ? new Date(`${lsEndDate}T00:00:00`) : new Date();
+  const defaultEndDate = lsEndDate ? new Date(`${lsEndDate}`) : new Date();
 
   const formatDate = (date) => {
     return `${date.getFullYear()}${date.getMonth().toString().padStart(2,'0')}${date.getDate()}`;
@@ -45,9 +45,18 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
     localStorage.setItem("dataPoints", JSON.stringify(updatedDataPoints));
   };
 
+  const updateStartDate = (date) => {
+    setStartDate(date)
+    localStorage.setItem("startDate", date);
+  }
+
+  const updateEndDate = (date) => {
+    setEndDate(date)
+    localStorage.setItem("endDate", date);
+  }
+
   useEffect(() => {
     const url = `${apiEndpoints.history}&symbol=${symbol}&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
-    console.log(' - - - - > url: ', url);
     fetch(url)
       .then((response) => response.json())
       .then((data) => {
@@ -81,7 +90,7 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
           enabledDataPoints={dataPoints}
           clickHandler={updateDataPoint}
         />
-        <DateChooser startDate={startDate} endDate={endDate} setStartDate={setStartDate} setEndDate={setEndDate} />
+        <DateChooser startDate={startDate} endDate={endDate} updateStartDate={updateStartDate} updateEndDate={updateEndDate} />
       </section></> : <h2>Please log in</h2>}
     </div>
   );

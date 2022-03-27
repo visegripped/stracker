@@ -3,7 +3,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
 export const DateChooser = (props) => {
-  const { startDate, endDate, setStartDate, setEndDate } = props;
+  const { startDate, endDate, updateStartDate, updateEndDate } = props;
   const oldestDateInHistory = new Date("January 01, 2020 00:00:00"); // at some point, we could load this dynamically based on symbol.
   const today = new Date();
   return (
@@ -17,7 +17,7 @@ export const DateChooser = (props) => {
           selectsStart
           endDate={endDate}
           selected={startDate}
-          onChange={(date) => setStartDate(date)}
+          onChange={(date) => updateStartDate(date)}
         />
       </label>
       <label className="dateChooser--label">
@@ -28,7 +28,7 @@ export const DateChooser = (props) => {
           selectsEnd
           startDate={startDate}
           selected={endDate}
-          onChange={(date) => setEndDate(date)}
+          onChange={(date) => updateEndDate(date)}
         />
       </label>
     </fieldset>
