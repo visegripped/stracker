@@ -2,11 +2,13 @@
 include "../../includes/stracker/mysql.php";
 include "../../includes/stracker/apiHeaders.php";
 include "../../includes/stracker/validation.php";
+include "../../includes/stracker/sessions.php";
 
 $task = $_GET['task'];
 $symbol = $_GET['symbol'];
 $startDate = $_GET['startDate'];
 $endDate = $_GET['endDate'];
+$endDate = $_GET['token'];
 
 function getHistory($symbol, $startDate, $endDate, $pdo) {
     $history = array();
@@ -23,13 +25,17 @@ function getSymbols($pdo) {
 }
 
 $db = dbConnect();
-if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
+if(!$token) {
+    $data = '{"err":"Token not specified on API request."}';
+} else if(!isValidSession) {
+    $data = '{"err":"Invalid/expired token.  Please sign (or re-sign) in."}';
+}else if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
     $data = getHistory($symbol, $startDate, $endDate, $db);
     $data = array_reverse($data);
 } else if($task == 'symbols' ) {
     $data = getSymbols($db);
 } else {
-    $data = '{"err":"no/invalid task defined or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). dates are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').'"}';
+    $data = '{"err":"No/Invalid task defined or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). dates are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').'"}';
 }
 
 $data = json_encode($data);
