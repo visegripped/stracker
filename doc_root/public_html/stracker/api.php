@@ -9,12 +9,15 @@ $task = $_GET['task'];
 $symbol = $_GET['symbol'];
 $startDate = $_GET['startDate'];
 $endDate = $_GET['endDate'];
-$token = $_COOKIE['token'];
 
-
+$tokenId = '';
+if(isset($_COOKIE['tokenId'])) {
+    $tokenId = $_COOKIE['tokenId'];
+}
 function getHistory($symbol, $startDate, $endDate, $pdo) {
     $history = array();
-    $query = "select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from $pdo->quote($symbol) where date between $pdo->quote($startDate) and $pdo->quote($endDate) order by date DESC";
+    // $query = "select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from ".$pdo->quote($symbol)." where date between ".$pdo->quote($startDate)." and ".$pdo->quote($endDate)." order by date DESC";
+    $query = "select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from $symbol where date between $startDate and $endDate order by date DESC";
     $stmt = $pdo->query($query);
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 }
@@ -27,9 +30,9 @@ function getSymbols($pdo) {
 }
 
 $db = dbConnect();
-if(!$token) {
+if(!$tokenId) {
     $data = '{"err":"Token not specified on API request."}';
-} else if(!isValidSession($token)) {
+} else if(!isValidSession($tokenId)) {
     $data = '{"err":"Invalid/expired token.  Please sign (or re-sign) in."}';
 }else if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
     $data = getHistory($symbol, $startDate, $endDate, $db);
@@ -42,7 +45,5 @@ if(!$token) {
 
 $data = json_encode($data);
 header('Content-type: application/json');
-
-
 print($data);
 ?>
