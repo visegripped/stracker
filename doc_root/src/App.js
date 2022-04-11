@@ -8,7 +8,7 @@ import "./App.css";
 
 function App() {
   const lsSymbol = localStorage.getItem("symbol") || "AAPL";
-  const lsSymbolName = localStorage.getItem("symbolName") || "";
+  const lsSymbolName = localStorage.getItem("symbolName") || "Apple";
   const [symbol, setSymbol] = useState(lsSymbol);
   const [symbolName, setSymbolName] = useState(lsSymbolName);
 

@@ -5,15 +5,12 @@ include "../../includes/stracker/validation.php";
 include "../../includes/stracker/sessions.php";
 require_once '../../includes/vendor/autoload.php';
 
-$task = $_GET['task'];
-$symbol = $_GET['symbol'];
-$startDate = $_GET['startDate'];
-$endDate = $_GET['endDate'];
+$task = $_GET['task'] ?? "";
+$symbol = $_GET['symbol'] ?? "";
+$startDate = $_GET['startDate'] ?? "";
+$endDate = $_GET['endDate'] ?? "";
+$tokenId = $_COOKIE['tokenId'] ?? "";
 
-$tokenId = '';
-if(isset($_COOKIE['tokenId'])) {
-    $tokenId = $_COOKIE['tokenId'];
-}
 function getHistory($symbol, $startDate, $endDate, $pdo) {
     $history = array();
     // $query = "select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from ".$pdo->quote($symbol)." where date between ".$pdo->quote($startDate)." and ".$pdo->quote($endDate)." order by date DESC";

@@ -8,7 +8,7 @@ import apiEndpoints from '../../endpoints.json';
 export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
     let [symbols, setSymbols] = useState({});
     const [App] = useContext(AppContext);
-    const { isAuthenticated, tokenId } = App;
+    const { isAuthenticated, accessToken } = App;
     const selectedOption = {
         value: symbol,
         label: symbolName,
@@ -24,7 +24,7 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
     }
 
     useEffect(() => {
-        if(tokenId) {
+        if(accessToken) {
             fetch(`${apiEndpoints.symbols}`)
             .then(response => response.json())
             .then(data => {

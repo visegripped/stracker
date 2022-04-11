@@ -10,7 +10,7 @@ import apiEndpoints from "../../endpoints.json";
 export const InteractiveGraph = ({ symbol, symbolName }) => {
   const [history, setHistory] = useState([]);
   const [App, setApp] = useContext(AppContext);
-  const { isAuthenticated, messages, accessToken, tokenId } = App;
+  const { isAuthenticated, messages, accessToken } = App;
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
