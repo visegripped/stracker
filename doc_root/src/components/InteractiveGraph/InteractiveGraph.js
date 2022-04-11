@@ -10,7 +10,7 @@ import apiEndpoints from "../../endpoints.json";
 export const InteractiveGraph = ({ symbol, symbolName }) => {
   const [history, setHistory] = useState([]);
   const [App, setApp] = useContext(AppContext);
-  const { isAuthenticated, messages } = App;
+  const { isAuthenticated, messages, accessToken, tokenId } = App;
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
@@ -29,7 +29,8 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   const defaultEndDate = lsEndDate ? new Date(`${lsEndDate}`) : new Date();
 
   const formatDate = (date) => {
-    return `${date.getFullYear()}${date.getMonth().toString().padStart(2,'0')}${date.getDate()}`;
+    const monthAdjustedForJS = date.getMonth() + 1;
+    return `${date.getFullYear()}${monthAdjustedForJS.toString().padStart(2,'0')}${date.getDate()}`;
   }
 
   const [startDate, setStartDate] = useState(defaultStartDate);
@@ -56,23 +57,25 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   }
 
   useEffect(() => {
-    const url = `${apiEndpoints.history}&symbol=${symbol}&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(`Historical data for ${symbol} was fetched`);
-        setHistory(data);
-      })
-      .catch((e) => {
-        messages.push({
-          message: `The request to fetch the list of symbols has failed. Please try again later.
-          If this error persists, contact the site administrator.
-          Error details: ${e}
-          URL: ${url}`,
-          classification: "error",
+    if(accessToken) {
+      const url = `${apiEndpoints.history}&symbol=${symbol}&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
+      fetch(url)
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(`Historical data for ${symbol} was fetched`);
+          setHistory(data);
+        })
+        .catch((e) => {
+          messages.push({
+            message: `The request to fetch the list of symbols has failed. Please try again later.
+            If this error persists, contact the site administrator.
+            Error details: ${e}
+            URL: ${url}`,
+            classification: "error",
+          });
+          setApp('messages', messages);
         });
-        setApp('messages', messages);
-      });
+    }
   }, [symbol, startDate, endDate]);
 
   return (

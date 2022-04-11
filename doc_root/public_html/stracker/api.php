@@ -3,12 +3,14 @@ include "../../includes/stracker/mysql.php";
 include "../../includes/stracker/apiHeaders.php";
 include "../../includes/stracker/validation.php";
 include "../../includes/stracker/sessions.php";
+require_once '../../includes/vendor/autoload.php';
 
 $task = $_GET['task'];
 $symbol = $_GET['symbol'];
 $startDate = $_GET['startDate'];
 $endDate = $_GET['endDate'];
-$endDate = $_GET['token'];
+$token = $_COOKIE['token'];
+
 
 function getHistory($symbol, $startDate, $endDate, $pdo) {
     $history = array();
@@ -27,7 +29,7 @@ function getSymbols($pdo) {
 $db = dbConnect();
 if(!$token) {
     $data = '{"err":"Token not specified on API request."}';
-} else if(!isValidSession) {
+} else if(!isValidSession($token)) {
     $data = '{"err":"Invalid/expired token.  Please sign (or re-sign) in."}';
 }else if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
     $data = getHistory($symbol, $startDate, $endDate, $db);

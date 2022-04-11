@@ -8,7 +8,7 @@ import apiEndpoints from '../../endpoints.json';
 export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
     let [symbols, setSymbols] = useState({});
     const [App] = useContext(AppContext);
-    const { isAuthenticated } = App;
+    const { isAuthenticated, tokenId } = App;
     const selectedOption = {
         value: symbol,
         label: symbolName,
@@ -24,14 +24,15 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
     }
 
     useEffect(() => {
-        console.log(' - fetch symbol list');
-        fetch(apiEndpoints.symbols)
-        .then(response => response.json())
-        .then(data => {
-          setSymbols(handleDataResponse(data));
-        }).catch((e) => {
-            console.log(' ERROR! ', e); // TODO -> need to handle this better.
-        });
+        if(tokenId) {
+            fetch(`${apiEndpoints.symbols}`)
+            .then(response => response.json())
+            .then(data => {
+              setSymbols(handleDataResponse(data));
+            }).catch((e) => {
+                console.log(' ERROR! ', e); // TODO -> need to handle this better.
+            });
+        }
       },[symbol]);
 
     return <div>

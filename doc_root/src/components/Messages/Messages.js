@@ -31,17 +31,19 @@ export const Messages = () => {
     setApp('messages', messages);
   };
 
-  messages.forEach(({ message, classification }, index) => {
-    messageList.push(
-      <MessageTemplate
-        messageIndex={index}
-        key={`messageId-${index}`}
-        message={message}
-        classification={classification}
-        buttonOnclick={removeMessage}
-      />
-    );
-  });
+  if(messages) {
+    messages.forEach(({ message, classification }, index) => {
+      messageList.push(
+        <MessageTemplate
+          messageIndex={index}
+          key={`messageId-${index}`}
+          message={message}
+          classification={classification}
+          buttonOnclick={removeMessage}
+        />
+      );
+    });
+  }
   return <section className="messagesContainer">{messageList}</section>;
 };
 

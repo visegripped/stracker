@@ -2,5 +2,13 @@
     "symbolsBak": "./api.php?task=symbols",
     "symbols": "http://localhost/public_html/stracker/api.php?task=symbols",
     "historyBak": "./api.php?task=history",
-    "history": "http://localhost/public_html/stracker/api.php?task=history"
+    "history": "http://localhost/public_html/stracker/api.php?task=history",
+    "local": {
+        "symbols": "http://localhost/public_html/stracker/api.php?task=symbols",
+        "history": "http://localhost/public_html/stracker/api.php?task=history"
+    },
+    "production": {
+        "symbolsBak": "./api.php?task=symbols",
+        "historyBak": "./api.php?task=history"
+    }
 }

@@ -13,28 +13,40 @@ const clientId =
 export const AuthButton = () => {
   const [App, setApp] = useContext(AppContext);
   const { isAuthenticated } = App;
-  console.log(' -> The App: ', App);
 
-  const setAccessToken = (accessToken) => {
+  const logout = () => {
+    sessionStorage.setItem('accessToken', '');
+    sessionStorage.setItem('tokenId', '');
+    document.cookie = "tokenId='';"
+    setApp("accessToken",'');
+    setApp("tokenId",'');
+    setApp("isAuthenticated",false);
+  }
+
+  const setTokens = (authResponse) => {
+    const { accessToken, tokenId } = authResponse;
+    document.cookie = `tokenId=${tokenId};`
     sessionStorage.setItem('accessToken', accessToken);
+    sessionStorage.setItem('tokenId', tokenId);
     setApp("accessToken",accessToken);
-    setApp("isAuthenticated",!!(accessToken));
+    setApp("tokenId",tokenId);
+    setApp("isAuthenticated",true);
   };
 
   const onLoginSuccess = (authResponse) => {
     console.log("Auth Success: currentUser:", authResponse);
-    setAccessToken(authResponse.accessToken);
+    setTokens(authResponse);
     refreshAuthTokenBeforeExpiration(authResponse);
   };
 
   const onLoginFailure = (authResponse) => {
+    console.log(' - - - -- > authResponse: ', authResponse);
     setApp('messages', authResponse);
   };
 
   const onLogoutSuccess = (authResponse) => {
-    setApp('messages', 'Your have been logged out');
-    setAccessToken(undefined);
     console.log('Logout made successfully', authResponse);
+    logout();
   };
 
   const refreshAuthTokenBeforeExpiration = (res) => {
@@ -44,7 +56,7 @@ export const AuthButton = () => {
       const newAuthRes = await res.reloadAuthResponse();
       durationBetweenAutoRefresh = (newAuthRes.expires_in || 3600 - 5 * 60) * 1000;
       // sessionStorage.setItem('authToken', newAuthRes.id_token);
-      setAccessToken(newAuthRes.accessToken);
+      setTokens(newAuthRes);
       setTimeout(refreshToken, durationBetweenAutoRefresh);
     };
     setTimeout(refreshToken, durationBetweenAutoRefresh);
