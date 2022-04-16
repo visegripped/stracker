@@ -1,6 +1,9 @@
 <?php
 
 function isValidSymbol($symbol) {
+  if(!$symbol) {
+    return false;
+  }
   if(mb_strlen($symbol) > 8) {
     return false;
   }
@@ -11,6 +14,9 @@ function isValidSymbol($symbol) {
 }
 
 function isValidDate($date) {
+  if(!$date) {
+    return false;
+  }
   if(mb_strlen($date) > 8) {
     return false;
   }
