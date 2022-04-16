@@ -3,12 +3,15 @@
     "symbols": "http://localhost/public_html/stracker/api.php?task=symbols",
     "historyBak": "./api.php?task=history",
     "history": "http://localhost/public_html/stracker/api.php?task=history",
+    "root": "http://localhost/public_html/stracker/api.php",
     "local": {
         "symbols": "http://localhost/public_html/stracker/api.php?task=symbols",
-        "history": "http://localhost/public_html/stracker/api.php?task=history"
+        "history": "http://localhost/public_html/stracker/api.php?task=history",
+    "root": "http://localhost/public_html/stracker/api.php"
     },
     "production": {
         "symbolsBak": "./api.php?task=symbols",
-        "historyBak": "./api.php?task=history"
+        "historyBak": "./api.php?task=history",
+        "root": "./api.php"
     }
 }

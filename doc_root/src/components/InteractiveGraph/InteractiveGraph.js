@@ -10,7 +10,7 @@ import apiEndpoints from "../../endpoints.json";
 export const InteractiveGraph = ({ symbol, symbolName }) => {
   const [history, setHistory] = useState([]);
   const [App, setApp] = useContext(AppContext);
-  const { isAuthenticated, messages, accessToken } = App;
+  const { messages, tokenId } = App;
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
@@ -19,10 +19,9 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   const lsEndDate = localStorage.getItem("endDate");
   let defaultStartDate;
 
-  if(lsStartDate) {
+  if (lsStartDate) {
     defaultStartDate = new Date(`${lsStartDate}`);
-  }
-  else {
+  } else {
     defaultStartDate = new Date();
     defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
   }
@@ -30,8 +29,10 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
 
   const formatDate = (date) => {
     const monthAdjustedForJS = date.getMonth() + 1;
-    return `${date.getFullYear()}${monthAdjustedForJS.toString().padStart(2,'0')}${date.getDate()}`;
-  }
+    return `${date.getFullYear()}${monthAdjustedForJS
+      .toString()
+      .padStart(2, "0")}${date.getDate()}`;
+  };
 
   const [startDate, setStartDate] = useState(defaultStartDate);
   const [endDate, setEndDate] = useState(defaultEndDate);
@@ -47,54 +48,76 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   };
 
   const updateStartDate = (date) => {
-    setStartDate(date)
+    setStartDate(date);
     localStorage.setItem("startDate", date);
-  }
+  };
 
   const updateEndDate = (date) => {
-    setEndDate(date)
+    setEndDate(date);
     localStorage.setItem("endDate", date);
-  }
+  };
 
   useEffect(() => {
-    if(accessToken) {
-      const url = `${apiEndpoints.history}&symbol=${symbol}&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
-      fetch(url)
+    if (tokenId) {
+      let formData = new FormData();
+      formData.append("tokenId", tokenId);
+      formData.append("task", "history");
+      formData.append("symbol", symbol);
+      formData.append("startDate", formatDate(startDate));
+      formData.append("endDate", formatDate(endDate));
+      fetch(apiEndpoints.root, {
+        body: formData,
+        method: "post",
+      })
         .then((response) => response.json())
         .then((data) => {
-          console.log(`Historical data for ${symbol} was fetched`);
-          setHistory(data);
+          console.log(`Historical data for ${symbol} was fetched`, data);
+          if (data.err) {
+            messages.push({ message: data.err, classification: "error" });
+          } else {
+            setHistory(data);
+          }
         })
         .catch((e) => {
           messages.push({
             message: `The request to fetch the list of symbols has failed. Please try again later.
             If this error persists, contact the site administrator.
-            Error details: ${e}
-            URL: ${url}`,
+            Error details: ${e}`,
             classification: "error",
           });
-          setApp('messages', messages);
+          setApp("messages", messages);
         });
     }
-  }, [symbol, startDate, endDate]);
+  }, [symbol, startDate, endDate, tokenId]);
 
   return (
     <div className="interactiveGraph--Container">
-      {isAuthenticated ? <><section className="interactiveGraph--mainCol">
-        <Graph
-          symbol={symbol}
-          symbolName={symbolName}
-          enabledDataPoints={dataPoints}
-          history={history}
-        />
-      </section>
-      <section className="interactiveGraph--sidebar">
-        <PlotChooser
-          enabledDataPoints={dataPoints}
-          clickHandler={updateDataPoint}
-        />
-        <DateChooser startDate={startDate} endDate={endDate} updateStartDate={updateStartDate} updateEndDate={updateEndDate} />
-      </section></> : <h2>Please log in</h2>}
+      {tokenId ? (
+        <>
+          <section className="interactiveGraph--mainCol">
+            <Graph
+              symbol={symbol}
+              symbolName={symbolName}
+              enabledDataPoints={dataPoints}
+              history={history}
+            />
+          </section>
+          <section className="interactiveGraph--sidebar">
+            <PlotChooser
+              enabledDataPoints={dataPoints}
+              clickHandler={updateDataPoint}
+            />
+            <DateChooser
+              startDate={startDate}
+              endDate={endDate}
+              updateStartDate={updateStartDate}
+              updateEndDate={updateEndDate}
+            />
+          </section>
+        </>
+      ) : (
+        <h2>Please log in</h2>
+      )}
     </div>
   );
 };

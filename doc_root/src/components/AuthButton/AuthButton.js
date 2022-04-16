@@ -12,7 +12,7 @@ const clientId =
 
 export const AuthButton = () => {
   const [App, setApp] = useContext(AppContext);
-  const { isAuthenticated } = App;
+  const { tokenId } = App;
 
   const logout = () => {
     sessionStorage.setItem('accessToken', '');
@@ -20,7 +20,6 @@ export const AuthButton = () => {
     document.cookie = "tokenId='';"
     setApp("accessToken",'');
     setApp("tokenId",'');
-    setApp("isAuthenticated",false);
   }
 
   const setTokens = (authResponse) => {
@@ -30,7 +29,6 @@ export const AuthButton = () => {
     sessionStorage.setItem('tokenId', tokenId);
     setApp("accessToken",accessToken);
     setApp("tokenId",tokenId);
-    setApp("isAuthenticated",true);
   };
 
   const onLoginSuccess = (authResponse) => {
@@ -63,7 +61,7 @@ export const AuthButton = () => {
   };
 
   return (
-    isAuthenticated ? 
+    tokenId ? 
     <GoogleLogout
         clientId={clientId}
         buttonText='Logout'
