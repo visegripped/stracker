@@ -16,23 +16,23 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   };
 // date uses session, not local. That way the dates reset between each visit. 
 // Is a bit confusing when you log in and don't get the most recent data.
-  const lsStartDate = sessionStorage.getItem("startDate");
-  const lsEndDate = sessionStorage.getItem("endDate");
+  const lsStartDate = sessionStorage.getItem("startDate") || '';
+  const lsEndDate = sessionStorage.getItem("endDate") || '';
   let defaultStartDate;
 
-  if (lsStartDate) {
-    defaultStartDate = new Date(`${lsStartDate}`);
+  if (lsStartDate && lsStartDate != 'null') {
+    defaultStartDate = new Date(lsStartDate);
   } else {
     defaultStartDate = new Date();
     defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
   }
-  const defaultEndDate = lsEndDate ? new Date(`${lsEndDate}`) : new Date();
+  const defaultEndDate = (lsEndDate && lsEndDate != 'null') ? new Date(`${lsEndDate}`) : new Date();
 
   const formatDate = (date) => {
-    const monthAdjustedForJS = date.getMonth() + 1;
+    const monthAdjustedForJS = (date.getMonth() + 1).toString().padStart(2, "0");
+    const dayPadded = date.getDate().toString().padStart(2,'0');
     return `${date.getFullYear()}${monthAdjustedForJS
-      .toString()
-      .padStart(2, "0")}${date.getDate()}`;
+      }${dayPadded}`;
   };
 
   const [startDate, setStartDate] = useState(defaultStartDate);
@@ -66,6 +66,7 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
       formData.append("symbol", symbol);
       formData.append("startDate", formatDate(startDate));
       formData.append("endDate", formatDate(endDate));
+      console.log(`startDate: ${formatDate(startDate)} and endData: ${formatDate(endDate)}`);
       fetch(apiEndpoints.root, {
         body: formData,
         method: "post",
