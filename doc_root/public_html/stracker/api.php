@@ -14,9 +14,13 @@ $tokenId = $_POST['tokenId'] ?? "";
 function getHistory($symbol, $startDate, $endDate, $pdo) {
     $history = array();
     // $query = "select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from ".$pdo->quote($symbol)." where date between ".$pdo->quote($startDate)." and ".$pdo->quote($endDate)." order by date DESC";
-    $query = "select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from $symbol where date between $startDate and $endDate order by date DESC";
-    $stmt = $pdo->query($query);
-    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    // $query = "select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from $symbol where date between $startDate and $endDate order by date DESC";
+    $stmt = $pdo->prepare('select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from AAPL where date between :startDate and :endDate order by date DESC');
+    $stmt->bindParam(':startDate', $startDate, PDO::PARAM_INT);
+    $stmt->bindParam(':endDate', $endDate, PDO::PARAM_INT);
+    $stmt->execute(array('startDate' => $startDate, 'endDate' => $endDate));
+    // $stmt = $pdo->query($query);
+    return $stmt->fetchAll(); //\PDO::FETCH_ASSOC
 }
 
 

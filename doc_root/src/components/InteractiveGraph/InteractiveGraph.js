@@ -14,9 +14,10 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
-
-  const lsStartDate = localStorage.getItem("startDate");
-  const lsEndDate = localStorage.getItem("endDate");
+// date uses session, not local. That way the dates reset between each visit. 
+// Is a bit confusing when you log in and don't get the most recent data.
+  const lsStartDate = sessionStorage.getItem("startDate");
+  const lsEndDate = sessionStorage.getItem("endDate");
   let defaultStartDate;
 
   if (lsStartDate) {
@@ -49,12 +50,12 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
 
   const updateStartDate = (date) => {
     setStartDate(date);
-    localStorage.setItem("startDate", date);
+    sessionStorage.setItem("startDate", date);
   };
 
   const updateEndDate = (date) => {
     setEndDate(date);
-    localStorage.setItem("endDate", date);
+    sessionStorage.setItem("endDate", date);
   };
 
   useEffect(() => {
