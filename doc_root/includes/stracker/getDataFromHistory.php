@@ -10,10 +10,20 @@ function getDataFromHistory($history) {
     $eodPrices = array();
     $deltas = array();
     $theData = array();
+    print("historyCount: $historyCount<br>");
     for($i = 0; $i < $historyCount; $i++ ) {
         $row = $history[$i];
         $date = $row['date'];
         $eod = $row['eod'];
+        $delta = 0;
+        $MA20 = 0;
+        $deltaMA5 = 0;
+        $deltaMA10 = 0;
+        $deltaMA20 = 0;
+        $M1 = 0;
+        $M2 = 0;
+        $M3 = 0;
+        $MA50 = 0;
 
         if(is_numeric($eod)) {
             array_push($eodPrices, $eod);

@@ -6,8 +6,6 @@ function dbConnect() {
       define("DB_CHARSET", "utf8");
       define("DB_USER", $dbusername);
       define("DB_PASSWORD", $dbpassword);
-      
-      
       try {
         $dbh = new PDO(
           "mysql:host=". DB_HOST .";dbname=". DB_NAME .";charset=". DB_CHARSET,
@@ -25,7 +23,6 @@ function tableExists($tableId, $db) {
   $is_table=$db->query($query);
    return $is_table->rowCount();
 }
-
 
 function createSymbolTable($symbol, $db) {
   $statement = "CREATE TABLE $symbol(
@@ -47,5 +44,4 @@ function createSymbolTable($symbol, $db) {
   )";
   $db->exec($statement);
 }
-
 ?>
