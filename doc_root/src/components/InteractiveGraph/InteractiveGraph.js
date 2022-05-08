@@ -10,27 +10,30 @@ import apiEndpoints from "../../endpoints.json";
 export const InteractiveGraph = ({ symbol, symbolName }) => {
   const [history, setHistory] = useState([]);
   const [App, setApp] = useContext(AppContext);
-  const { isAuthenticated, messages } = App;
+  const { messages, tokenId } = App;
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
-
-  const lsStartDate = localStorage.getItem("startDate");
-  const lsEndDate = localStorage.getItem("endDate");
+// date uses session, not local. That way the dates reset between each visit. 
+// Is a bit confusing when you log in and don't get the most recent data.
+  const lsStartDate = sessionStorage.getItem("startDate") || '';
+  const lsEndDate = sessionStorage.getItem("endDate") || '';
   let defaultStartDate;
 
-  if(lsStartDate) {
-    defaultStartDate = new Date(`${lsStartDate}`);
-  }
-  else {
+  if (lsStartDate && lsStartDate != 'null') {
+    defaultStartDate = new Date(lsStartDate);
+  } else {
     defaultStartDate = new Date();
     defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
   }
-  const defaultEndDate = lsEndDate ? new Date(`${lsEndDate}`) : new Date();
+  const defaultEndDate = (lsEndDate && lsEndDate != 'null') ? new Date(`${lsEndDate}`) : new Date();
 
   const formatDate = (date) => {
-    return `${date.getFullYear()}${date.getMonth().toString().padStart(2,'0')}${date.getDate()}`;
-  }
+    const monthAdjustedForJS = (date.getMonth() + 1).toString().padStart(2, "0");
+    const dayPadded = date.getDate().toString().padStart(2,'0');
+    return `${date.getFullYear()}${monthAdjustedForJS
+      }${dayPadded}`;
+  };
 
   const [startDate, setStartDate] = useState(defaultStartDate);
   const [endDate, setEndDate] = useState(defaultEndDate);
@@ -46,52 +49,77 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   };
 
   const updateStartDate = (date) => {
-    setStartDate(date)
-    localStorage.setItem("startDate", date);
-  }
+    setStartDate(date);
+    sessionStorage.setItem("startDate", date);
+  };
 
   const updateEndDate = (date) => {
-    setEndDate(date)
-    localStorage.setItem("endDate", date);
-  }
+    setEndDate(date);
+    sessionStorage.setItem("endDate", date);
+  };
 
   useEffect(() => {
-    const url = `${apiEndpoints.history}&symbol=${symbol}&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
-    fetch(url)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(`Historical data for ${symbol} was fetched`);
-        setHistory(data);
+    if (tokenId) {
+      let formData = new FormData();
+      formData.append("tokenId", tokenId);
+      formData.append("task", "history");
+      formData.append("symbol", symbol);
+      formData.append("startDate", formatDate(startDate));
+      formData.append("endDate", formatDate(endDate));
+      console.log(`startDate: ${formatDate(startDate)} and endData: ${formatDate(endDate)}`);
+      fetch(apiEndpoints.root, {
+        body: formData,
+        method: "post",
       })
-      .catch((e) => {
-        messages.push({
-          message: `The request to fetch the list of symbols has failed. Please try again later.
-          If this error persists, contact the site administrator.
-          Error details: ${e}
-          URL: ${url}`,
-          classification: "error",
+        .then((response) => response.json())
+        .then((data) => {
+          console.log(`Historical data for ${symbol} was fetched`, data);
+          if (data.err) {
+            messages.push({ message: data.err, classification: "error" });
+          } else {
+            setHistory(data);
+          }
+        })
+        .catch((e) => {
+          messages.push({
+            message: `The request to fetch the list of symbols has failed. Please try again later.
+            If this error persists, contact the site administrator.
+            Error details: ${e}`,
+            classification: "error",
+          });
+          setApp("messages", messages);
         });
-        setApp('messages', messages);
-      });
-  }, [symbol, startDate, endDate]);
+    }
+  }, [symbol, startDate, endDate, tokenId]);
 
   return (
     <div className="interactiveGraph--Container">
-      {isAuthenticated ? <><section className="interactiveGraph--mainCol">
-        <Graph
-          symbol={symbol}
-          symbolName={symbolName}
-          enabledDataPoints={dataPoints}
-          history={history}
-        />
-      </section>
-      <section className="interactiveGraph--sidebar">
-        <PlotChooser
-          enabledDataPoints={dataPoints}
-          clickHandler={updateDataPoint}
-        />
-        <DateChooser startDate={startDate} endDate={endDate} updateStartDate={updateStartDate} updateEndDate={updateEndDate} />
-      </section></> : <h2>Please log in</h2>}
+      {tokenId ? (
+        <>
+          <section className="interactiveGraph--mainCol">
+            <Graph
+              symbol={symbol}
+              symbolName={symbolName}
+              enabledDataPoints={dataPoints}
+              history={history}
+            />
+          </section>
+          <section className="interactiveGraph--sidebar">
+            <PlotChooser
+              enabledDataPoints={dataPoints}
+              clickHandler={updateDataPoint}
+            />
+            <DateChooser
+              startDate={startDate}
+              endDate={endDate}
+              updateStartDate={updateStartDate}
+              updateEndDate={updateEndDate}
+            />
+          </section>
+        </>
+      ) : (
+        <h2>Please log in</h2>
+      )}
     </div>
   );
 };

@@ -2,6 +2,7 @@ passwords.php
 secretSauce.php
 reference-material/
 doc_root/public_html/stracker/static/
+notes.md
 
 # dependencies
 node_modules/

@@ -4,9 +4,10 @@ const AppContext = createContext();
 
 function AppProvider(props) {
   const accessToken = sessionStorage.getItem('accessToken') || undefined;
-  console.log(' -> initial auth state: ', !!(accessToken));
+  const tokenId = sessionStorage.getItem('tokenId') || undefined;
   const [App, setApp] = useState({
     accessToken,
+    tokenId,
     isAuthenticated: !!(accessToken),
     messages: [],
   });
