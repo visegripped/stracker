@@ -13,13 +13,12 @@ $tokenId = $_POST['tokenId'] ?? "";
 
 function getHistory($symbol, $startDate, $endDate, $pdo) {
     $history = array();
-    $stmt = $pdo->prepare('select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from AAPL where date between :startDate and :endDate order by date DESC'); // hard coded to apple for testing.
+    $stmt = $pdo->prepare("select date, EOD, MA20, MA50, delta, deltaMA5, deltaMA10, deltaMA20, P0, P1, P2, M1, M2, M3 from $symbol where date between :startDate and :endDate order by date DESC"); // hard coded to apple for testing.
     $stmt->bindParam(':startDate', $startDate, PDO::PARAM_INT);
     $stmt->bindParam(':endDate', $endDate, PDO::PARAM_INT);
     $stmt->execute(array('startDate' => $startDate, 'endDate' => $endDate));
     return $stmt->fetchAll();
 }
-
 
 function getSymbols($pdo) {
     $query = "select symbol, name from _symbols ORDER by symbol ASC";
