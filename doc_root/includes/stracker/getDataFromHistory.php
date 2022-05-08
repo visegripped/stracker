@@ -10,7 +10,6 @@ function getDataFromHistory($history) {
     $eodPrices = array();
     $deltas = array();
     $theData = array();
-    print("historyCount: $historyCount<br>");
     for($i = 0; $i < $historyCount; $i++ ) {
         $row = $history[$i];
         $date = $row['date'];
