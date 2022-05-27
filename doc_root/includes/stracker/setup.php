@@ -44,5 +44,10 @@ CREATE TABLE "_users" (
     PRIMARY KEY ("id")
    ) 
    
-
+   CREATE TABLE `_alerts` (
+    `id` mediumint NOT NULL AUTO_INCREMENT,
+    `date` date NOT NULL,
+    `type` mediumtext NOT NULL,
+  PRIMARY KEY (id)
+  );
 ?>
