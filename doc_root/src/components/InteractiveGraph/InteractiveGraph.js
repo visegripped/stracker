@@ -4,6 +4,7 @@ import { AppContext } from "../../context/AppContext";
 import PlotChooser from "../PlotChooser/PlotChooser";
 import DateChooser from "../DateChooser/DateChooser";
 import Graph from "../Graph/Graph";
+import Alerts from "../Alerts/";
 import "./styles.css";
 import apiEndpoints from "../../endpoints.json";
 
@@ -20,13 +21,13 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
   const lsEndDate = sessionStorage.getItem("endDate") || '';
   let defaultStartDate;
 
-  if (lsStartDate && lsStartDate != 'null') {
+  if (lsStartDate && lsStartDate !== 'null') {
     defaultStartDate = new Date(lsStartDate);
   } else {
     defaultStartDate = new Date();
     defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
   }
-  const defaultEndDate = (lsEndDate && lsEndDate != 'null') ? new Date(`${lsEndDate}`) : new Date();
+  const defaultEndDate = (lsEndDate && lsEndDate !== 'null') ? new Date(`${lsEndDate}`) : new Date();
 
   const formatDate = (date) => {
     const monthAdjustedForJS = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -115,6 +116,8 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
               updateStartDate={updateStartDate}
               updateEndDate={updateEndDate}
             />
+            <Alerts
+              symbol={symbol} />
           </section>
         </>
       ) : (

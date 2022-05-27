@@ -26,6 +26,13 @@ function getSymbols($pdo) {
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 }
 
+function getAlerts($symbol, $pdo) {
+    $stmt = $pdo->prepare("select symbol, date, type, id from _alerts where symbol = :symbol order by date DESC");
+    $stmt->bindParam(':symbol', $symbol, PDO::PARAM_STR);
+    $stmt->execute(array('symbol' => $symbol));
+    return $stmt->fetchAll();
+}
+
 $db = dbConnect();
 if(!$tokenId) {
     $data = '{"err":"Token not specified on API request."}';
@@ -36,6 +43,8 @@ if(!$tokenId) {
 } else if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
     $data = getHistory($symbol, $startDate, $endDate, $db);
     $data = array_reverse($data);
+} else if($task == 'alerts' & isValidSymbol($symbol)) {
+    $data = getAlerts($symbol, $db);
 } else if($task == 'symbols' ) {
     $data = getSymbols($db);
 } else {

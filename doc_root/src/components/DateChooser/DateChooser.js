@@ -1,4 +1,3 @@
-import "./styles.css";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -7,9 +6,9 @@ export const DateChooser = (props) => {
   const oldestDateInHistory = new Date("January 01, 2020 00:00:00"); // at some point, we could load this dynamically based on symbol.
   const today = new Date();
   return (
-    <fieldset className="dateChooser--fieldset">
-      <legend className="dateChooser--legend">Date Range:</legend>
-      <label className="dateChooser--label">
+    <fieldset>
+      <legend>Date Range:</legend>
+      <label>
         Start Date:
         <DatePicker
           maxDate={endDate}
@@ -20,7 +19,7 @@ export const DateChooser = (props) => {
           onChange={(date) => updateStartDate(date)}
         />
       </label>
-      <label className="dateChooser--label">
+      <label>
         End Date:
         <DatePicker
           maxDate={today}  //can't choose a date in the future.

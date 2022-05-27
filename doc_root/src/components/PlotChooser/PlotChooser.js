@@ -1,6 +1,3 @@
-
-import './styles.css';
-
 const Label = ({ id, clickHandler, isChecked }) => {
     return <label className='plotChooser--label'><input type='checkbox' defaultChecked={isChecked} onClick={(e) => clickHandler(id, e.target.checked)} /> { id }</label>
 }
