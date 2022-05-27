@@ -26,7 +26,7 @@ function csvDateTimeToDate($dateTime) {
     }
 }
 
-function getEodHistory($symbol, $maxRows = 50, $pdo) {
+function getEodHistory($symbol, $pdo, $maxRows = 50) {
     $history = array();
     $query = "select date, EOD from $symbol ORDER by date DESC LIMIT $maxRows";
     $stmt = $pdo->query($query);
@@ -41,9 +41,11 @@ function getEodHistory($symbol, $maxRows = 50, $pdo) {
 }
 
 function recordAlerts($date, $alerts, $pdo) {
-    $alertsAsJson = json_encode($alerts);
-    $query = "INSERT INTO _alertHistory (date, alerts) VALUES (?,?) on duplicate key update date=date, alerts=alerts";
-    $pdo->prepare($query)->execute([$date, $alertsAsJson]);
+    $query = "INSERT INTO _alerts (date, symbol, type) VALUES (?,?,?) on duplicate key update date=date, type=type, symbol=symbol";
+    foreach($alerts as $symbol => $type) {
+        $pdo->prepare($query)->execute([$date, $symbol, $type]);
+        // print("Symbol $symbol had a $type alert.<br>");
+    }
 }
 
 function handleDailies($dailyEodPriceCsv) {
@@ -61,7 +63,7 @@ function handleDailies($dailyEodPriceCsv) {
             array_push($errors, "Symbol $symbol had a non-numeric price: $price. TradeDate: $tradeDate and company name: $companyName.");
         } elseif(tableExists($symbol, $db)) {
             echo "Tracked symbol [$symbol] ended at $price traded on ".$tradeDate.".<br>";
-            $recentHistory = getEodHistory($symbol, 75, $db);
+            $recentHistory = getEodHistory($symbol, $db, 75);
             $lastDateFromHistory = end($recentHistory)['date'];
 
             // this condition could happen if the daily script was run twice on the same date.
