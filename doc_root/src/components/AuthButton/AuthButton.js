@@ -1,6 +1,6 @@
-import React, { useContext } from "react";
+import React from "react";
 import { GoogleLogin, GoogleLogout } from "react-google-login";
-import { AppContext } from "../../context/AppContext";
+import useApp from "../../hooks/useApp";
 import "./styles.css";
 
 // heavily borrowed from https://dev.to/sivaneshs/add-google-login-to-your-react-apps-in-10-mins-4del
@@ -8,38 +8,38 @@ import "./styles.css";
 const clientId =
   "451536185848-p0c132ugq4jr7r08k4m6odds43qk6ipj.apps.googleusercontent.com";
 
-
-
 export const AuthButton = () => {
-  const [App, setApp] = useContext(AppContext);
-  const { tokenId } = App;
+  const { app, setApp } = useApp();
+  const { tokenId } = app;
 
   const logout = () => {
-    sessionStorage.setItem('accessToken', '');
     sessionStorage.setItem('tokenId', '');
-    document.cookie = "tokenId='';"
-    setApp("accessToken",'');
     setApp("tokenId",'');
+    // setApp("userEmail",'');
   }
 
   const setTokens = (authResponse) => {
-    const { accessToken, tokenId } = authResponse;
-    document.cookie = `tokenId=${tokenId};`
-    sessionStorage.setItem('accessToken', accessToken);
+    const { tokenId } = authResponse;
     sessionStorage.setItem('tokenId', tokenId);
-    setApp("accessToken",accessToken);
     setApp("tokenId",tokenId);
+  };
+
+  const setUserData = (userDetail={}) => {
+    const {email} = userDetail;
+    console.log( ' - - - - - email: ', email);
+    // setApp('userEmail', email);
   };
 
   const onLoginSuccess = (authResponse) => {
     console.log("Auth Success: currentUser:", authResponse);
     setTokens(authResponse);
     refreshAuthTokenBeforeExpiration(authResponse);
+    setUserData(authResponse.profileObj);
   };
 
   const onLoginFailure = (authResponse) => {
     console.log(' - - - -- > authResponse: ', authResponse);
-    setApp('messages', authResponse);
+    // setApp('messages', authResponse);
   };
 
   const onLogoutSuccess = (authResponse) => {

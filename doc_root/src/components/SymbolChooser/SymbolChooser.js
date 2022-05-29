@@ -34,16 +34,16 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
         .then((response) => response.json())
         .then((data) => {
           if (data.err) {
-            messages.push({ message: data.err, classification: "error" });
+            // messages.push({ message: data.err, classification: "error" });
           } else {
             setSymbols(handleDataResponse(data));
           }
         })
         .catch((err) => {
-          messages.push({
-            message: `Error requesting symbols: ${err}`,
-            classification: "error",
-          });
+          // messages.push({
+          //   message: `Error requesting symbols: ${err}`,
+          //   classification: "error",
+          // });
         });
     }
   }, [symbol, tokenId]);

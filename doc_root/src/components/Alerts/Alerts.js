@@ -23,16 +23,16 @@ export const Alerts = ({ symbol }) => {
         .then((data) => {
           console.log(' - - - - -- > got to fetch', data)
           if (data.err) {
-            messages.push({ message: data.err, classification: "error" });
+            // messages.push({ message: data.err, classification: "error" });
           } else {
             setAlertHistory(data);
           }
         })
         .catch((err) => {
-          messages.push({
-            message: `Error requesting alerts: ${err}`,
-            classification: "error",
-          });
+          // messages.push({
+          //   message: `Error requesting alerts: ${err}`,
+          //   classification: "error",
+          // });
         });
     }
   }, [symbol, tokenId]);

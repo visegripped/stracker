@@ -11,7 +11,6 @@ function App() {
   const lsSymbolName = localStorage.getItem("symbolName") || "Apple";
   const [symbol, setSymbol] = useState(lsSymbol);
   const [symbolName, setSymbolName] = useState(lsSymbolName);
-
   const changeSymbol = (event) => {
     const newSymbol = event.value;
     const newSymbolName = event.label;

@@ -76,19 +76,19 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
         .then((data) => {
           console.log(`Historical data for ${symbol} was fetched`, data);
           if (data.err) {
-            messages.push({ message: data.err, classification: "error" });
+            // messages.push({ message: data.err, classification: "error" });
           } else {
             setHistory(data);
           }
         })
         .catch((e) => {
-          messages.push({
-            message: `The request to fetch the list of symbols has failed. Please try again later.
-            If this error persists, contact the site administrator.
-            Error details: ${e}`,
-            classification: "error",
-          });
-          setApp("messages", messages);
+          // messages.push({
+          //   message: `The request to fetch the list of symbols has failed. Please try again later.
+          //   If this error persists, contact the site administrator.
+          //   Error details: ${e}`,
+          //   classification: "error",
+          // });
+          // setApp("messages", messages);
         });
     }
   }, [symbol, startDate, endDate, tokenId]);

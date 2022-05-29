@@ -5,25 +5,29 @@ const AppContext = createContext();
 function AppProvider(props) {
   const accessToken = sessionStorage.getItem('accessToken') || undefined;
   const tokenId = sessionStorage.getItem('tokenId') || undefined;
-  const [App, setApp] = useState({
+  const [app, setApp] = useState({
     accessToken,
     tokenId,
-    isAuthenticated: !!(accessToken),
+    userEmail: '',
     messages: [],
   });
   const updateApp = (id, val) => {
+    console.log(` - - -- - > updateApp. id = ${id} and val = ${val}`);
     const updatedValue = { [id]: val };
     const updatedApp = {
-      ...App,
+      ...app,
       ...updatedValue,
     };
     setApp(updatedApp);
   };
   return (
-    <AppContext.Provider value={[App, updateApp]}>
+    <AppContext.Provider value={[app, updateApp]}>
       {props.children}
     </AppContext.Provider>
   );
 }
 
-export { AppContext, AppProvider };
+const AppConsumer = AppContext.Consumer;
+
+export { AppContext, AppProvider, AppConsumer };
+export default AppContext;
