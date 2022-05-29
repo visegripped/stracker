@@ -1,12 +1,14 @@
 import React from "react";
 import { useEffect, useState, useContext } from "react";
 import { AppContext } from "../../context/AppContext";
+import useMessaging from "../../hooks/useMessaging";
 import Select from "react-select"; // https://react-select.com/home
 import apiEndpoints from "../../endpoints.json";
 
 export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
   let [symbols, setSymbols] = useState({});
   const [App] = useContext(AppContext);
+  const { addMessage } = useMessaging();
   const { tokenId, messages } = App;
   const selectedOption = {
     value: symbol,
@@ -34,13 +36,13 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
         .then((response) => response.json())
         .then((data) => {
           if (data.err) {
-            messages.push({ message: data.err, classification: "error" });
+            addMessage({ message: data.err, classification: "error" });
           } else {
             setSymbols(handleDataResponse(data));
           }
         })
         .catch((err) => {
-          messages.push({
+          addMessage({
             message: `Error requesting symbols: ${err}`,
             classification: "error",
           });

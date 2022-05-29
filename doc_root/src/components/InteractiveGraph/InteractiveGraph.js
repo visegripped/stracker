@@ -1,6 +1,7 @@
 import React from "react";
 import { useState, useEffect, useContext } from "react";
 import { AppContext } from "../../context/AppContext";
+import useMessaging from "../../hooks/useMessaging";
 import PlotChooser from "../PlotChooser/PlotChooser";
 import DateChooser from "../DateChooser/DateChooser";
 import Graph from "../Graph/Graph";
@@ -11,7 +12,8 @@ import apiEndpoints from "../../endpoints.json";
 export const InteractiveGraph = ({ symbol, symbolName }) => {
   const [history, setHistory] = useState([]);
   const [App, setApp] = useContext(AppContext);
-  const { messages, tokenId } = App;
+  const { tokenId } = App;
+  const { addMessage } = useMessaging();
   const lsDataPoints = JSON.parse(localStorage.getItem("dataPoints")) || {
     EOD: true,
   };
@@ -76,19 +78,18 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
         .then((data) => {
           console.log(`Historical data for ${symbol} was fetched`, data);
           if (data.err) {
-            messages.push({ message: data.err, classification: "error" });
+            addMessage({ message: data.err, classification: "error" });
           } else {
             setHistory(data);
           }
         })
         .catch((e) => {
-          messages.push({
+          addMessage({
             message: `The request to fetch the list of symbols has failed. Please try again later.
             If this error persists, contact the site administrator.
             Error details: ${e}`,
             classification: "error",
           });
-          setApp("messages", messages);
         });
     }
   }, [symbol, startDate, endDate, tokenId]);

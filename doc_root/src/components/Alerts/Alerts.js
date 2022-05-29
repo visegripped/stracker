@@ -1,14 +1,16 @@
 import React from "react";
 import { useEffect, useState, useContext } from "react";
 import { AppContext } from "../../context/AppContext";
+import useMessaging from "../../hooks/useMessaging";
 import apiEndpoints from "../../endpoints.json";
 import "./Alerts.css";
 
 export const Alerts = ({ symbol }) => {
   const [App] = useContext(AppContext);
-  const { tokenId, messages } = App;
-  const [ alertHistory, setAlertHistory ] = useState([]);
-  
+  const { addMessage } = useMessaging();
+  const { tokenId } = App;
+  const [alertHistory, setAlertHistory] = useState([]);
+
   useEffect(() => {
     if (tokenId) {
       let formData = new FormData();
@@ -21,15 +23,14 @@ export const Alerts = ({ symbol }) => {
       })
         .then((response) => response.json())
         .then((data) => {
-          console.log(' - - - - -- > got to fetch', data)
           if (data.err) {
-            messages.push({ message: data.err, classification: "error" });
+            addMessage({ message: data.err, classification: "error" });
           } else {
             setAlertHistory(data);
           }
         })
         .catch((err) => {
-          messages.push({
+          addMessage({
             message: `Error requesting alerts: ${err}`,
             classification: "error",
           });
@@ -42,10 +43,14 @@ export const Alerts = ({ symbol }) => {
       <legend>Alert History:</legend>
       <div className="alertContainer">
         {alertHistory.map((alert) => {
-          return <div className="alertItem" key={alert.id}>{alert.date}: {alert.type}</div>
+          return (
+            <div className="alertItem" key={alert.id}>
+              {alert.date}: {alert.type}
+            </div>
+          );
         })}
       </div>
     </fieldset>
-  )
-}
+  );
+};
 export default Alerts;
