@@ -1,6 +1,7 @@
 import React, { useContext } from "react";
 import { GoogleLogin, GoogleLogout } from "react-google-login";
 import { AppContext } from "../../context/AppContext";
+import useMessaging from "../../hooks/useMessaging";
 import "./styles.css";
 
 // heavily borrowed from https://dev.to/sivaneshs/add-google-login-to-your-react-apps-in-10-mins-4del
@@ -12,6 +13,7 @@ const clientId =
 
 export const AuthButton = () => {
   const [App, setApp] = useContext(AppContext);
+  const { addMessage } = useMessaging();
   const { tokenId } = App;
 
   const logout = () => {
@@ -39,7 +41,7 @@ export const AuthButton = () => {
 
   const onLoginFailure = (authResponse) => {
     console.log(' - - - -- > authResponse: ', authResponse);
-    setApp('messages', authResponse);
+    addMessage(authResponse);
   };
 
   const onLogoutSuccess = (authResponse) => {
