@@ -9,7 +9,6 @@ function AppProvider(props) {
     accessToken,
     tokenId,
     isAuthenticated: !!(accessToken),
-    messages: [],
   });
   const updateApp = (id, val) => {
     const updatedValue = { [id]: val };
