@@ -6,8 +6,8 @@ export const MessageTemplate = ({ classification, message, uuid }) => {
   const { removeMessage } = useMessaging();
   const handleClick = (clickEvent) => {
     const uuid = clickEvent.target.dataset.uuid;
-    removeMessage(uuid)
-  }
+    removeMessage(uuid);
+  };
   return (
     <div className={`message ${classification}`}>
       <pre className="message--pre">{message}</pre>
@@ -22,14 +22,12 @@ export const MessageTemplate = ({ classification, message, uuid }) => {
   );
 };
 
-
 export const Messages = () => {
   const { messages } = useMessaging();
   const messageList = [];
   const keys = Object.keys(messages);
-
-  if(keys) {
-    keys.forEach(( uuid ) => {
+  if (keys) {
+    keys.forEach((uuid) => {
       const { message, classification } = messages[uuid];
       messageList.push(
         <MessageTemplate
@@ -41,7 +39,7 @@ export const Messages = () => {
       );
     });
   }
-  return <section className="messagesContainer">{ messageList }</section>;
+  return <section className="messagesContainer">{messageList}</section>;
 };
 
 export default Messages;

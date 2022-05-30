@@ -9,7 +9,7 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
   let [symbols, setSymbols] = useState({});
   const [App] = useContext(AppContext);
   const { addMessage } = useMessaging();
-  const { tokenId, messages } = App;
+  const { tokenId } = App;
   const selectedOption = {
     value: symbol,
     label: symbolName,
@@ -34,10 +34,13 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
         method: "post",
       })
         .then((response) => {
-          if(response.status >= 200 && response.status < 300) {
-            return response.json()
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
           } else {
-            addMessage({ message: `Request to fetch symbol list failed w/ error status ${response.status}`, classification: "error" });
+            addMessage({
+              message: `Request to fetch symbol list failed w/ error status ${response.status}`,
+              classification: "error",
+            });
           }
         })
         .then((data) => {

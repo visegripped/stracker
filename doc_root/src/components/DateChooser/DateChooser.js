@@ -22,7 +22,7 @@ export const DateChooser = (props) => {
       <label>
         End Date:
         <DatePicker
-          maxDate={today}  //can't choose a date in the future.
+          maxDate={today} //can't choose a date in the future.
           minDate={startDate} //can't choose a end date before the start date
           selectsEnd
           startDate={startDate}
