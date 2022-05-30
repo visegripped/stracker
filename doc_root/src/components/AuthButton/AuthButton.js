@@ -47,6 +47,7 @@ export const AuthButton = () => {
       (res.tokenObj.expires_in || 3600 - 5 * 60) * 1000;
     const refreshToken = async () => {
       const newAuthRes = await res.reloadAuthResponse();
+      console.log(" - - - > newAuthRes: ", newAuthRes);
       durationBetweenAutoRefresh =
         (newAuthRes.expires_in || 3600 - 5 * 60) * 1000;
       setToken(newAuthRes);
