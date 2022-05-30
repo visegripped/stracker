@@ -26,7 +26,6 @@ export const Messages = () => {
   const { messages } = useMessaging();
   const messageList = [];
   const keys = Object.keys(messages);
-  console.log(" -> rendering Messages");
   if (keys) {
     keys.forEach((uuid) => {
       const { message, classification } = messages[uuid];

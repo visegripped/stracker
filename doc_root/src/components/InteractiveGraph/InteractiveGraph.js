@@ -71,11 +71,6 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
       formData.append("symbol", symbol);
       formData.append("startDate", formatDate(startDate));
       formData.append("endDate", formatDate(endDate));
-      console.log(
-        `startDate: ${formatDate(startDate)} and endData: ${formatDate(
-          endDate
-        )}`
-      );
       fetch(apiEndpoints.root, {
         body: formData,
         method: "post",
