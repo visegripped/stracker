@@ -7,13 +7,13 @@ const useMessaging = () => {
   const [ messages, setMessages ] = context;
 
   const removeMessage = (uuid) => {
-    console.log( ' removeMessage: ', uuid);
     let updatedMessages = {...messages};
     delete updatedMessages[uuid];
     setMessages(updatedMessages);
   };
 
   const addMessage = (messageObj) => {
+    console.log(' -> Message added: ', messageObj);
     const uuid = uuidv4();
     messages[uuid] = messageObj;
     setMessages(messages);

@@ -74,7 +74,13 @@ export const InteractiveGraph = ({ symbol, symbolName }) => {
         body: formData,
         method: "post",
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if(response.status >= 200 && response.status < 300) {
+            return response.json()
+          } else {
+            addMessage({ message: `Request to get historical data failed w/ error status ${response.status}`, classification: "error" });
+          }
+        })
         .then((data) => {
           console.log(`Historical data for ${symbol} was fetched`, data);
           if (data.err) {

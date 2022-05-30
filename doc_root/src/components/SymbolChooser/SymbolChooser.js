@@ -33,7 +33,13 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
         body: formData,
         method: "post",
       })
-        .then((response) => response.json())
+        .then((response) => {
+          if(response.status >= 200 && response.status < 300) {
+            return response.json()
+          } else {
+            addMessage({ message: `Request to fetch symbol list failed w/ error status ${response.status}`, classification: "error" });
+          }
+        })
         .then((data) => {
           if (data.err) {
             addMessage({ message: data.err, classification: "error" });
