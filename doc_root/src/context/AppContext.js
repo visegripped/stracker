@@ -7,12 +7,13 @@ function AppProvider(props) {
   const [App, setApp] = useState({
     tokenId,
   });
-  const updateApp = (id, val) => {
-    const updatedValue = { [id]: val };
+  const updateApp = (valObj) => {
+    console.log(` - - -- > app updated for with `, valObj);
     const updatedApp = {
       ...App,
-      ...updatedValue,
+      ...valObj,
     };
+    console.log(' - - - - - - > updateApp value: ', updatedApp);
     setApp(updatedApp);
   };
   return (

@@ -16,13 +16,14 @@ export const AuthButton = () => {
 
   const logout = () => {
     sessionStorage.setItem("tokenId", "");
-    setApp("tokenId", "");
+    setApp({"tokenId": ""});
   };
 
   const setToken = (authResponse) => {
-    const { tokenId } = authResponse;
+    const { tokenId, profileObj } = authResponse;
+    const { email } = profileObj;
     sessionStorage.setItem("tokenId", tokenId);
-    setApp("tokenId", tokenId);
+    setApp({"tokenId": tokenId, "email": email});
   };
 
   const onLoginSuccess = (authResponse) => {
