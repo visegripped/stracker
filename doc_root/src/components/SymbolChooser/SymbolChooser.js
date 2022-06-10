@@ -57,7 +57,7 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
           });
         });
     }
-  }, [symbol, tokenId]);
+  }, [tokenId]);
 
   return (
     <div>
