@@ -6,6 +6,7 @@ include "../../includes/stracker/sessions.php";
 require_once '../../includes/vendor/autoload.php';
 
 $task = $_POST['task'] ?? "";
+$userId = $_POST['userId'] ?? "";
 $symbol = $_POST['symbol'] ?? "";
 $startDate = $_POST['startDate'] ?? "";
 $endDate = $_POST['endDate'] ?? "";
@@ -33,6 +34,11 @@ function getAlerts($symbol, $pdo) {
     return $stmt->fetchAll();
 }
 
+function track($symbol, $userId, $pdo) {
+    $query = "INSERT INTO _track (symbol, userid) VALUES (?,?) on duplicate key update symbol=symbol, userid=userid";
+    return $pdo->prepare($query)->execute([$symbol, $userId]);
+}
+
 $db = dbConnect();
 if(!$tokenId) {
     $data = '{"err":"Token not specified on API request."}';
@@ -45,6 +51,8 @@ if(!$tokenId) {
     $data = array_reverse($data);
 } else if($task == 'alerts' & isValidSymbol($symbol)) {
     $data = getAlerts($symbol, $db);
+} else if($task == 'track' & isValidSymbol($symbol) && isValidEmail($userId)) {
+    $data = track($symbol, $userId, $db) ? '{"msg":"'.$symbol.' now being tracked"}' : '{"err":"Error attempting to track symbol ['.$symbol.']"}';
 } else if($task == 'symbols' ) {
     $data = getSymbols($db);
 } else {
