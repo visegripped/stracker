@@ -4,16 +4,16 @@ const AppContext = createContext();
 
 function AppProvider(props) {
   const tokenId = sessionStorage.getItem("tokenId") || undefined;
+  const userId = sessionStorage.getItem("userId") || undefined;
   const [App, setApp] = useState({
     tokenId,
+    userId,
   });
   const updateApp = (valObj) => {
-    console.log(` - - -- > app updated for with `, valObj);
     const updatedApp = {
       ...App,
       ...valObj,
     };
-    console.log(' - - - - - - > updateApp value: ', updatedApp);
     setApp(updatedApp);
   };
   return (

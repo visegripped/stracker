@@ -33,4 +33,8 @@ function areValidDates($date1, $date2) {
   return false;
 }
 
+function isValidEmail($email) {
+  return filter_var($email, FILTER_VALIDATE_EMAIL);
+}
+
 ?>

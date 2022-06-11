@@ -16,6 +16,7 @@ export const AuthButton = () => {
 
   const logout = () => {
     sessionStorage.setItem("tokenId", "");
+    sessionStorage.setItem("userId", "");
     setApp({"tokenId": ""});
   };
 
@@ -23,7 +24,8 @@ export const AuthButton = () => {
     const { tokenId, profileObj } = authResponse;
     const { email } = profileObj;
     sessionStorage.setItem("tokenId", tokenId);
-    setApp({"tokenId": tokenId, "email": email});
+    sessionStorage.setItem("userId", email);
+    setApp({"tokenId": tokenId, "userId": email});
   };
 
   const onLoginSuccess = (authResponse) => {
