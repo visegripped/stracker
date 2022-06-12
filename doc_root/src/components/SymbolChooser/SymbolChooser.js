@@ -1,42 +1,77 @@
-
-import React from 'react';
-import { useEffect, useState, useContext } from 'react';
+import React from "react";
+import { useEffect, useState, useContext } from "react";
 import { AppContext } from "../../context/AppContext";
-import Select from 'react-select'; // https://react-select.com/home
-import apiEndpoints from '../../endpoints.json';
+import useMessaging from "../../hooks/useMessaging";
+import Select from "react-select"; // https://react-select.com/home
+import apiEndpoints from "../../endpoints.json";
 
 export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
-    let [symbols, setSymbols] = useState({});
-    const [App, setApp] = useContext(AppContext);
-    const { isAuthenticated } = App;
-    const selectedOption = {
-        value: symbol,
-        label: symbolName,
-    };
+  let [symbols, setSymbols] = useState({});
+  const [App] = useContext(AppContext);
+  const { addMessage } = useMessaging();
+  const { tokenId } = App;
+  const selectedOption = {
+    value: symbol,
+    label: symbolName,
+  };
 
-    const handleDataResponse = (symbols = []) => {
-        const data = [];
-        symbols.forEach((symbol) => {
-            const option = {value: symbol.symbol, label: symbol.name};
-            data.push(option);
+  const handleDataResponse = (symbols = []) => {
+    const data = [];
+    symbols.forEach((symbol) => {
+      const option = { value: symbol.symbol, label: symbol.name };
+      data.push(option);
+    });
+    return data;
+  };
+
+  useEffect(() => {
+    if (tokenId) {
+      let formData = new FormData();
+      formData.append("tokenId", tokenId);
+      formData.append("task", "symbols");
+      fetch(apiEndpoints.root, {
+        body: formData,
+        method: "post",
+      })
+        .then((response) => {
+          if (response.status >= 200 && response.status < 300) {
+            return response.json();
+          } else {
+            addMessage({
+              message: `Request to fetch symbol list failed w/ error status ${response.status}`,
+              classification: "error",
+            });
+          }
+        })
+        .then((data) => {
+          if (data.err) {
+            addMessage({ message: data.err, classification: "error" });
+          } else {
+            setSymbols(handleDataResponse(data));
+          }
+        })
+        .catch((err) => {
+          addMessage({
+            message: `Error requesting symbols: ${err}`,
+            classification: "error",
+          });
         });
-        return data;
     }
+  }, [tokenId]);
 
-    useEffect(() => {
-        const url = `${apiEndpoints.symbols}&token=${accessToken}`;
-        fetch(url)
-        .then(response => response.json())
-        .then(data => {
-          setSymbols(handleDataResponse(data));
-        }).catch((e) => {
-            setApp('messages', e);
-        });
-      },[symbol]);
-
-    return <div>
-        {isAuthenticated ? <Select onChange={symbolChangeHandler} defaultValue={selectedOption} options={symbols} /> : <></>}
+  return (
+    <div>
+      {tokenId ? (
+        <Select
+          onChange={symbolChangeHandler}
+          defaultValue={selectedOption}
+          options={symbols}
+        />
+      ) : (
+        <></>
+      )}
     </div>
-}
+  );
+};
 
 export default SymbolChooser;

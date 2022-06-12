@@ -1,16 +1,19 @@
-import React, { useContext } from "react";
-import { AppContext } from "../../context/AppContext";
+import React from "react";
+import useMessaging from "../../hooks/useMessaging";
 import "./Messages.styles.css";
 
-export const MessageTemplate = ({ classification, message, messageIndex, buttonOnclick }) => {
-  const handleClick = () => {
-    buttonOnclick(messageIndex);
-  }
+export const MessageTemplate = ({ classification, message, uuid }) => {
+  const { removeMessage } = useMessaging();
+  const handleClick = (clickEvent) => {
+    const uuid = clickEvent.target.dataset.uuid;
+    removeMessage(uuid);
+  };
   return (
     <div className={`message ${classification}`}>
       <pre className="message--pre">{message}</pre>
       <button
         className={`button message--button message--button--${classification}`}
+        data-uuid={uuid}
         onClick={handleClick}
       >
         X
@@ -20,28 +23,22 @@ export const MessageTemplate = ({ classification, message, messageIndex, buttonO
 };
 
 export const Messages = () => {
-  const [App, setApp] = useContext(AppContext);
-  const { messages } = App;
+  const { messages } = useMessaging();
   const messageList = [];
-
-  const removeMessage = (index) => {
-    if(index > -1) {
-      messages.splice(index, 1);
-    }
-    setApp('messages', messages);
-  };
-
-  messages.forEach(({ message, classification }, index) => {
-    messageList.push(
-      <MessageTemplate
-        messageIndex={index}
-        key={`messageId-${index}`}
-        message={message}
-        classification={classification}
-        buttonOnclick={removeMessage}
-      />
-    );
-  });
+  const keys = Object.keys(messages);
+  if (keys) {
+    keys.forEach((uuid) => {
+      const { message, classification } = messages[uuid];
+      messageList.push(
+        <MessageTemplate
+          uuid={uuid}
+          key={uuid}
+          message={message}
+          classification={classification}
+        />
+      );
+    });
+  }
   return <section className="messagesContainer">{messageList}</section>;
 };
 

@@ -14,3 +14,28 @@
 .app--symbolChooser {
   width: 40%;
 }
+
+label {
+  display: block;
+  padding: 8px 16px;
+  min-width: 200px;
+}
+
+label:hover {
+  background: #efefef;
+}
+
+legend {
+  font-weight: 600;
+  color: #666;
+  margin-left: 8px;
+  padding: 0 8px;
+}
+
+fieldset {
+  border: 1px solid #CDCDCD;
+  background: #fff;
+  border-radius: 4px;
+  margin: 0 0 16px 0;
+  padding: 0;
+}
