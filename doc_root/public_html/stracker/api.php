@@ -39,20 +39,29 @@ function track($symbol, $userId, $pdo) {
     return $pdo->prepare($query)->execute([$symbol, $userId]);
 }
 
+function untrack($symbol, $userId, $pdo) {
+    $query = "INSERT INTO _track (symbol, userid) VALUES (?,?) on duplicate key update symbol=symbol, userid=userid";
+    return $pdo->prepare($query)->execute([$symbol, $userId]);
+}
+
 $db = dbConnect();
-if(!$tokenId) {
-    $data = '{"err":"Token not specified on API request."}';
-    $data = json_decode($data);
-} else if(!isValidSession($tokenId)) {
-    $data = '{"err":"Invalid/expired token.  Please sign (or re-sign) in."}';
-    $data = json_decode($data);
-} else if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
+// if(!$tokenId) {
+//     $data = '{"err":"Token not specified on API request."}';
+//     $data = json_decode($data);
+// } else if(!isValidSession($tokenId)) {
+//     $data = '{"err":"Invalid/expired token.  Please sign (or re-sign) in."}';
+//     $data = json_decode($data);
+// } else 
+
+if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
     $data = getHistory($symbol, $startDate, $endDate, $db);
     $data = array_reverse($data);
 } else if($task == 'alerts' & isValidSymbol($symbol)) {
     $data = getAlerts($symbol, $db);
 } else if($task == 'track' & isValidSymbol($symbol) && isValidEmail($userId)) {
     $data = track($symbol, $userId, $db) ? '{"msg":"'.$symbol.' now being tracked"}' : '{"err":"Error attempting to track symbol ['.$symbol.']"}';
+}  else if($task == 'untrack' & isValidSymbol($symbol) && isValidEmail($userId)) {
+    $data = untrack($symbol, $userId, $db) ? '{"msg":"'.$symbol.' no longer being tracked"}' : '{"err":"Error attempting to un-track symbol ['.$symbol.']"}';
 } else if($task == 'symbols' ) {
     $data = getSymbols($db);
 } else {

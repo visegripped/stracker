@@ -3,13 +3,14 @@ import SymbolChooser from "./components/SymbolChooser";
 import { useState } from "react";
 import { AppProvider } from "./context/AppContext";
 import { MessageProvider } from "./context/MessageContext";
-import AuthButton from "./components/AuthButton/AuthButton";
+// import AuthButton from "./components/AuthButton/AuthButton";
 import Messages from "./components/Messages";
 import "./App.css";
 
 function App() {
   const lsSymbol = localStorage.getItem("symbol") || "AAPL";
   const lsSymbolName = localStorage.getItem("symbolName") || "Apple";
+  const {trackedSymbols, setTrackedSymbols} = useState([]);
   const [symbol, setSymbol] = useState(lsSymbol);
   const [symbolName, setSymbolName] = useState(lsSymbolName);
   const changeSymbol = (event) => {
@@ -34,7 +35,7 @@ function App() {
               />
             </div>
             <div>
-              <AuthButton />
+              {/* <AuthButton /> */}
             </div>
           </header>
           <main>
