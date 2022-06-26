@@ -29,6 +29,7 @@
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
+
 .app--nav > li > a:focus,
 .app--nav > li > a:hover {
   background: rgb(185, 205, 185);
@@ -40,6 +41,7 @@
   padding: 4px 0;
   background: rgb(185, 205, 185);
   justify-content: space-evenly;
+  margin-bottom: 12px;
 }
 
 .app--verticalSplit {
