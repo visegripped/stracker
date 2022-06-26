@@ -40,7 +40,7 @@ function track($symbol, $userId, $pdo) {
 }
 
 function untrack($symbol, $userId, $pdo) {
-    $query = "INSERT INTO _track (symbol, userid) VALUES (?,?) on duplicate key update symbol=symbol, userid=userid";
+    $stmt = $pdo->prepare("delete where symbol = :symbol and userd = :userId from _track");
     return $pdo->prepare($query)->execute([$symbol, $userId]);
 }
 

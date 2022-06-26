@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { AppContext } from "../../context/AppContext";
 import useMessaging from "../../hooks/useMessaging";
 import apiEndpoints from "../../endpoints.json";
@@ -8,7 +8,8 @@ export const TrackButton = ({ symbol = '' }) => {
   const { addMessage } = useMessaging();
   const [App] = useContext(AppContext);
   const { tokenId, userId } = App;
-  const { trackedSymbols, setTrackedSymbols } = useState([]);
+  const [ trackedSymbols, setTrackedSymbols ] = useState([]);
+  const [ stateChangeTest, setStateChangeTest ] = useState(1);
 
   const getTrackedSymbols = () => {
     let formData = new FormData();
@@ -28,14 +29,19 @@ export const TrackButton = ({ symbol = '' }) => {
         message: `Error requesting alerts: ${err}`,
         classification: "error",
       });
-    });;
+    });
   }
-  getTrackedSymbols()
 
+
+  useEffect(() => {
+    if(tokenId) {
+      getTrackedSymbols();
+    }
+  }, [stateChangeTest]);
 
   const handleClick = (clickEvent) => {
     console.log(`-> trackSymbol was triggered for ${symbol}. tokenId is set: ${!!(tokenId)} and userId: ${userId}`);
-    const trackStatus = clickEvent.target.dataset.action || 'track';
+    const trackStatus = clickEvent?.target?.dataset?.action || 'track';
     if(tokenId && userId) {
       let formData = new FormData();
       formData.append("tokenId", tokenId);
@@ -48,7 +54,6 @@ export const TrackButton = ({ symbol = '' }) => {
       })
       .then((response) => {
         if (response.status >= 200 && response.status < 300) {
-          getTrackedSymbols();
           return response.json();
         } else {
           addMessage({
@@ -63,6 +68,7 @@ export const TrackButton = ({ symbol = '' }) => {
         } else {
         // success.  Throw success message.
           addMessage({ message: `Symbol ${symbol} is track status changed to: ${trackStatus}`, classification: "info" });
+          setStateChangeTest(stateChangeTest+1);
         }
       })
       .catch((err) => {
