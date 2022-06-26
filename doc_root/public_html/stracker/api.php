@@ -34,6 +34,12 @@ function getAlerts($symbol, $pdo) {
     return $stmt->fetchAll();
 }
 
+function getAlertHistory($pdo) {
+    $query = "select symbol, date, type, id from _alerts order by date DESC";
+    $stmt = $pdo->query($query);
+    return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+}
+
 function track($symbol, $userId, $pdo) {
     $query = "INSERT INTO _track (symbol, userid) VALUES (?,?) on duplicate key update symbol=symbol, userid=userid";
     return $pdo->prepare($query)->execute([$symbol, $userId]);
@@ -76,6 +82,8 @@ if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($sym
     $data = untrack($symbol, $userId, $db) ? '{"msg":"'.$symbol.' no longer being tracked"}' : '{"err":"Error attempting to un-track symbol ['.$symbol.']"}';
 } else if($task == 'symbols' ) {
     $data = getSymbols($db);
+} else if($task == 'getAlertHistory' ) {
+    $data = getAlertHistory($db);
 } else {
     $data = '{"err":"No/Invalid task defined ['.$task.'] or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). dates are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').'"}';
     $data = json_decode($data);

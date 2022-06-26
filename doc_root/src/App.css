@@ -1,6 +1,7 @@
-.app--header {
+.appHeader {
   display: flex;
   justify-content: space-between;
+  vertical-align: bottom;
 }
 
 .app--logo {
@@ -11,8 +12,38 @@
   color: #666;
 }
 
-.app--symbolChooser {
-  width: 40%;
+.app--nav > li {
+  display: inline-block;
+  margin-right: 4px;
+}
+
+.app--nav > li > a {
+  text-decoration: none;
+  display: block;
+  border: 1px solid rgb(185, 205, 185);
+  border-bottom-width: 0;
+  background: #fff;
+  padding: 8px 12px;
+  font-size: 14px;
+  border-radius: 8px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.app--nav > li > a:focus,
+.app--nav > li > a:hover {
+  background: rgb(185, 205, 185);
+  color: #fff;
+}
+
+.app--menuBar {
+  display: flex;
+  padding: 4px 0;
+  background: rgb(185, 205, 185);
+  justify-content: space-evenly;
+}
+
+.app--verticalSplit {
+  border-right: 1px solid #333;
 }
 
 label {
@@ -22,7 +53,8 @@ label {
 }
 
 label:hover {
-  background: #efefef;
+  background: rgb(185, 205, 185);
+  color: #fff;
 }
 
 legend {
@@ -33,9 +65,13 @@ legend {
 }
 
 fieldset {
-  border: 1px solid #CDCDCD;
+  border: 1px solid rgb(185, 205, 185);
   background: #fff;
   border-radius: 4px;
   margin: 0 0 16px 0;
   padding: 0;
+}
+
+a {
+  color: rgb(65, 105, 65);
 }

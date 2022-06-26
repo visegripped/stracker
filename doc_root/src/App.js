@@ -1,5 +1,4 @@
 import InteractiveGraph from "./components/InteractiveGraph/InteractiveGraph";
-import SymbolChooser from "./components/SymbolChooser";
 import { useState } from "react";
 import { AppProvider } from "./context/AppContext";
 import { MessageProvider } from "./context/MessageContext";
@@ -8,40 +7,32 @@ import Messages from "./components/Messages";
 import "./App.css";
 
 function App() {
-  const lsSymbol = localStorage.getItem("symbol") || "AAPL";
-  const lsSymbolName = localStorage.getItem("symbolName") || "Apple";
-  const {trackedSymbols, setTrackedSymbols} = useState([]);
-  const [symbol, setSymbol] = useState(lsSymbol);
-  const [symbolName, setSymbolName] = useState(lsSymbolName);
-  
-  const changeSymbol = (event) => {
-    const newSymbol = event.value;
-    const newSymbolName = event.label;
-    setSymbol(newSymbol);
-    setSymbolName(newSymbolName);
-    localStorage.setItem("symbol", newSymbol);
-    localStorage.setItem("symbolName", newSymbolName);
-  };
+  const [ view, setView ] = useState(document.location.hash || 'symbol');
+  const changeView = (clickEvent) => {
+    const newView = clickEvent.target.dataset.view;
+    console.log(` -> Changing view to ${newView}`);
+    setView(newView);
+  }
   return (
     <div className="app">
       <AppProvider>
         <MessageProvider>
-          <header className="app--header">
-            <div className="app--logo">Stracker</div>
-            <div className="app--symbolChooser">
-              <SymbolChooser
-                symbolChangeHandler={changeSymbol}
-                symbol={symbol}
-                symbolName={symbolName}
-              />
+          <header className="appHeader">
+            <div>
+              <span className='app--logo'>Stracker</span>
             </div>
+            <nav className='app--nav'>
+              <li><a href='#symbol' data-view='symbol' onClick={changeView}>Symbol</a></li>
+              <li><a href='#alertHistory' data-view='alertHistory' onClick={changeView}>Alert History</a></li>
+            </nav>
             <div>
               {/* <AuthButton /> */}
             </div>
           </header>
+
           <main>
             <Messages></Messages>
-            <InteractiveGraph symbol={symbol} symbolName={symbolName} trackedSymbols={trackedSymbols} />
+            {view === 'alertHistory' ? <div>stuff</div> : <InteractiveGraph />}
           </main>
         </MessageProvider>
       </AppProvider>

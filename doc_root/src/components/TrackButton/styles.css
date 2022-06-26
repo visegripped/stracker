@@ -1,12 +1,12 @@
 .trackButton {
   font-size: 14px;
   font-weight: normal;
-  background: #00c851;
+  background: #fff;
   border-radius: 10em;
-  border: none;
-  color: #fff;
+  border: 1px solid rgb(141, 156, 141);;
+  color: rgb(65, 105, 65);
   white-space: normal;
-  padding: .5em 2em;
+  padding: .3em 1.5em;
   margin: .5em auto;
   cursor: pointer;
 }
