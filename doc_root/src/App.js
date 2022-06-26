@@ -13,6 +13,7 @@ function App() {
   const {trackedSymbols, setTrackedSymbols} = useState([]);
   const [symbol, setSymbol] = useState(lsSymbol);
   const [symbolName, setSymbolName] = useState(lsSymbolName);
+  
   const changeSymbol = (event) => {
     const newSymbol = event.value;
     const newSymbolName = event.label;
@@ -40,7 +41,7 @@ function App() {
           </header>
           <main>
             <Messages></Messages>
-            <InteractiveGraph symbol={symbol} symbolName={symbolName} />
+            <InteractiveGraph symbol={symbol} symbolName={symbolName} trackedSymbols={trackedSymbols} />
           </main>
         </MessageProvider>
       </AppProvider>

@@ -44,6 +44,16 @@ function untrack($symbol, $userId, $pdo) {
     return $pdo->prepare($query)->execute([$symbol, $userId]);
 }
 
+function getTrackedSymbols($userId, $pdo) {
+    $symbols = array();
+    $query = "select symbol from _track ORDER by symbol ASC";
+    $stmt = $pdo->query($query);
+    while ($row = $stmt->fetch()) {
+        array_push($symbols, $row['symbol']);
+    }
+    return $symbols;
+}
+
 $db = dbConnect();
 // if(!$tokenId) {
 //     $data = '{"err":"Token not specified on API request."}';
@@ -58,6 +68,8 @@ if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($sym
     $data = array_reverse($data);
 } else if($task == 'alerts' & isValidSymbol($symbol)) {
     $data = getAlerts($symbol, $db);
+} else if($task == 'getTrackedSymbols') {
+    $data = getTrackedSymbols($userId, $db);
 } else if($task == 'track' & isValidSymbol($symbol) && isValidEmail($userId)) {
     $data = track($symbol, $userId, $db) ? '{"msg":"'.$symbol.' now being tracked"}' : '{"err":"Error attempting to track symbol ['.$symbol.']"}';
 }  else if($task == 'untrack' & isValidSymbol($symbol) && isValidEmail($userId)) {
