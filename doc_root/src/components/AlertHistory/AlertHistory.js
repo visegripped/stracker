@@ -12,13 +12,13 @@ export const AlertHistory = ({ symbol }) => {
   const { tokenId } = App;
   const [alertHistory, setAlertHistory] = useState([]);
   const [alertsToRetrieve, setNumAlertsToRetrieve] = useState(50);
-  const [sinceDate, setSinceDate] = useState();
-  const [dateRange, setDateRange] = useState();
-
+  // const [sinceDate, setSinceDate] = useState();
+  // const [dateRange, setDateRange] = useState();
+  const [alertTypesToRetrieve, setAlertTypesToRetrieve] = useState({});
 
   useEffect(() => {
-    console.log( ' - - - -> alertsToRetrieve: ', alertsToRetrieve);
     if (tokenId) {
+      console.log(' - - -- > alertTypesToRetrieve', alertTypesToRetrieve);
       let formData = new FormData();
       formData.append("tokenId", tokenId);
       formData.append("task", "getAlertHistory");
@@ -48,7 +48,7 @@ export const AlertHistory = ({ symbol }) => {
     <>
       <section className="app--menuBar">
         <div className="interactiveGraph--symbolChooser">
-          <Filter setNumAlertsToRetrieve={setNumAlertsToRetrieve} />
+          <Filter alertTypesToRetrieve={alertTypesToRetrieve} setAlertTypesToRetrieve={setAlertTypesToRetrieve} setNumAlertsToRetrieve={setNumAlertsToRetrieve} />
         </div>
         <div></div>
       </section>
