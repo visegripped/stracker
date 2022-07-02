@@ -67,15 +67,13 @@ function getTrackedSymbols($userId, $pdo) {
 }
 
 $db = dbConnect();
-// if(!$tokenId) {
-//     $data = '{"err":"Token not specified on API request."}';
-//     $data = json_decode($data);
-// } else if(!isValidSession($tokenId)) {
-//     $data = '{"err":"Invalid/expired token.  Please sign (or re-sign) in."}';
-//     $data = json_decode($data);
-// } else 
-
-if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
+if(!$tokenId) {
+    $data = '{"err":"Token not specified on API request."}';
+    $data = json_decode($data);
+} else if(!isValidSession($tokenId)) {
+    $data = '{"err":"Invalid/expired token.  Please sign (or re-sign) in."}';
+    $data = json_decode($data);
+} else if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
     $data = getHistory($symbol, $startDate, $endDate, $db);
     $data = array_reverse($data);
 } else if($task == 'alerts' & isValidSymbol($symbol)) {

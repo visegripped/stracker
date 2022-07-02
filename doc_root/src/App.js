@@ -3,7 +3,7 @@ import AlertHistory from "./components/AlertHistory/AlertHistory";
 import { useState } from "react";
 import { AppProvider } from "./context/AppContext";
 import { MessageProvider } from "./context/MessageContext";
-// import AuthButton from "./components/AuthButton/AuthButton";
+import AuthButton from "./components/AuthButton/AuthButton";
 import Messages from "./components/Messages";
 import "./App.css";
 
@@ -38,7 +38,7 @@ function App() {
                 </a>
               </li>
             </nav>
-            <div>{/* <AuthButton /> */}</div>
+            <div><AuthButton /></div>
           </header>
 
           <main>
