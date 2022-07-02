@@ -12,6 +12,7 @@ export const TrackButton = ({ symbol = '' }) => {
   const [ stateChangeTest, setStateChangeTest ] = useState(1);
 
   const getTrackedSymbols = () => {
+    console.log(' -> getTrackedSymbols was executed.');
     let formData = new FormData();
     formData.append("tokenId", tokenId);
     formData.append("task", "getTrackedSymbols");
@@ -23,6 +24,7 @@ export const TrackButton = ({ symbol = '' }) => {
     .then((response) => response.json())
     .then((data) => {
       setTrackedSymbols(data);
+      console.log(' -> response for getTrackedSymbols: ', data);
     })
     .catch((err) => {
       addMessage({
@@ -40,8 +42,9 @@ export const TrackButton = ({ symbol = '' }) => {
   }, [stateChangeTest]);
 
   const handleClick = (clickEvent) => {
-    console.log(`-> trackSymbol was triggered for ${symbol}. tokenId is set: ${!!(tokenId)} and userId: ${userId}`);
+    console.log(' BEGIN handleClick');
     const trackStatus = clickEvent?.target?.dataset?.action || 'track';
+    console.log(`-> trackSymbol was triggered for ${symbol}. tokenId is set: ${!!(tokenId)} and userId: ${userId} and trackStatus: ${trackStatus}`);
     if(tokenId && userId) {
       let formData = new FormData();
       formData.append("tokenId", tokenId);
@@ -67,19 +70,20 @@ export const TrackButton = ({ symbol = '' }) => {
           addMessage({ message: data.err, classification: "error" });
         } else {
         // success.  Throw success message.
+        console.log(" - - - - - > data: ", data)
           addMessage({ message: `Symbol ${symbol} is track status changed to: ${trackStatus}`, classification: "info" });
           setStateChangeTest(stateChangeTest+1);
         }
       })
       .catch((err) => {
         addMessage({
-          message: `Error requesting track of ${symbol}: ${err}`,
+          message: `Error requesting ${trackStatus} of ${symbol}: ${err}`,
           classification: "error",
         });
       });
     }
   }
-  const buttonAction = (trackedSymbols?.indexOf(symbol) > -1) ? 'Track' : 'Untrack';
+  const buttonAction = (trackedSymbols && trackedSymbols.indexOf(symbol) > -1) ? 'Untrack' : 'Track';
   return  (
     <button
       onClick={handleClick}

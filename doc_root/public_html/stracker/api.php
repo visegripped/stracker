@@ -46,8 +46,13 @@ function track($symbol, $userId, $pdo) {
 }
 
 function untrack($symbol, $userId, $pdo) {
-    $stmt = $pdo->prepare("delete where symbol = :symbol and userd = :userId from _track");
-    return $pdo->prepare($query)->execute([$symbol, $userId]);
+    $data = [
+        'symbol' => $symbol,
+        'userId' => $userId,
+    ];
+    $sql = "DELETE FROM _track WHERE userid = :userId AND symbol = :symbol";
+    $stmt= $pdo->prepare($sql);
+    return $stmt->execute($data);
 }
 
 function getTrackedSymbols($userId, $pdo) {
@@ -79,7 +84,8 @@ if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($sym
 } else if($task == 'track' & isValidSymbol($symbol) && isValidEmail($userId)) {
     $data = track($symbol, $userId, $db) ? '{"msg":"'.$symbol.' now being tracked"}' : '{"err":"Error attempting to track symbol ['.$symbol.']"}';
 }  else if($task == 'untrack' & isValidSymbol($symbol) && isValidEmail($userId)) {
-    $data = untrack($symbol, $userId, $db) ? '{"msg":"'.$symbol.' no longer being tracked"}' : '{"err":"Error attempting to un-track symbol ['.$symbol.']"}';
+    $rowsRemoved = untrack($symbol, $userId, $db);
+    $data = $rowsRemoved ? '{"msg":"'.$symbol.' no longer being tracked. '.$rowsRemoved.' row(s) removed"}' : '{"err":"Error attempting to un-track symbol ['.$symbol.']"}';
 } else if($task == 'symbols' ) {
     $data = getSymbols($db);
 } else if($task == 'getAlertHistory' ) {
