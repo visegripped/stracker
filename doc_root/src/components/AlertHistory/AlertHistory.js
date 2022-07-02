@@ -3,6 +3,7 @@ import { useEffect, useState, useContext } from "react";
 import { AppContext } from "../../context/AppContext";
 import useMessaging from "../../hooks/useMessaging";
 import apiEndpoints from "../../endpoints.json";
+import Filter from "../Filter";
 import "./AlertHistory.css";
 
 export const AlertHistory = ({ symbol }) => {
@@ -10,13 +11,18 @@ export const AlertHistory = ({ symbol }) => {
   const { addMessage } = useMessaging();
   const { tokenId } = App;
   const [alertHistory, setAlertHistory] = useState([]);
+  const [alertsToRetrieve, setNumAlertsToRetrieve] = useState(50);
+  const [sinceDate, setSinceDate] = useState();
+  const [dateRange, setDateRange] = useState();
+
 
   useEffect(() => {
-    console.log(" WOOT !");
+    console.log( ' - - - -> alertsToRetrieve: ', alertsToRetrieve);
     if (tokenId) {
       let formData = new FormData();
       formData.append("tokenId", tokenId);
       formData.append("task", "getAlertHistory");
+      formData.append("limit", alertsToRetrieve);
       fetch(apiEndpoints.root, {
         body: formData,
         method: "post",
@@ -36,12 +42,14 @@ export const AlertHistory = ({ symbol }) => {
           });
         });
     }
-  }, [symbol, tokenId]);
+  }, [tokenId, alertsToRetrieve]);
 
   return (
     <>
       <section className="app--menuBar">
-        <div className="interactiveGraph--symbolChooser">date range picker</div>
+        <div className="interactiveGraph--symbolChooser">
+          <Filter setNumAlertsToRetrieve={setNumAlertsToRetrieve} />
+        </div>
         <div></div>
       </section>
       <section>
