@@ -1,9 +1,8 @@
 import React, {useState} from "react";
 import DateChooser from "../DateChooser";
 import "./styles.css";
-export const Filter = ({setNumAlertsToRetrieve, alertTypesToRetrieve, setAlertTypesToRetrieve}) => {
+export const Filter = ({setNumAlertsToRetrieve, setAlertBytype}) => {
 
-  
   const handleClickForLastAlerts = (clickEvent) => {
     clickEvent.preventDefault();
     const numAlerts = clickEvent?.target?.dataset?.alerts || 0;
@@ -12,9 +11,7 @@ export const Filter = ({setNumAlertsToRetrieve, alertTypesToRetrieve, setAlertTy
   const handleChangeForType = (clickEvent) => {
     const isChecked = clickEvent.target.checked;
     const name = clickEvent.target.name;
-    const newAlertTypes = {...alertTypesToRetrieve};
-    newAlertTypes[name] = isChecked;
-    setAlertTypesToRetrieve(newAlertTypes);
+    setAlertBytype(name,isChecked);
   }
   return (
     <div className="filter">

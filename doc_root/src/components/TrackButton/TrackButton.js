@@ -10,7 +10,8 @@ export const TrackButton = ({ symbol = '' }) => {
   const { tokenId, userId } = App;
   const [ trackedSymbols, setTrackedSymbols ] = useState([]);
   const [ stateChangeTest, setStateChangeTest ] = useState(1);
-
+  console.log(' -> trackedSymbols: ', trackedSymbols);
+  const buttonAction = (trackedSymbols && trackedSymbols?.includes(symbol) > -1) ? 'Untrack' : 'Track';
   const getTrackedSymbols = () => {
     console.log(' -> getTrackedSymbols was executed.');
     let formData = new FormData();
@@ -23,8 +24,12 @@ export const TrackButton = ({ symbol = '' }) => {
     })  
     .then((response) => response.json())
     .then((data) => {
-      setTrackedSymbols(data);
-      console.log(' -> response for getTrackedSymbols: ', data);
+      if(data.err) {
+        addMessage(data);
+      }
+      else {
+        setTrackedSymbols(data);
+      }
     })
     .catch((err) => {
       addMessage({
@@ -83,7 +88,7 @@ export const TrackButton = ({ symbol = '' }) => {
       });
     }
   }
-  const buttonAction = (trackedSymbols && trackedSymbols.indexOf(symbol) > -1) ? 'Untrack' : 'Track';
+  
   return  (
     <button
       onClick={handleClick}

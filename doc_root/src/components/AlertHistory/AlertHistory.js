@@ -15,10 +15,20 @@ export const AlertHistory = ({ symbol }) => {
   // const [sinceDate, setSinceDate] = useState();
   // const [dateRange, setDateRange] = useState();
   const [alertTypesToRetrieve, setAlertTypesToRetrieve] = useState({});
+  const setAlertBytype = (type, state) => {
+    console.log(' -> setAlertBytype: ')
+    const newAlertTypes = {...alertTypesToRetrieve};
+    newAlertTypes[type] = state;
+    setAlertTypesToRetrieve(newAlertTypes);
+  }
 
   useEffect(() => {
+    console.log(' - - -- > alertTypesToRetrieve', alertTypesToRetrieve);
+    const something = Object.keys( alertTypesToRetrieve ).map((key) => {
+      return ( alertTypesToRetrieve[key]) ? key : null;
+    })
+    console.log(something);
     if (tokenId) {
-      console.log(' - - -- > alertTypesToRetrieve', alertTypesToRetrieve);
       let formData = new FormData();
       formData.append("tokenId", tokenId);
       formData.append("task", "getAlertHistory");
@@ -42,13 +52,13 @@ export const AlertHistory = ({ symbol }) => {
           });
         });
     }
-  }, [tokenId, alertsToRetrieve]);
+  }, [tokenId, alertsToRetrieve, alertTypesToRetrieve]);
 
   return (
     <>
       <section className="app--menuBar">
         <div className="interactiveGraph--symbolChooser">
-          <Filter alertTypesToRetrieve={alertTypesToRetrieve} setAlertTypesToRetrieve={setAlertTypesToRetrieve} setNumAlertsToRetrieve={setNumAlertsToRetrieve} />
+          <Filter setAlertBytype={setAlertBytype} setNumAlertsToRetrieve={setNumAlertsToRetrieve} />
         </div>
         <div></div>
       </section>
