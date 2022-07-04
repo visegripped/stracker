@@ -12,27 +12,28 @@ export const AlertHistory = ({ symbol }) => {
   const { tokenId } = App;
   const [alertHistory, setAlertHistory] = useState([]);
   const [alertsToRetrieve, setNumAlertsToRetrieve] = useState(50);
-  // const [sinceDate, setSinceDate] = useState();
-  // const [dateRange, setDateRange] = useState();
   const [alertTypesToRetrieve, setAlertTypesToRetrieve] = useState({});
   const setAlertBytype = (type, state) => {
-    console.log(' -> setAlertBytype: ')
     const newAlertTypes = {...alertTypesToRetrieve};
     newAlertTypes[type] = state;
     setAlertTypesToRetrieve(newAlertTypes);
   }
 
   useEffect(() => {
-    console.log(' - - -- > alertTypesToRetrieve', alertTypesToRetrieve);
-    const something = Object.keys( alertTypesToRetrieve ).map((key) => {
-      return ( alertTypesToRetrieve[key]) ? key : null;
-    })
-    console.log(something);
     if (tokenId) {
+
+
+
       let formData = new FormData();
       formData.append("tokenId", tokenId);
       formData.append("task", "getAlertHistory");
       formData.append("limit", alertsToRetrieve);
+      Object.keys( alertTypesToRetrieve ).forEach((key) => {
+        if(alertTypesToRetrieve[key]) {
+          formData.append('alertTypes[]', key);
+        }
+      });
+
       fetch(apiEndpoints.root, {
         body: formData,
         method: "post",

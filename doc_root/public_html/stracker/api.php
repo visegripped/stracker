@@ -12,6 +12,7 @@ $startDate = $_POST['startDate'] ?? "";
 $endDate = $_POST['endDate'] ?? "";
 $tokenId = $_POST['tokenId'] ?? "";
 $limit = $_POST['limit'] ?? "50";
+$alertTypes = $_POST['alertTypes'] ?? "";
 
 function getHistory($symbol, $startDate, $endDate, $pdo) {
     $history = array();
@@ -35,8 +36,17 @@ function getAlerts($symbol, $pdo) {
     return $stmt->fetchAll();
 }
 
-function getAlertHistory($limit, $pdo) {
-    $query = "select symbol, date, type, id from _alerts order by date DESC limit $limit";
+function getAlertHistory($limit, $alertTypes, $pdo) {
+    $query = "select symbol, date, type, id from _alerts ";
+    if($alertTypes) {
+        $query .= "where type in ( ";
+        foreach($alertTypes as $key) {
+            $query .= "'$key',";
+        }
+        $query = rtrim($query, ',');
+        $query .= " ) ";
+    }
+    $query .= "order by date DESC limit $limit";
     $stmt = $pdo->query($query);
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 }
@@ -88,7 +98,7 @@ if(!$tokenId) {
 } else if($task == 'symbols' ) {
     $data = getSymbols($db);
 } else if($task == 'getAlertHistory' ) {
-    $data = getAlertHistory($limit, $db);
+    $data = getAlertHistory($limit, $alertTypes, $db);
 } else {
     $data = '{"err":"No/Invalid task defined ['.$task.'] or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). dates are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').'"}';
     $data = json_decode($data);

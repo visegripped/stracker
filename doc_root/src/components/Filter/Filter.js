@@ -31,17 +31,17 @@ export const Filter = ({setNumAlertsToRetrieve, setAlertBytype}) => {
       <div className="filter--col">
           <h3  className="filter--heading">Buy: </h3>
           <ul className="filter--checkList">
-            <li><label><input type='checkbox' onChange={handleChangeForType} name='p0buy' /> P0</label></li>
-            <li><label><input type='checkbox' onChange={handleChangeForType} name='p1buy' /> P1</label></li>
-            <li><label><input type='checkbox' onChange={handleChangeForType} name='p2buy' /> P2</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p0-buy' /> P0</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p1-buy' /> P1</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p2-buy' /> P2</label></li>
           </ul>
         </div>
       <div className="filter--col">
           <h3  className="filter--heading">Sell: </h3>
           <ul className="filter--checkList">
-            <li><label><input type='checkbox' onChange={handleChangeForType} name='p0sell' /> P0</label></li>
-            <li><label><input type='checkbox' onChange={handleChangeForType} name='p1sell' /> P1</label></li>
-            <li><label><input type='checkbox' onChange={handleChangeForType} name='p2sell' /> P2</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p0-sell' /> P0</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p1-sell' /> P1</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p2-sell' /> P2</label></li>
           </ul>
         </div>
       {/* <div className="filter--col">
