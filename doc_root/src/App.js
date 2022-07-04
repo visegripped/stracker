@@ -38,7 +38,7 @@ function App() {
                 </a>
               </li>
             </nav>
-            <div><AuthButton /></div>
+            <div className="appHeader--loginContainer"><AuthButton /></div>
           </header>
 
           <main>

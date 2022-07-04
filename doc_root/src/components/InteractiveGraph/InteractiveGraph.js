@@ -5,7 +5,7 @@ import useMessaging from "../../hooks/useMessaging";
 import PlotChooser from "../PlotChooser/PlotChooser";
 import DateChooser from "../DateChooser/DateChooser";
 import SymbolChooser from "../SymbolChooser";
-import {TrackButton} from "../TrackButton/TrackButton";
+import { TrackButton } from "../TrackButton/TrackButton";
 import Graph from "../Graph/Graph";
 import Alerts from "../Alerts/";
 import "./styles.css";
@@ -15,7 +15,7 @@ export const InteractiveGraph = () => {
   const lsSymbol = localStorage.getItem("symbol") || "AAPL";
   const lsSymbolName = localStorage.getItem("symbolName") || "Apple";
   const [history, setHistory] = useState([]);
-  const {trackedSymbols, setTrackedSymbols} = useState([]);
+  const { trackedSymbols, setTrackedSymbols } = useState([]);
   const [symbol, setSymbol] = useState(lsSymbol);
   const [symbolName, setSymbolName] = useState(lsSymbolName);
   const [App] = useContext(AppContext);
@@ -125,40 +125,42 @@ export const InteractiveGraph = () => {
     <>
       {tokenId ? (
         <>
-        <section className="app--menuBar">
-          <div className="interactiveGraph--symbolChooser">
-              <SymbolChooser
-                symbolChangeHandler={changeSymbol}
+          <section className="app--menuBar">
+            <div className="interactiveGraph--menuBar">
+              <div className="interactiveGraph--symbolChooser">
+                <SymbolChooser
+                  symbolChangeHandler={changeSymbol}
+                  symbol={symbol}
+                  symbolName={symbolName}
+                />
+              </div>
+              <div>
+                <TrackButton symbol={symbol} />
+              </div>
+            </div>
+          </section>
+          <div className="interactiveGraph--container">
+            <section className="interactiveGraph--sidebar">
+              <PlotChooser
+                enabledDataPoints={dataPoints}
+                clickHandler={updateDataPoint}
+              />
+              <DateChooser
+                startDate={startDate}
+                endDate={endDate}
+                updateStartDate={updateStartDate}
+                updateEndDate={updateEndDate}
+              />
+              <Alerts symbol={symbol} />
+            </section>
+            <section className="interactiveGraph--mainCol">
+              <Graph
                 symbol={symbol}
                 symbolName={symbolName}
+                enabledDataPoints={dataPoints}
+                history={history}
               />
-            </div>
-            <div>
-            <TrackButton symbol={symbol} />
-            </div>
-          </section>
-          <div className="interactiveGraph--Container">
-          <section className="interactiveGraph--sidebar">
-            <PlotChooser
-              enabledDataPoints={dataPoints}
-              clickHandler={updateDataPoint}
-            />
-            <DateChooser
-              startDate={startDate}
-              endDate={endDate}
-              updateStartDate={updateStartDate}
-              updateEndDate={updateEndDate}
-            />
-            <Alerts symbol={symbol} />
-          </section>
-          <section className="interactiveGraph--mainCol">
-            <Graph
-              symbol={symbol}
-              symbolName={symbolName}
-              enabledDataPoints={dataPoints}
-              history={history}
-            />
-          </section>
+            </section>
           </div>
         </>
       ) : (

@@ -1,7 +1,11 @@
 .appHeader {
   display: flex;
   justify-content: space-between;
-  vertical-align: bottom;
+  align-items: flex-end;
+}
+
+.appHeader--loginContainer {
+  padding-bottom: 4px;
 }
 
 .app--logo {
@@ -37,10 +41,9 @@
 }
 
 .app--menuBar {
-  display: flex;
   padding: 4px 0;
   background: rgb(185, 205, 185);
-  justify-content: space-evenly;
+
   margin-bottom: 12px;
 }
 
@@ -51,7 +54,6 @@
 label {
   display: block;
   padding: 8px 16px;
-  min-width: 200px;
 }
 
 label:hover {

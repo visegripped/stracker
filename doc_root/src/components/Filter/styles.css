@@ -1,19 +1,40 @@
-.filter {
+
+.filter{
   display: flex;
   background: #fff;
   font-size: 12px;
-  align-items: stretch;
+  gap: 20px;
+  align-items: center;
   justify-content: center;
-  justify-items: center;
 }
 
 .filter--col {
-  margin: 20px;
-  padding-right: 20px;
-  border-right: 1px solid #efefef;
+  padding: 4px 20px;
+  border-left: 1px solid #efefef;
 }
 
-.filter--col:last-of-type {
+.filter--col:first-of-type {
   padding-right: 0;
   border-right: 0;
+}
+
+.filter--heading {
+  display: inline;
+  margin: 0;
+}
+
+.filter--linkList,
+.filter--checkList {
+  list-style: none;
+  display: inline;
+}
+
+.filter--linkList > li,
+.filter--checkList > li {
+  display: inline-block;
+}
+
+.filter--linkList-link {
+  display: inline-block;
+  padding-right: 12px;
 }

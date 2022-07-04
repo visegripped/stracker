@@ -1,6 +1,13 @@
-.interactiveGraph--Container {
+.interactiveGraph--container {
     display: flex;
     justify-content: space-between;
+}
+
+.interactiveGraph--menuBar {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+    gap: 20px;
 }
 
 .interactiveGraph--mainCol {

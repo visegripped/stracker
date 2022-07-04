@@ -16,35 +16,43 @@ export const Filter = ({setNumAlertsToRetrieve, setAlertBytype}) => {
   return (
     <div className="filter">
       <div className="filter--col">
-        <ul>
+        <ul className="filter--linkList">
           <li>
-            <a href="#" onClick={handleClickForLastAlerts} data-alerts='1'>Last alert</a>
+            <a href="#" onClick={handleClickForLastAlerts} data-alerts='1' className="filter--linkList-link">Last alert</a>
           </li>
           <li>
-            <a href="#"  onClick={handleClickForLastAlerts} data-alerts='5'>Last 5 alerts</a>
+            <a href="#"  onClick={handleClickForLastAlerts} data-alerts='5' className="filter--linkList-link">Last 5 alerts</a>
           </li>
           <li>
-            <a href="#"  onClick={handleClickForLastAlerts} data-alerts='20'>last 20 alerts</a>
+            <a href="#"  onClick={handleClickForLastAlerts} data-alerts='20' className="filter--linkList-link">last 20 alerts</a>
           </li>
         </ul>
       </div>
       <div className="filter--col">
-        <fieldset>
-          <legend>Types</legend>
-          <h3>Buy</h3>
-          <ul>
+          <h3  className="filter--heading">Buy: </h3>
+          <ul className="filter--checkList">
             <li><label><input type='checkbox' onChange={handleChangeForType} name='p0buy' /> P0</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p1buy' /> P1</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p2buy' /> P2</label></li>
           </ul>
-        </fieldset>
         </div>
       <div className="filter--col">
-        <h3>Since:</h3>
-        Single date input
+          <h3  className="filter--heading">Sell: </h3>
+          <ul className="filter--checkList">
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p0sell' /> P0</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p1sell' /> P1</label></li>
+            <li><label><input type='checkbox' onChange={handleChangeForType} name='p2sell' /> P2</label></li>
+          </ul>
+        </div>
+      {/* <div className="filter--col">
+        <fieldset>
+          <legend>Since:</legend>
+          <div>Single date input</div>
+        </fieldset>
       </div>
       <div className="filter--col">
-        <h3>Between:</h3>
         <DateChooser />
-      </div>
+      </div> */}
     </div>
   );
 };

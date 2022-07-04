@@ -57,10 +57,7 @@ export const AlertHistory = ({ symbol }) => {
   return (
     <>
       <section className="app--menuBar">
-        <div className="interactiveGraph--symbolChooser">
-          <Filter setAlertBytype={setAlertBytype} setNumAlertsToRetrieve={setNumAlertsToRetrieve} />
-        </div>
-        <div></div>
+        <Filter setAlertBytype={setAlertBytype} setNumAlertsToRetrieve={setNumAlertsToRetrieve} />
       </section>
       <section>
         <table className="alertHistory--table">
