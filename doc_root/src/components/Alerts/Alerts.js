@@ -3,7 +3,6 @@ import { useEffect, useState, useContext } from "react";
 import { AppContext } from "../../context/AppContext";
 import useMessaging from "../../hooks/useMessaging";
 import apiEndpoints from "../../endpoints.json";
-import TrackButton from "../TrackButton";
 import "./Alerts.css";
 
 export const Alerts = ({ symbol }) => {
@@ -50,7 +49,7 @@ export const Alerts = ({ symbol }) => {
             </div>
           );
         })}
-        <TrackButton symbol={symbol} />
+        
       </div>
     </fieldset>
   );

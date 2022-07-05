@@ -1,0 +1,20 @@
+.alertHistory--table {
+  border: 1px solid rgb(185, 205, 185);
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
+.alertHistory--th {
+  background: rgb(185, 205, 185);
+  color: rgb(65, 105, 65);
+  font-size: 16px;
+  text-align: left;
+  padding: 4px;
+}
+
+.alertHistory--td {
+  font-size: 14px;
+  text-align: left;
+  padding: 4px;
+}

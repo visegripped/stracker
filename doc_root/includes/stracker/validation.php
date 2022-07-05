@@ -37,4 +37,10 @@ function isValidEmail($email) {
   return filter_var($email, FILTER_VALIDATE_EMAIL);
 }
 
+function isValidNumber($number) {
+  if(!ctype_digit($number)) {
+    return false;
+  }
+  return true;
+}
 ?>
