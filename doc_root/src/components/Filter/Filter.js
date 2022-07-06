@@ -44,7 +44,9 @@ export const Filter = ({setNumAlertsToRetrieve, setAlertBytype}) => {
             <li><label><input type='checkbox' onChange={handleChangeForType} name='p2-sell' /> P2</label></li>
           </ul>
         </div>
-      {/* <div className="filter--col">
+      {/* <div>
+      <label><input type='checkbox' onChange={handleChangeForTrackedSymbols} name='trackedSymbolsOnly' /> Tracked</label>
+      </div><div className="filter--col">
         <fieldset>
           <legend>Since:</legend>
           <div>Single date input</div>
