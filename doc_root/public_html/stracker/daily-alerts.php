@@ -23,10 +23,10 @@ function getTrackedAlertsByUser($pdo) {
   $trackedAlerts = (object)[];
   $trackedSymbols = getAllTrackedSymbols($pdo);
   foreach($trackedSymbols as $key) {
-    if(!property_exists($trackedAlerts, $key['userid'])) {
-      $trackedAlerts->{$key['userid']} = array();
+    if(!property_exists($trackedAlerts, $key['userId'])) {
+      $trackedAlerts->{$key['userId']} = array();
     }
-    array_push($trackedAlerts->{$key['userid']}, $key['symbol']);
+    array_push($trackedAlerts->{$key['userId']}, $key['symbol']);
   }
   return $trackedAlerts;
 }
@@ -48,15 +48,19 @@ function notifyUserForTriggeredAlerts($emailAddress, $matchedAlerts) {
 
 function getTriggeredAlertsByUser($pdo) {
   $today = date("Y-m-d");
+  print "<h1>Checking matched alerts on $today</h1>";
   $trackedAlerts = getTrackedAlertsByUser($pdo);
   $alerts = getAlertsByDate($today, $pdo);
-  foreach($trackedAlerts as $userid => $data) {
+  foreach($trackedAlerts as $userId => $data) {
     $matches = getTriggeredAlertsFromList($data, $alerts);
-    notifyUserForTriggeredAlerts($userid, $matches);
+    print "<hr>".count($matches)." matches";
+    if(!empty($matches)) {
+      print " and an email was sent";
+      notifyUserForTriggeredAlerts($userId, $matches);
+    }
   }
 }
 
 $pdo = dbConnect();
 getTriggeredAlertsByUser($pdo);
 ?>
-
