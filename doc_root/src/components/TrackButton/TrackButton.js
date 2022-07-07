@@ -10,10 +10,8 @@ export const TrackButton = ({ symbol = '' }) => {
   const { tokenId, userId } = App;
   const [ trackedSymbols, setTrackedSymbols ] = useState([]);
   const [ stateChangeTest, setStateChangeTest ] = useState(1);
-  console.log(' -> trackedSymbols: ', trackedSymbols);
-  const buttonAction = (trackedSymbols && trackedSymbols?.includes(symbol) > -1) ? 'Untrack' : 'Track';
+  const buttonAction = (trackedSymbols && trackedSymbols?.includes(symbol)) ? 'Untrack' : 'Track';
   const getTrackedSymbols = () => {
-    console.log(' -> getTrackedSymbols was executed.');
     let formData = new FormData();
     formData.append("tokenId", tokenId);
     formData.append("task", "getTrackedSymbols");
@@ -47,9 +45,8 @@ export const TrackButton = ({ symbol = '' }) => {
   }, [stateChangeTest]);
 
   const handleClick = (clickEvent) => {
-    console.log(' BEGIN handleClick');
     const trackStatus = clickEvent?.target?.dataset?.action || 'track';
-    console.log(`-> trackSymbol was triggered for ${symbol}. tokenId is set: ${!!(tokenId)} and userId: ${userId} and trackStatus: ${trackStatus}`);
+    console.log(`-> trackButton handleClick was triggered for ${symbol}. tokenId is set: ${!!(tokenId)} and userId: ${userId} and trackStatus: ${trackStatus}`);
     if(tokenId && userId) {
       let formData = new FormData();
       formData.append("tokenId", tokenId);
@@ -75,7 +72,6 @@ export const TrackButton = ({ symbol = '' }) => {
           addMessage({ message: data.err, classification: "error" });
         } else {
         // success.  Throw success message.
-        console.log(" - - - - - > data: ", data)
           addMessage({ message: `Symbol ${symbol} is track status changed to: ${trackStatus}`, classification: "info" });
           setStateChangeTest(stateChangeTest+1);
         }
