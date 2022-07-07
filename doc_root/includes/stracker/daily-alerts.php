@@ -41,23 +41,27 @@ function getTriggeredAlertsFromList($watchList, $triggeredAlerts) {
   return $matches;
 }
 
-function formatEmailBody($matchedAlerts) {
+function formatEmailBody($matchedAlerts, $todaysAlerts) {
   $content = "Matched alerts: \r\n";
   foreach($matchedAlerts as $key) {
     $content .= "$key \r\n";
   }
+  $content .= "\r\n\r\nToday's alerts:\r\n";
+  foreach($todaysAlerts as $symbol => $type) {
+    $content .= $symbol." = ".$type." \r\n";
+  }
   return $content;
 }
 
-function notifyUserForTriggeredAlerts($emailAddress, $matchedAlerts) {
+function notifyUserForTriggeredAlerts($emailAddress, $matchedAlerts, $todaysAlerts) {
   $headers = "From: stracker@visegripped.com\r\n";
-  $content = formatEmailBody($matchedAlerts);
+  $content = formatEmailBody($matchedAlerts, $todaysAlerts);
   print $content;
   mail($emailAddress,'Stracker - Tracked symbol(s) notification',$content,$headers);
 }
 
 function getTriggeredAlertsByUser($pdo) {
-  $today = '2022-05-09'; //date("Y-m-d");
+  $today = date("Y-m-d");
   print "<h1>Checking matched alerts on $today</h1>";
   $trackedAlerts = getTrackedAlertsByUser($pdo);
   $alerts = getAlertsByDate($today, $pdo);
@@ -66,7 +70,7 @@ function getTriggeredAlertsByUser($pdo) {
     print "<hr>".count($matches)." matches";
     if(!empty($matches)) {
       print " and an email was sent";
-      notifyUserForTriggeredAlerts($userId, $matches);
+      notifyUserForTriggeredAlerts($userId, $matches, $alerts);
     }
   }
 }
