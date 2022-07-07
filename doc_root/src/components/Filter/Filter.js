@@ -18,13 +18,13 @@ export const Filter = ({setNumAlertsToRetrieve, setAlertBytype}) => {
       <div className="filter--col">
         <ul className="filter--linkList">
           <li>
-            <a href="#" onClick={handleClickForLastAlerts} data-alerts='1' className="filter--linkList-link">Last alert</a>
+            <a href="#" onClick={handleClickForLastAlerts} data-alerts='20' className="filter--linkList-link">Last 20 alerts</a>
           </li>
           <li>
-            <a href="#"  onClick={handleClickForLastAlerts} data-alerts='5' className="filter--linkList-link">Last 5 alerts</a>
+            <a href="#"  onClick={handleClickForLastAlerts} data-alerts='50' className="filter--linkList-link">Last 50 alerts</a>
           </li>
           <li>
-            <a href="#"  onClick={handleClickForLastAlerts} data-alerts='20' className="filter--linkList-link">last 20 alerts</a>
+            <a href="#"  onClick={handleClickForLastAlerts} data-alerts='100' className="filter--linkList-link">last 100 alerts</a>
           </li>
         </ul>
       </div>
