@@ -15,6 +15,13 @@
  * PHPMyAdmin is available at: http://localhost:8000/index.php
 
 
+## Painful deploy process
+ * log in to the hosting service and go to the FTP section.
+ * Upload the PHP files.
+ * Test the APIs
+ * upload the JS from the static folder into the corresponding folder on the server.
+ * upload the CSS from the static folder into the corresponding folder on the server.
+
 # Stracker Web... AKA Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
