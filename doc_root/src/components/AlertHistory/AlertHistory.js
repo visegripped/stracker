@@ -66,6 +66,7 @@ export const AlertHistory = ({ symbol }) => {
             <tr>
               <th className="alertHistory--th">Date</th>
               <th className="alertHistory--th">Symbol</th>
+              <th className="alertHistory--th">Name</th>
               <th className="alertHistory--th">Alert Type</th>
             </tr>
           </thead>
@@ -75,6 +76,7 @@ export const AlertHistory = ({ symbol }) => {
                 <tr key={row.id}>
                   <td className="alertHistory--td">{row.date}</td>
                   <td className="alertHistory--td">{row.symbol}</td>
+                  <td className="alertHistory--td">{row.name}</td>
                   <td className="alertHistory--td">{row.type}</td>
                 </tr>
               );

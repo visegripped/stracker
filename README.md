@@ -1,16 +1,18 @@
 # Stracker
-publish repo
 
-
-Local development
+## Local development
 
 1. Install docker
-1. run `docker-compose up` in your terminal
+1. Start docker
+1. Run `docker-compose up` in your terminal
+1. In another terminal, run `cd doc_root`
+1. Run `yarn start`
+1. Visit http://localhost/public_html/stracker/ in your browser
 
-
-App is available at: http://localhost/
-Stracker is available at: http://localhost/public_html/stracker/
-PHPMyAdmin is available at: http://localhost:8000/index.php
+## Links
+ * App is available at: http://localhost/
+ * Stracker is available at: http://localhost/public_html/stracker/
+ * PHPMyAdmin is available at: http://localhost:8000/index.php
 
 
 # Stracker Web... AKA Getting Started with Create React App
