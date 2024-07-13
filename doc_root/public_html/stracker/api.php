@@ -100,7 +100,7 @@ if(!$tokenId) {
 } else if($task == 'getAlertHistory' ) {
     $data = getAlertHistory($limit, $alertTypes, $db);
 } else {
-    $data = '{"err":"No/Invalid task defined ['.$task.'] or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). dates are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').'"}';
+    $data = '{"err":"No/Invalid task defined ['.$task.'] or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). dates [startDate: '.$startDate.' and endDate: '.$endDate.'] are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').'"}';
     $data = json_decode($data);
 }
 

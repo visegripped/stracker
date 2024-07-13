@@ -13,6 +13,14 @@ Stracker is available at: http://localhost/public_html/stracker/
 PHPMyAdmin is available at: http://localhost:8000/index.php
 
 
+## TokenId
+You can grab this from your debug tool in session storage - localhost - tokenId (handy for postman)
+
+
+
+
+
+
 # Stracker Web... AKA Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
