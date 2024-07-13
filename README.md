@@ -22,6 +22,14 @@
  * upload the JS from the static folder into the corresponding folder on the server.
  * upload the CSS from the static folder into the corresponding folder on the server.
 
+## TokenId
+You can grab this from your debug tool in session storage - localhost - tokenId (handy for postman)
+
+
+
+
+
+
 # Stracker Web... AKA Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

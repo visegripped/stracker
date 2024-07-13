@@ -21,6 +21,20 @@ function isValidGoogleToken($token) {
   return false;
 }
 
+function getUserEmailFromSession($token) {
+  if(!$token) {
+    return '';
+  }
+  $CLIENT_ID = "451536185848-p0c132ugq4jr7r08k4m6odds43qk6ipj.apps.googleusercontent.com";
+  $client = new Google_Client(['client_id' => $CLIENT_ID]);  // Specify the CLIENT_ID of the app that accesses the backend
+  $payload = $client->verifyIdToken($token);
+  if ($payload) {
+    $userid = $payload['sub'];
+    return $userid;
+  }
+  return '';
+}
+
 function isValidSession($token) {
   if(isset($_SESSION['isValid']) || isValidGoogleToken($token)) {
     $_SESSION['isValid'] = true;
