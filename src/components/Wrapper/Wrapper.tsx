@@ -1,4 +1,5 @@
 import { Outlet, Link } from "react-router-dom"
+import { Suspense } from "react";
 import './Wrapper.css'
 import PathConstants from '../../routes/pathConstants';
 
@@ -18,7 +19,7 @@ export default function Wrapper() {
 
           </header>
           <main>                
-              <Outlet />
+              <Suspense fallback={<div>Loading content...</div>}><Outlet /></Suspense>
           </main>
           <footer>Footer</footer>
       </>
