@@ -9,18 +9,24 @@
 1. Run `yarn start`
 1. Visit http://localhost/public_html/stracker/ in your browser
 
+If the API is pointed at the production endpoint, toggle the root and rootb values in endpoints.json
+
 ## Links
  * App is available at: http://localhost/
  * Stracker is available at: http://localhost/public_html/stracker/
  * PHPMyAdmin is available at: http://localhost:8000/index.php
 
 
+
 ## Painful deploy process
+ * Make sure that in endpoints.json, root is set to the relative API path.
+ * Run `yarn build`
  * log in to the hosting service and go to the FTP section.
  * Upload the PHP files.
- * Test the APIs
+ * Test the APIs.
  * upload the JS from the static folder into the corresponding folder on the server.
  * upload the CSS from the static folder into the corresponding folder on the server.
+ * upload the index.html file from the static folder.
 
 ## TokenId
 You can grab this from your debug tool in session storage - localhost - tokenId (handy for postman)
