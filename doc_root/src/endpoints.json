@@ -1,4 +1,4 @@
 {
-    "root": "./api.php",
-    "rootb": "http://localhost/public_html/stracker/api.php"
+    "rootb": "./api.php",
+    "root": "http://localhost/public_html/stracker/api.php"
 }
