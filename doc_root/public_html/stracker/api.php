@@ -37,7 +37,8 @@ function getAlerts($symbol, $pdo) {
 }
 
 function getAlertHistory($limit, $alertTypes, $pdo) {
-    $query = "select symbol, date, type, id from _alerts ";
+    $query = "select a.symbol, a.date, a.type, a.id, s.name from _alerts a ";
+    $query .= "JOIN _symbols s ON a.symbol = s.symbol ";
     if($alertTypes) {
         $query .= "where type in ( ";
         foreach($alertTypes as $key) {
@@ -46,7 +47,7 @@ function getAlertHistory($limit, $alertTypes, $pdo) {
         $query = rtrim($query, ',');
         $query .= " ) ";
     }
-    $query .= "order by date DESC limit $limit";
+    $query .= "order by a.date DESC limit $limit";
     $stmt = $pdo->query($query);
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 }
