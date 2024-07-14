@@ -90,6 +90,8 @@ footer {
   border-top: 1px solid #efefef;
 }
 
+label {display: block;}
+
 .grid-container {
   display: grid;
   gap: var(--spacing);
@@ -109,3 +111,4 @@ footer {
   padding: var(--spacing);
   text-align: center;
 }
+
