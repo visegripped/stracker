@@ -7,6 +7,7 @@ notes.md
 # dependencies
 node_modules/
 build/
+dist/
 /.pnp
 .pnp.js
 vendor/

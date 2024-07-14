@@ -3,7 +3,7 @@ import { useEffect, useState, useContext } from "react";
 // import { AppContext } from "../../context/AppContext";
 // import useMessaging from "../../../doc_root/src/hooks/useMessaging";
 import Select from "react-select"; // https://react-select.com/home
-import apiEndpoints from "../../../doc_root/src/endpoints.json";
+// import apiEndpoints from "../../../doc_root/src/endpoints.json";
 
 export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
   let [symbols, setSymbols] = useState({});
@@ -29,7 +29,7 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
       let formData = new FormData();
       formData.append("tokenId", tokenId);
       formData.append("task", "symbols");
-      fetch(apiEndpoints.root, {
+      fetch("NEEDTOSETTHIS.php", {
         body: formData,
         method: "post",
       })

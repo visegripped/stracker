@@ -38,7 +38,6 @@ header {
   padding-top: var(--spacing);
 }
 
-main,
 footer {
   padding: var(--spacing);
 }
@@ -89,4 +88,11 @@ main {
 footer {
   min-height: 60px;
   border-top: 1px solid #efefef;
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: 1fr 4fr;
+  gap: var(--spacing);
+  margin: var(--spacing);
 }
