@@ -1,14 +1,14 @@
 import React from "react";
 import { useEffect, useState, useContext } from "react";
-import { AppContext } from "../../context/AppContext";
-import useMessaging from "../../hooks/useMessaging";
+// import { AppContext } from "../../context/AppContext";
+// import useMessaging from "../../../doc_root/src/hooks/useMessaging";
 import Select from "react-select"; // https://react-select.com/home
-import apiEndpoints from "../../endpoints.json";
+import apiEndpoints from "../../../doc_root/src/endpoints.json";
 
 export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
   let [symbols, setSymbols] = useState({});
   const [App] = useContext(AppContext);
-  const { addMessage } = useMessaging();
+  // const { addMessage } = useMessaging();
   const { tokenId } = App;
   const selectedOption = {
     value: symbol,
@@ -37,24 +37,24 @@ export const SymbolChooser = ({ symbolChangeHandler, symbol, symbolName }) => {
           if (response.status >= 200 && response.status < 300) {
             return response.json();
           } else {
-            addMessage({
-              message: `Request to fetch symbol list failed w/ error status ${response.status}`,
-              classification: "error",
-            });
+            // addMessage({
+            //   message: `Request to fetch symbol list failed w/ error status ${response.status}`,
+            //   classification: "error",
+            // });
           }
         })
         .then((data) => {
           if (data.err) {
-            addMessage({ message: data.err, classification: "error" });
+            // addMessage({ message: data.err, classification: "error" });
           } else {
             setSymbols(handleDataResponse(data));
           }
         })
         .catch((err) => {
-          addMessage({
-            message: `Error requesting symbols: ${err}`,
-            classification: "error",
-          });
+          // addMessage({
+          //   message: `Error requesting symbols: ${err}`,
+          //   classification: "error",
+          // });
         });
     }
   }, [tokenId]);

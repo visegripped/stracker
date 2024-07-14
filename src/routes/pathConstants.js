@@ -1,6 +1,6 @@
 const PathConstants = {
   HOME: "/",
-  SYMBOL: "/Symbol", // will need to be dynamic.
+  SYMBOL: "/Symbol",
   ALERTS: "/Alerts",
 }
 

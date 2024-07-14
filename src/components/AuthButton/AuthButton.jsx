@@ -1,23 +1,24 @@
 import React, { useContext } from "react";
 import { GoogleLogin, GoogleLogout } from "react-google-login";
-import { AppContext } from "../../context/AppContext";
-import useMessaging from "../../hooks/useMessaging";
+import { AuthContext } from "../../context/AuthContext";
+// import useMessaging from "../../../doc_root/src/hooks/useMessaging";
 import "./styles.css";
 
 // heavily borrowed from https://dev.to/sivaneshs/add-google-login-to-your-react-apps-in-10-mins-4del
+// in case we need to upgrade: https://muhammedsahad.medium.com/react-js-a-step-by-step-guide-to-google-authentication-926d0d85edbd
 
 const clientId =
   "451536185848-p0c132ugq4jr7r08k4m6odds43qk6ipj.apps.googleusercontent.com";
 
 export const AuthButton = () => {
-  const [App, setApp] = useContext(AppContext);
-  const { addMessage } = useMessaging();
-  const { tokenId } = App;
+  const [Auth, setAuth] = useContext(AuthContext);
+  // const { addMessage } = useMessaging();
+  const { tokenId } = Auth;
 
   const logout = () => {
     sessionStorage.setItem("tokenId", "");
     sessionStorage.setItem("userId", "");
-    setApp({"tokenId": ""});
+    setAuth({"tokenId": ""});
   };
 
   const setToken = (authResponse) => {
@@ -25,7 +26,7 @@ export const AuthButton = () => {
     const { email } = profileObj;
     sessionStorage.setItem("tokenId", tokenId);
     sessionStorage.setItem("userId", email);
-    setApp({"tokenId": tokenId, "userId": email});
+    setAuth({"tokenId": tokenId, "userId": email});
   };
 
   const onLoginSuccess = (authResponse) => {
@@ -36,7 +37,7 @@ export const AuthButton = () => {
 
   const onLoginFailure = (authResponse) => {
     console.log(" - - - -- > authResponse: ", authResponse);
-    addMessage(authResponse);
+    // addMessage(authResponse);
   };
 
   const onLogoutSuccess = (authResponse) => {
