@@ -8,6 +8,13 @@
     "module": "ESNext",
     "skipLibCheck": true,
 
+    "allowJs": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@/app/*": ["./app/src/*"],
+      "@/component/*": ["./app/src/components/*"]
+    },
+
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
