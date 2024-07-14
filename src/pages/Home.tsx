@@ -1,9 +1,21 @@
 const Home = () => {
 
   return (
+    <section className='grid-container grid-columns'>
     <div>
-      <h2>Homepage content</h2>
+      Your tracked symbols:
     </div>
+      <div>
+        Your recent sell signals:
+      </div>
+      <div>
+        Your recent buy signals:
+      </div>
+
+      <div>
+        Most recent signals:
+      </div>
+    </section>
   )
 
 }

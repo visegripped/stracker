@@ -1,22 +1,29 @@
 import { useParams } from 'react-router-dom';
-// import DateRangePicker from '../components/DateRangePicker';
+import DateRangePicker from '../components/DateRangePicker';
+import Fieldset from '../components/Fieldset';
+import Graph from '../components/Graph';
+import SymbolPicker from '../components/SymbolPicker';
 
 const Symbol = () => {
   let { symbol } = useParams();
   return (
-    <section className="grid-container">
-      <div className="grid-col grid-col-sidebar">
-        left - {symbol}
+    <>
+    <section className='search-bar'>
+      <SymbolPicker />
+    </section>
+    <section className="grid-container grid-sidebar">
+      <div>
 
-IndicatorPicker
-{/* <DateRangePicker></DateRangePicker> */}
-Alert History for symbol - truncate this.
+        <Fieldset legend="Data Points">EOD, MA20, etc</Fieldset>
+        <Fieldset legend="Date Range"><DateRangePicker></DateRangePicker></Fieldset>
+        <Fieldset legend="Alert History"> for symbol: {symbol} - truncate this.</Fieldset>
 
       </div>
-      <div className="grid-col grid-col-main">
-        main
+      <div>
+        <Graph />
       </div>
     </section>
+    </>
   )
 
 }

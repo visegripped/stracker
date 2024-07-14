@@ -1,13 +1,13 @@
-import { Children } from "react";
-import styles from './Fieldset.css';
+import './Fieldset.css';
 
 export const Fieldset = (props) => {
-  const { legend } = props;
+  const { legend, children } = props;
   return (
     <fieldset>
       <legend>{legend}</legend>
-      {Children}
+      {children}
     </fieldset>
   );
 };
+
 export default Fieldset;

@@ -3,7 +3,7 @@ import { Suspense } from "react";
 import './Wrapper.css'
 import PathConstants from '../../routes/pathConstants';
 import { AuthProvider} from '../../context/AuthContext';
-import AuthButton from '../AuthButton';
+// import AuthButton from '../AuthButton';
 import { ErrorBoundary } from "react-error-boundary"
 
 // https://medium.com/@vnkelkar11/using-error-boundary-in-react-a29ded725eee - has some examples for async/fetch as well.
@@ -39,7 +39,9 @@ export default function Wrapper() {
             </ul>
           </nav>
 
-          <div className='auth'><AuthButton /></div>
+          <div className='auth'>
+            {/* <AuthButton /> */}
+            </div>
       </header>
       <main>
         <Suspense fallback={<div>Loading content...</div>}><Outlet /></Suspense>

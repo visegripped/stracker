@@ -92,7 +92,20 @@ footer {
 
 .grid-container {
   display: grid;
-  grid-template-columns: 1fr 4fr;
   gap: var(--spacing);
   margin: var(--spacing);
+}
+
+.grid-sidebar {
+  grid-template-columns: 1fr 4fr;
+}
+
+.grid-columns {
+  grid-auto-flow:column; 
+}
+
+.search-bar {
+  background: #000;
+  padding: var(--spacing);
+  text-align: center;
 }
