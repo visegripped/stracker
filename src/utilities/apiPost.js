@@ -6,7 +6,7 @@ export const formatDate = (date) => {
 
 export const apiPost = (config) => {
   // refactor this so that tokenId is grabbed out of the session. That'll be lighter than every requesting component requiring authContext.
-  const { tokenId, task, symbol, startDate, endDate, limit, symbols } = config;
+  const { tokenId, task, symbol, startDate, endDate, limit, symbols, userId } = config;
 
   const makeAsyncRequest = async (theFormData) => {
     let jsonPayload = {};
@@ -39,6 +39,7 @@ export const apiPost = (config) => {
     if (limit) formData.append("limit", limit);
     if (startDate) formData.append("startDate", formatDate(startDate));
     if (endDate) formData.append("endDate", formatDate(endDate));
+    if (userId) formData.append("userId", userId);
 
     return makeAsyncRequest(formData);
   }

@@ -77,6 +77,16 @@ function getTrackedSymbols($userId, $pdo) {
     return $symbols;
 }
 
+function getTrackedSymbolList($userId, $pdo) {
+
+    $stmt = $pdo->prepare("select a.symbol, s.name from _track a JOIN  _symbols s ON a.symbol = s.symbol WHERE userid = :userId ORDER by symbol ASC");
+    // $query = "select a.symbol, a.date, a.type, a.id, s.name from _alerts a ";
+    // $query .= "JOIN _symbols s ON a.symbol = s.symbol ";
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_STR);
+    $stmt->execute(array('userId' => $userId));
+    return $stmt->fetchAll();
+}
+
 $db = dbConnect();
 if(!$tokenId) {
     $data = '{"err":"Token not specified on API request."}';
@@ -91,6 +101,8 @@ if(!$tokenId) {
     $data = getAlerts($symbol, $limit, $db);
 } else if($task == 'getTrackedSymbols') {
     $data = getTrackedSymbols($userId, $db);
+} else if($task == 'getTrackedSymbolList' && $userId) {
+    $data = getTrackedSymbolList($userId, $db);
 } else if($task == 'track' & isValidSymbol($symbol) && isValidEmail($userId)) {
     $data = track($symbol, $userId, $db) ? '{"msg":"'.$symbol.' now being tracked"}' : '{"err":"Error attempting to track symbol ['.$symbol.']"}';
 }  else if($task == 'untrack' & isValidSymbol($symbol) && isValidEmail($userId)) {
@@ -101,14 +113,14 @@ if(!$tokenId) {
 } else if($task == 'getAlertHistory' ) {
     $data = getAlertHistory($limit, $alertTypes, $db);
 } else {
-    $data = '{"err":"No/Invalid task defined ['.$task.'] or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). dates [startDate: '.$startDate.' and endDate: '.$endDate.'] are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').'"}';
+    $data = '{"err":"No/Invalid task defined ['.$task.'] or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). userId: ['.$userId.'] and dates [startDate: '.$startDate.' and endDate: '.$endDate.'] are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').'"}';
     $data = json_decode($data);
 }
 
 $data = json_encode($data);
 header('Content-type: application/json');
-// header('Access-Control-Allow-Origin: *');
-// header('Access-Control-Allow-Methods: GET, POST');
-// header("Access-Control-Allow-Headers: X-Requested-With");
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: GET, POST');
+header("Access-Control-Allow-Headers: X-Requested-With");
 print($data);
 ?>
