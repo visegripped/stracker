@@ -52,7 +52,7 @@ const colorMap = {
   deltaMA5: "brown",
   deltaMA10: "purple",
   deltaMA20: "teal",
-  M1: "black",
+  M1: "white",
   M2: "gold",
   M3: "pink",
 };
@@ -87,13 +87,13 @@ export const Graph = ({ symbol, symbolName, enabledDataPoints, history }) => {
         display: true,
         position: "bottom",
         labels: {
-          fontColor: "#323130",
+          fontColor: "#efefef",
           fontSize: 14,
         },
       },
       title: {
         display: true,
-        text: `History for ${symbolName} [${symbol}]`,
+        text: `History for ${symbol}`,
       },
     },
   };

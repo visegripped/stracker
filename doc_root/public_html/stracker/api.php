@@ -29,8 +29,8 @@ function getSymbols($pdo) {
     return $stmt->fetchAll(\PDO::FETCH_ASSOC);
 }
 
-function getAlerts($symbol, $pdo) {
-    $stmt = $pdo->prepare("select symbol, date, type, id from _alerts where symbol = :symbol order by date DESC");
+function getAlerts($symbol, $limit, $pdo) {
+    $stmt = $pdo->prepare("select symbol, date, type, id from _alerts where symbol = :symbol order by date DESC LIMIT $limit");
     $stmt->bindParam(':symbol', $symbol, PDO::PARAM_STR);
     $stmt->execute(array('symbol' => $symbol));
     return $stmt->fetchAll();
@@ -88,7 +88,7 @@ if(!$tokenId) {
     $data = getHistory($symbol, $startDate, $endDate, $db);
     $data = array_reverse($data);
 } else if($task == 'alerts' & isValidSymbol($symbol)) {
-    $data = getAlerts($symbol, $db);
+    $data = getAlerts($symbol, $limit, $db);
 } else if($task == 'getTrackedSymbols') {
     $data = getTrackedSymbols($userId, $db);
 } else if($task == 'track' & isValidSymbol($symbol) && isValidEmail($userId)) {
@@ -107,5 +107,8 @@ if(!$tokenId) {
 
 $data = json_encode($data);
 header('Content-type: application/json');
+// header('Access-Control-Allow-Origin: *');
+// header('Access-Control-Allow-Methods: GET, POST');
+// header("Access-Control-Allow-Headers: X-Requested-With");
 print($data);
 ?>

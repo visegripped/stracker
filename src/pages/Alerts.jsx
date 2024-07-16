@@ -1,9 +1,14 @@
+import { useState, useEffect, useContext } from "react";
+import { AuthContext } from "../context/AuthContext";
+import apiPost from "../utilities/apiPost";
 import DateRangePicker from '../components/DateRangePicker';
 import Fieldset from '../components/Fieldset';
 import IndicatorPicker from '../components/IndicatorPicker';
 
-const Alerts = () => {
 
+
+const PageContent = (props) => {
+  const {tokenId} = props;
   return (
     <section className="grid-container grid-sidebar">
       <div>
@@ -20,7 +25,23 @@ const Alerts = () => {
         content is king - an interactive table will go here.
       </div>
     </section>
-  )
+
+  );
+}
+
+const Alerts = () => {
+  const [Auth] = useContext(AuthContext);
+  const { tokenId } = Auth;
+
+  return (
+    <>
+      {tokenId ? (
+        <PageContent tokenId={tokenId} />
+      ) : (
+        <h3>Please log in</h3>
+      )}
+    </>
+  );
 
 }
 

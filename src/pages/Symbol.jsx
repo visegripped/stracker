@@ -1,23 +1,27 @@
 import { useParams } from "react-router-dom";
-import DateRangePicker from "../components/DateRangePicker";
-import Fieldset from "../components/Fieldset";
-import Graph from "../components/Graph";
-import SymbolPicker from "../components/SymbolPicker";
-import PlotPicker from "../components/PlotPicker";
+import {
+  DateRangePicker,
+  Fieldset,
+  Graph,
+  SymbolPicker,
+  PlotPicker,
+} from "../components";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
+import apiPost from "../utilities/apiPost";
 
-const Symbol = () => {
-  let { symbol } = useParams() || "AAPL";
+const PageContent = (props) => {
+  const defaultSymbol =
+    localStorage.getItem("mostRecentlyViewedSymbol") || "INTU";
+  const { symbol = defaultSymbol, tokenId } = props;
   const [history, setHistory] = useState([]);
-  const [Auth] = useContext(AuthContext);
-  const { tokenId } = Auth;
+  const [alertHistory, setAlertHistory] = useState([]);
+
   // console.log(`Token ID: ${tokenId}`);
   const dp = localStorage.getItem("dataPoints") || "{}";
   const lsDataPoints = JSON.parse(dp) || {
     EOD: true,
   };
-  console.log(` -> lsDataPoints: `, lsDataPoints);
 
   // date uses session, not local. That way the dates reset between each visit.
   // Is a bit confusing when you log in and don't get the most recent data.
@@ -33,14 +37,6 @@ const Symbol = () => {
   }
   const defaultEndDate =
     lsEndDate && lsEndDate !== "null" ? new Date(`${lsEndDate}`) : new Date();
-
-  const formatDate = (date) => {
-    const monthAdjustedForJS = (date.getMonth() + 1)
-      .toString()
-      .padStart(2, "0");
-    const dayPadded = date.getDate().toString().padStart(2, "0");
-    return `${date.getFullYear()}${monthAdjustedForJS}${dayPadded}`;
-  };
 
   const [startDate, setStartDate] = useState(defaultStartDate);
   const [endDate, setEndDate] = useState(defaultEndDate);
@@ -67,39 +63,37 @@ const Symbol = () => {
   };
 
   useEffect(() => {
-    if (tokenId) {
-      let formData = new FormData();
-      formData.append("tokenId", tokenId);
-      formData.append("task", "history");
-      formData.append("symbol", symbol);
-      formData.append("startDate", formatDate(startDate));
-      formData.append("endDate", formatDate(endDate));
-      fetch("https://visegripped.com/stracker/api.php", {
-        body: formData,
-        method: "post",
-      })
-        .then((response) => {
-          if (response.status >= 200 && response.status < 300) {
-            return response.json();
-          } else {
-            throw new Error(response.status);
-          }
-        })
-        .then((data) => {
-          console.log(`Historical data for ${symbol} was fetched`, data);
-          if (data.err) {
-            throw new Error(data.err);
-          } else {
-            setHistory(data);
-          }
-        })
-        .catch((e) => {
-          throw new Error(`The request to fetch the list of symbols has failed. Please try again later.
-              If this error persists, contact the site administrator.
-              Error details: ${e}`);
+    if (startDate && endDate && tokenId && symbol) {
+      const response = apiPost({
+        tokenId,
+        task: "history",
+        symbol,
+        startDate,
+        endDate,
+      });
+      response &&
+        response.then((data) => {
+          setHistory(data);
         });
     }
-  }, [symbol, startDate, endDate, tokenId]); // The request always has all the data, so no need to trigger on dataPoints
+  }, [symbol, startDate, endDate, tokenId]); // The response always has all the graph data, so no need to trigger on dataPoints change
+
+  useEffect(() => {
+    if (symbol && tokenId) {
+      localStorage.setItem("mostRecentlyViewedSymbol", symbol);
+      const response = apiPost({
+        tokenId,
+        task: "alerts",
+        symbol,
+        limit: 20,
+      });
+
+      response &&
+        response.then((data) => {
+          setAlertHistory(data);
+        });
+    }
+  }, [symbol, tokenId]);
 
   return (
     <>
@@ -123,8 +117,13 @@ const Symbol = () => {
             ></DateRangePicker>
           </Fieldset>
           <Fieldset legend="Alert History">
-            {" "}
-            for symbol: {symbol} - truncate this.
+            {alertHistory.map((alert) => {
+              return (
+                <div className="alertItem" key={alert.id}>
+                  {alert.date}: {alert.type}
+                </div>
+              );
+            })}
           </Fieldset>
         </div>
         <div>
@@ -135,6 +134,22 @@ const Symbol = () => {
           />
         </div>
       </section>
+    </>
+  );
+};
+
+const Symbol = () => {
+  let { symbol } = useParams() || "AAPL";
+  const [Auth] = useContext(AuthContext);
+  const { tokenId } = Auth;
+
+  return (
+    <>
+      {tokenId ? (
+        <PageContent symbol={symbol} tokenId={tokenId} />
+      ) : (
+        <h3>Please log in</h3>
+      )}
     </>
   );
 };
