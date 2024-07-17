@@ -150,7 +150,8 @@ const PageContent = (props) => {
               <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
                 {data.name}
               </Link>
-              : {data.type}
+              : {data.type} on {data.date}
+
             </div>
           );
         })}

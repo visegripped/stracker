@@ -42,7 +42,6 @@ const PageContent = (props) => {
   const [endDate, setEndDate] = useState(defaultEndDate);
   const [dataPoints, setDataPoints] = useState(lsDataPoints);
   const updateDataPoint = (id, val) => {
-    console.log(` -> Got to updateDataPoint.  id: ${id} and val: ${val}`);
     const updatedValue = { [id]: val };
     const updatedDataPoints = {
       ...dataPoints,
@@ -139,7 +138,7 @@ const PageContent = (props) => {
 };
 
 const Symbol = () => {
-  let { symbol } = useParams() || "AAPL";
+  let { symbol } = useParams() || "INTU";
   const [Auth] = useContext(AuthContext);
   const { tokenId } = Auth;
 
