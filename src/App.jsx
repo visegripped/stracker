@@ -58,10 +58,10 @@ const App = () => {
             }}
           >
             <Routes>
-              <Route path="/" Component={Home} />
-              <Route path="/alerts" Component={Alerts} />
-              <Route path="/symbol" Component={Symbol} />
-              <Route path="/symbol/:symbol" Component={Symbol} />
+              <Route path={PathConstants.HOME} Component={Home} />
+              <Route path={PathConstants.ALERTS} Component={Alerts} />
+              <Route path={PathConstants.SYMBOL} Component={Symbol} />
+              <Route path={`${PathConstants.SYMBOL}/:symbol`} Component={Symbol} />
               <Route Component={Page404} />
             </Routes>
           </ErrorBoundary>
