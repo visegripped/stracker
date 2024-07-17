@@ -9,7 +9,8 @@ const PageContent = (props) => {
   const [usersTrackedSymbols, setUsersTrackedSymbols] = useState([]);
   const [recentSignals, setRecentSignals] = useState([]);
   const [recent20Signals, setRecent20Signals] = useState([]);
-  const [recentTrackedSignals, setRecentTrackedSignals] = useState([]);
+  const [recentTrackedBuySignals, setRecentTrackedBuySignals] = useState([]);
+  const [recentTrackedSellSignals, setRecentTrackedSellSignals] = useState([]);
   const [Auth] = useContext(AuthContext);
   const { userId } = Auth;
 
@@ -48,7 +49,7 @@ const PageContent = (props) => {
         filteredList.push(data);
       }
     });
-    return [];
+    return filteredList;
   };
 
   useEffect(() => {
@@ -78,7 +79,7 @@ const PageContent = (props) => {
   }, [tokenId]);
 
   useEffect(() => {
-    if (usersTrackedSymbols.length && recentSignals.length) {
+    if (usersTrackedSymbols.length && recentSignals.length && recentTrackedBuySignals.length === 0 && recentTrackedSellSignals.length === 0) {
       const recentSignalBySimbol = flattenObjectBySymbol(recentSignals);
       const trackedSignalBySimbol = flattenObjectBySymbol(usersTrackedSymbols);
       const trackedSymbolsWithRecentAlerts = haveCommonItems(
@@ -95,15 +96,8 @@ const PageContent = (props) => {
         recentSignals,
         trackedSymbolsWithRecentAlerts
       );
-
-      console.log(
-        " - - - - - > 2 lists",
-        recentTrackedBuySignals,
-        recentTrackedSellSignals
-      );
-      // setRecentBuySignals(
-      //   getTrackedAlertsBySignalType("buy", usersTrackedSymbols, data)
-      // );
+      setRecentTrackedBuySignals(recentTrackedBuySignals);
+      setRecentTrackedSellSignals(recentTrackedSellSignals);
     }
   }, [usersTrackedSymbols, recentSignals]);
 
@@ -113,7 +107,7 @@ const PageContent = (props) => {
         <h2>Your tracked symbols:</h2>
         {usersTrackedSymbols.map((data) => {
           return (
-            <div key={`your-tracked-${data.symbol}`}>
+            <div key={`your-tracked-${data.symbol}-${data.type}-${data.date}`}>
               <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
                 {data.name}
               </Link>
@@ -122,14 +116,27 @@ const PageContent = (props) => {
         })}
       </div>
       <div>
-        <h2>Your recent signals:</h2>
-        {recentTrackedSignals.map((data, index) => {
+        <h2>Your recent buy signals:</h2>
+        {recentTrackedBuySignals.map((data, index) => {
           return (
-            <div key={`your-recent-${data.symbol}`}>
+            <div key={`your-recent-${data.symbol}-${data.type}-${data.date}-${Math.random()}`}>
               <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
                 {data.name}
               </Link>
-              : {data.type}
+              : {data.type} on {data.date}
+            </div>
+          );
+        })}
+      </div>
+      <div>
+        <h2>Your recent sell signals:</h2>
+        {recentTrackedSellSignals.map((data, index) => {
+          return (
+            <div key={`your-recent-${data.symbol}-${data.type}-${data.date}-${Math.random()}`}>
+              <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
+                {data.name}
+              </Link>
+              : {data.type} on {data.date}
             </div>
           );
         })}
