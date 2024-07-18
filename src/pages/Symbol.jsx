@@ -5,6 +5,7 @@ import {
   Graph,
   SymbolPicker,
   PlotPicker,
+  TrackButton,
 } from "../components";
 import { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
@@ -97,7 +98,7 @@ const PageContent = (props) => {
   return (
     <>
       <section className="search-bar">
-        <SymbolPicker />
+        <SymbolPicker /> <TrackButton symbol={symbol} />
       </section>
       <section className="grid-container grid-sidebar">
         <div>

@@ -6,5 +6,5 @@ export { default as IndicatorPicker } from './IndicatorPicker';
 export { default as PlotPicker } from './PlotPicker';
 export { default as SymbolPicker } from './SymbolPicker';
 // export { default as ToggleSwitch } from './ToggleSwitch';
-// export { default as TrackButton } from './TrackButton';
+export { default as TrackButton } from './TrackButton';
 
