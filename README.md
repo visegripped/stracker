@@ -6,7 +6,7 @@
 1. Start docker
 1. Run `docker-compose up` in your terminal
 1. In another terminal, run `cd doc_root`
-1. Run `yarn start`
+1. Run `pnpm dev`
 1. Visit http://localhost/public_html/stracker/ in your browser
 
 If the API is pointed at the production endpoint, toggle the root and rootb values in endpoints.json
@@ -20,7 +20,7 @@ If the API is pointed at the production endpoint, toggle the root and rootb valu
 
 ## Painful deploy process
  * Make sure that in endpoints.json, root is set to the relative API path.
- * Run `yarn build`
+ * Run `pnpm build`
  * log in to the hosting service and go to the FTP section.
  * Upload the PHP files.
  * Test the APIs.
@@ -33,36 +33,33 @@ You can grab this from your debug tool in session storage - localhost - tokenId 
 
 
 
+# React + TypeScript + Vite
 
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
+Currently, two official plugins are available:
 
-# Stracker Web... AKA Getting Started with Create React App
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Expanding the ESLint configuration
 
-## Available Scripts
+If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
 
-In the project directory, you can run:
+- Configure the top-level `parserOptions` property like this:
 
-### `yarn start`
+```js
+export default {
+  // other rules...
+  parserOptions: {
+    ecmaVersion: 'latest',
+    sourceType: 'module',
+    project: ['./tsconfig.json', './tsconfig.node.json'],
+    tsconfigRootDir: __dirname,
+  },
+}
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `yarn test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `yarn run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
+- Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
+- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list

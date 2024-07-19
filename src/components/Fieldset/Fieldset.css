@@ -1,0 +1,6 @@
+fieldset {
+  margin: 0 0 var(--spacing) 0;
+  padding: var(--spacing);
+  border: 1px solid var(--primary-border-color);
+  border-radius: var(--border-radius);
+}
