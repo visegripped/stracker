@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../../context/AuthContext";
+import { AuthContext } from "@context/AuthContext";
 import "./TrackButton.css";
-import apiPost from "../../utilities/apiPost"
+import apiPost from "@utilities/apiPost"
 
 export const TrackButton = (props) => {
   const { symbol } = props;
