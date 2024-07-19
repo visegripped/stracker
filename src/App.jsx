@@ -1,17 +1,18 @@
 import { HashRouter as Router, Route, Routes, Link } from "react-router-dom";
-import Home from "./pages/Home";
-import Alerts from "./pages/Alerts";
-import Symbol from "./pages/Symbol";
-import Page404 from "./pages/Page404";
+import { Home } from "./pages/Home";
+import { Alerts } from "./pages/Alerts";
+import { Symbol } from "./pages/Symbol";
+import { Page404 } from "./pages/Page404";
 import { AuthProvider } from "./context/AuthContext";
-import AuthButton from "./components/AuthButton";
+import { AuthButton } from "./components/AuthButton";
+// import { Notification } from "@components/Notification";
 import { ErrorBoundary } from "react-error-boundary";
 import PathConstants from "./routes/pathConstants";
-import './App.css';
+import "./App.css";
+// import "animate.css";
 
 // https://medium.com/@vnkelkar11/using-error-boundary-in-react-a29ded725eee - has some examples for async/fetch as well.
 function fallbackRender({ error, resetErrorBoundary }) {
-  // Call resetErrorBoundary() to reset the error boundary and retry the render.
   return (
     <div role="alert">
       <p>Something went wrong:</p>
@@ -22,6 +23,26 @@ function fallbackRender({ error, resetErrorBoundary }) {
 
 const logError = (error, info) => {
   // Do something with the error, e.g. log to an external API
+};
+
+const Notifications = () => {
+  // const { notifications } = useMessaging();
+  const messageList = [];
+  const keys = Object.keys(notifications);
+  if (keys) {
+    keys.forEach((uuid) => {
+      const { message, classification } = notifications[uuid];
+      // messageList.push(
+      //   <Notification
+      //     uuid={uuid}
+      //     key={uuid}
+      //     message={message}
+      //     classification={classification}
+      //   />
+      // );
+    });
+  }
+  return <section className="notificationsContainer">{messageList}</section>;
 };
 
 const App = () => {
@@ -55,21 +76,24 @@ const App = () => {
             onError={logError}
             onReset={(details) => {
               // Reset the state of your app so the error doesn't happen again - NEED TO EXPLORE THIS
+              // Call resetErrorBoundary() to reset the error boundary and retry the render.
             }}
           >
+            <Notifications />
             <Routes>
               <Route path={PathConstants.HOME} Component={Home} />
               <Route path={PathConstants.ALERTS} Component={Alerts} />
               <Route path={PathConstants.SYMBOL} Component={Symbol} />
-              <Route path={`${PathConstants.SYMBOL}/:symbol`} Component={Symbol} />
+              <Route
+                path={`${PathConstants.SYMBOL}/:symbol`}
+                Component={Symbol}
+              />
               <Route Component={Page404} />
             </Routes>
           </ErrorBoundary>
         </main>
 
-        <footer>
-       
-       </footer>
+        <footer></footer>
       </AuthProvider>
     </Router>
   );

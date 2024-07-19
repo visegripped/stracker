@@ -1,4 +1,4 @@
-.message {
+.notification {
   padding: 20px;
   text-align: left;
   border: 1px solid;
@@ -8,44 +8,44 @@
   margin-bottom: 8px;
 }
 
-.message.info {
+.notification.info {
   background: lightblue;
   border-color: darkblue;
 }
 
-.message--button--info {
+.notification--button--info {
   border-color: darkblue;
-  color: darkblue;
+  color: darkblueŽ
 }
 
-.message.warn {
+.notification.warn {
   background: lightgoldenrodyellow;
   border-color: darkorange
 }
 
-.message--button--warn {
+.notification--button--warn {
   border-color: darkorange;
   color: darkorange;
 }
 
-.message.error {
+.notification.error {
   background: lightpink;
   border-color: darkred;
 }
 
-.message--button--error {
+.notification--button--error {
   border-color: darkred;
   color: darkred;
 }
 
-.message--pre {
+.notification--pre {
   font-size: 14px;
   overflow-x: auto;
   white-space: pre-wrap;
   word-wrap: break-word;
 }
 
-.message--button {
+.notification--button {
   position: absolute;
   top: 4px;
   right: 4px;
