@@ -98,9 +98,12 @@ const PageContent = (props) => {
   return (
     <>
       <section className="search-bar">
-        <SymbolPicker /> <TrackButton symbol={symbol} />
+        <SymbolPicker /> 
       </section>
       <section className="grid-container grid-sidebar">
+
+      <TrackButton symbol={symbol} />
+      <br />
         <div>
           <Fieldset legend="Data Points">
             <PlotPicker

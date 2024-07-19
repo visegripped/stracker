@@ -67,6 +67,27 @@ function untrack($symbol, $userId, $pdo) {
     return $stmt->execute($data);
 }
 
+function symbolIsTrackedByUser($symbol, $userId, $pdo) {
+    $sql = 'SELECT COUNT(*) FROM _track WHERE userId = :userId AND symbol = :symbol';
+    $stmt = $pdo->prepare($sql);
+
+    // Bind parameters
+    $stmt->bindParam(':userId', $userId, PDO::PARAM_STR);
+    $stmt->bindParam(':symbol', $symbol, PDO::PARAM_STR);
+
+    // Execute the query
+    $stmt->execute();
+
+    // Fetch the result
+    $count = $stmt->fetchColumn();
+
+    // Determine if the symbol is tracked
+    $isTracked = ($count > 0);
+
+    // Return the result as a JSON object
+    return ['isTracked' => $isTracked];
+}
+
 function getTrackedSymbols($userId, $pdo) {
     $symbols = array();
     $query = "select symbol from _track ORDER by symbol ASC";
@@ -101,6 +122,8 @@ if(!$tokenId) {
     $data = getAlerts($symbol, $limit, $db);
 } else if($task == 'getTrackedSymbols') {
     $data = getTrackedSymbols($userId, $db);
+}  else if($task == 'symbolIsTrackedByUser'  & isValidSymbol($symbol) && isValidEmail($userId)) {
+    $data = SymbolIsTrackedByUser($symbol, $userId, $db);
 } else if($task == 'getTrackedSymbolList' && $userId) {
     $data = getTrackedSymbolList($userId, $db);
 } else if($task == 'track' & isValidSymbol($symbol) && isValidEmail($userId)) {
@@ -113,14 +136,14 @@ if(!$tokenId) {
 } else if($task == 'getAlertHistory' ) {
     $data = getAlertHistory($limit, $alertTypes, $db);
 } else {
-    $data = '{"err":"No/Invalid task defined ['.$task.'] or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). userId: ['.$userId.'] and dates [startDate: '.$startDate.' and endDate: '.$endDate.'] are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').'"}';
+    $data = '{"err":"No/Invalid task defined ['.$task.'] or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). userId: ['.$userId.'] and dates [startDate: '.$startDate.' and endDate: '.$endDate.'] are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').' and isValidEmail: '.(isValidEmail($userId)).'"}';
     $data = json_decode($data);
 }
 
 $data = json_encode($data);
-header('Content-type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST');
-header("Access-Control-Allow-Headers: X-Requested-With");
+// header('Content-type: application/json');
+// header('Access-Control-Allow-Origin: *');
+// header('Access-Control-Allow-Methods: GET, POST');
+// header("Access-Control-Allow-Headers: X-Requested-With");
 print($data);
 ?>

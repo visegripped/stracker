@@ -8,4 +8,5 @@
   white-space: normal;
   padding: .3em 1.5em;
   cursor: pointer;
+  display: inline-block;
 }

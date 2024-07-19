@@ -1,32 +1,66 @@
 import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import "./TrackButton.css";
+import apiPost from "../../utilities/apiPost"
 
 export const TrackButton = (props) => {
-  const { symbol } = props;     
-  const { tokenId, userId } = useContext(AuthContext);
-  const [trackedSymbols, setTrackedSymbols] = useState([]);
-  const buttonAction =
-    trackedSymbols && trackedSymbols?.includes(symbol) ? "Untrack" : "Track";
+  const { symbol } = props;
+  const [Auth] = useContext(AuthContext);
 
-  useEffect(() => {
-    if (tokenId && trackedSymbols.length === 0) {
+  const { tokenId, userId } = Auth;
+  const [trackedSymbols, setTrackedSymbols] = useState([]);
+  const [buttonAction, setButtonAction] = useState("Track");
+
+  /*
+
+Next steps:
+1. new API request for isSymbolTracked.  Pass symbol and userId. Get boolean.
+2. Add new API request to a useEffect on symbol change.  Update buttonAction accordingly.
+3. onClick handler that:
+   - Makes API request on click to track/untrack.
+   - Updates buttonAction accordingly.
+
+*/
+
+  const handleClick = (clickEvent) => {
+    // console.log(
+    //   `-> trackButton handleClick was triggered for ${symbol}. tokenId is set: ${!!tokenId} and userId: ${userId} and buttonAction: ${buttonAction}`
+    // );
+    if (tokenId && userId) {
       const response = apiPost({
         tokenId,
-        task: "getTrackedSymbols",
+        task: buttonAction.toLocaleLowerCase(),
         userId,
+        symbol,
+      });
+      response &&
+        response.then(() => {
+          setButtonAction(buttonAction === 'Track' ? 'Untrack' : 'Track');
+        });
+    }
+  };
+
+  useEffect(() => {
+    if (tokenId) {
+      const response = apiPost({
+        tokenId,
+        task: "symbolIsTrackedByUser",
+        userId,
+        symbol,
       });
       response &&
         response.then((data) => {
-          setTrackedSymbols(data);
+          setButtonAction(data.isTracked ? 'Untrack' : 'Track'); // button has the opposite of what is currently set
+        });
+        response.catch((err) => {
+          console.log(err); ;
         });
     }
-  }, [tokenId]);
+  }, [tokenId, symbol]);
 
   return (
     <button
-      // onClick={handleClick}
-      data-action={buttonAction.toLocaleLowerCase()}
+      onClick={handleClick}
       className="trackButton"
     >
       {buttonAction} {symbol}
