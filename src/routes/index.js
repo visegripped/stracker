@@ -11,4 +11,5 @@ const routes = [
     { path: PathConstants.SYMBOL, element: <Symbol /> },
 ]
 
+export { PathConstants };
 export default routes

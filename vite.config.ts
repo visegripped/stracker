@@ -2,6 +2,17 @@ import { defineConfig, transformWithEsbuild } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
 export default defineConfig({
+  resolve: {
+    // https://medium.com/@pushplaybang/absolutely-dont-use-relative-paths-imports-in-your-vite-react-project-c8593f93bbea
+    alias: {
+      "@components": "/src/components",
+      "@pages": "/src/pages",
+      "@utilities": "/src/utilities",
+      "@hooks": "/src/hooks",
+      "@context": "/src/context",
+      "@routes": "/src/routes",
+    },
+  },
   plugins: [
     {
       name: 'treat-js-files-as-jsx',

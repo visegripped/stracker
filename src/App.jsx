@@ -1,12 +1,12 @@
 import { HashRouter as Router, Route, Routes, Link } from "react-router-dom";
-import Home from "./pages/Home";
-import Alerts from "./pages/Alerts";
-import Symbol from "./pages/Symbol";
-import Page404 from "./pages/Page404";
-import { AuthProvider } from "./context/AuthContext";
-import AuthButton from "./components/AuthButton";
+import Home from "@pages/Home";
+import Alerts from "@pages/Alerts";
+import Symbol from "@pages/Symbol";
+import Page404 from "@pages/Page404";
+import { AuthProvider } from "@context/AuthContext";
+import AuthButton from "@components/AuthButton";
 import { ErrorBoundary } from "react-error-boundary";
-import PathConstants from "./routes/pathConstants";
+import PathConstants from "@routes/pathConstants";
 import './App.css';
 
 // https://medium.com/@vnkelkar11/using-error-boundary-in-react-a29ded725eee - has some examples for async/fetch as well.
