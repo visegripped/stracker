@@ -1,0 +1,52 @@
+.notification {
+  padding: 20px;
+  text-align: left;
+  border: 1px solid;
+  color: #333;
+  position: relative;
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.notification.info {
+  background: lightblue;
+  border-color: darkblue;
+}
+
+.notification--button--info {
+  border-color: darkblue;
+  color: darkblueŽ
+}
+
+.notification.warn {
+  background: lightgoldenrodyellow;
+  border-color: darkorange
+}
+
+.notification--button--warn {
+  border-color: darkorange;
+  color: darkorange;
+}
+
+.notification.error {
+  background: lightpink;
+  border-color: darkred;
+}
+
+.notification--button--error {
+  border-color: darkred;
+  color: darkred;
+}
+
+.notification--pre {
+  font-size: 14px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.notification--button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+}
