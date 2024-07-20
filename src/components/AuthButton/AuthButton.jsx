@@ -1,43 +1,55 @@
 import React, { useContext } from "react";
-import { GoogleLogin, GoogleLogout } from "react-google-login";
+import { GoogleLogin, googleLogout } from "@react-oauth/google"; // docs: https://www.npmjs.com/package/@react-oauth/google
 import { AuthContext } from "../../context/AuthContext";
-// import useMessaging from "../../../doc_root/src/hooks/useMessaging";
+// import useNotification from "@hooks/useNotification";
 import "./styles.css";
-
-// heavily borrowed from https://dev.to/sivaneshs/add-google-login-to-your-react-apps-in-10-mins-4del
-// in case we need to upgrade: https://muhammedsahad.medium.com/react-js-a-step-by-step-guide-to-google-authentication-926d0d85edbd
 
 const clientId =
   "451536185848-p0c132ugq4jr7r08k4m6odds43qk6ipj.apps.googleusercontent.com";
 
 export const AuthButton = () => {
   const [Auth, setAuth] = useContext(AuthContext);
-  // const { addMessage } = useMessaging();
+  // const { addNotification } = useNotification();
+  const addNotification = (p) => {
+    console.log(p);
+  };
   const { tokenId } = Auth;
 
   const logout = () => {
     sessionStorage.setItem("tokenId", "");
     sessionStorage.setItem("userId", "");
-    setAuth({"tokenId": ""});
+    setAuth({ tokenId: "" });
+    addNotification({
+      message: "Thank you for your visit.  You have been logged out.",
+      type: "info",
+    });
+    googleLogout();
   };
 
   const setToken = (authResponse) => {
-    const { tokenId, profileObj } = authResponse;
-    const { email } = profileObj;
+    const { credential } = authResponse;
     sessionStorage.setItem("tokenId", tokenId);
-    sessionStorage.setItem("userId", email);
-    setAuth({"tokenId": tokenId, "userId": email});
+    setAuth({ tokenId: credential });
   };
 
   const onLoginSuccess = (authResponse) => {
     console.log("Auth Success: currentUser:", authResponse);
     setToken(authResponse);
     refreshAuthTokenBeforeExpiration(authResponse);
+    addNotification({
+      message: "Thank you for your visit.  You are now logged in.",
+      type: "info",
+    });
   };
 
   const onLoginFailure = (authResponse) => {
     console.log(" - - - -- > authResponse: ", authResponse);
-    // addMessage(authResponse);
+    addNotification({
+      message: `Something has gone wrong with your authentication.  This may help: ${JSON.stringify(
+        authResponse
+      )}`,
+      type: "info",
+    });
   };
 
   const onLogoutSuccess = (authResponse) => {
@@ -45,35 +57,27 @@ export const AuthButton = () => {
     logout();
   };
 
-  const refreshAuthTokenBeforeExpiration = (res) => {
-    // Timing to renew access token
-    let durationBetweenAutoRefresh =
-      (res.tokenObj.expires_in || 3600 - 5 * 60) * 1000;
-    const refreshToken = async () => {
-      const newAuthRes = await res.reloadAuthResponse();
-      console.log(" - - - > newAuthRes: ", newAuthRes);
-      durationBetweenAutoRefresh =
-        (newAuthRes.expires_in || 3600 - 5 * 60) * 1000;
-      setToken(newAuthRes);
-      setTimeout(refreshToken, durationBetweenAutoRefresh);
-    };
-    setTimeout(refreshToken, durationBetweenAutoRefresh);
-  };
-
-  return tokenId ? (
-    <GoogleLogout
-      clientId={clientId}
-      buttonText="Logout"
-      onLogoutSuccess={onLogoutSuccess}
-    ></GoogleLogout>
-  ) : (
+  // const refreshAuthTokenBeforeExpiration = (res) => {
+  //   // Timing to renew access token
+  //   let durationBetweenAutoRefresh =
+  //     (res.tokenObj.expires_in || 3600 - 5 * 60) * 1000;
+  //   const refreshToken = async () => {
+  //     const newAuthRes = await res.reloadAuthResponse();
+  //     console.log(" - - - > newAuthRes: ", newAuthRes);
+  //     durationBetweenAutoRefresh =
+  //       (newAuthRes.expires_in || 3600 - 5 * 60) * 1000;
+  //     setToken(newAuthRes);
+  //     setTimeout(refreshToken, durationBetweenAutoRefresh);
+  //   };
+  //   setTimeout(refreshToken, durationBetweenAutoRefresh);
+  // };
+  return (
     <GoogleLogin
-      clientId={clientId}
-      buttonText="Login"
       onSuccess={onLoginSuccess}
-      onFailure={onLoginFailure}
-      cookiePolicy={"single_host_origin"}
-      isSignedIn={true}
+      onError={onLoginFailure}
+      // useOneTap
+      theme="filled_black"
+      // size="medium"
     />
   );
 };
