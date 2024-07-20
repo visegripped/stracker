@@ -39,6 +39,7 @@ a:hover {
 
 header {
   padding-top: var(--spacing);
+  border-bottom: 2px solid #000;
 }
 
 footer {
@@ -113,3 +114,7 @@ label {display: block;}
   text-align: center;
 }
 
+.notifications-container {
+  position: absolute;
+  right: var(--spacing);
+}

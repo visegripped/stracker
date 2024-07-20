@@ -1,3 +1,5 @@
+import useNotification from "@hooks/useNotification";
+
 export const formatDate = (date) => {
   const monthAdjustedForJS = (date.getMonth() + 1).toString().padStart(2, "0");
   const dayPadded = date.getDate().toString().padStart(2, "0");
@@ -6,17 +8,19 @@ export const formatDate = (date) => {
 
 export const apiPost = (config) => {
   // refactor this so that tokenId is grabbed out of the session. That'll be lighter than every requesting component requiring authContext.
-  const { tokenId, task, symbol, startDate, endDate, limit, symbols, userId } = config;
+  const { tokenId, task, symbol, startDate, endDate, limit, symbols, userId } =
+    config;
 
   const makeAsyncRequest = async (theFormData) => {
     let jsonPayload = {};
+    let errorMessage = "";
     const apiResponse = await fetch(
       "https://visegripped.com/stracker/api.php",
       {
         body: theFormData,
         method: "post",
       }
-    );
+    )
 
     if (apiResponse.status >= 200 && apiResponse.status < 300) {
       jsonPayload = await apiResponse.json();
@@ -26,6 +30,7 @@ export const apiPost = (config) => {
     // console.log(`Historical data for ${symbol} was fetched`, jsonPayload);
     if (jsonPayload.err) {
       throw new Error(jsonPayload.err);
+
     }
     return jsonPayload;
   };
