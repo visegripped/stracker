@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@context/AuthContext";
 import "./TrackButton.css";
 import apiPost from "@utilities/apiPost";
-import useNotifications from "@hooks/useNotification";
+import useNotifications from "@hooks/useNotifications";
 
 export const TrackButton = (props) => {
   const { symbol } = props;

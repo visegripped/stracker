@@ -4,6 +4,7 @@ session_start();
 
 // https://www.oauth.com/oauth2-servers/signing-in-with-google/verifying-the-user-info/
 // https://oauth2.googleapis.com/tokeninfo?id_token=
+// https://developers.google.com/identity/gsi/web/guides/verify-google-id-token#php
 
 function isValidGoogleToken($token) {
   if(!$token) {

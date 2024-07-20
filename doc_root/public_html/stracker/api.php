@@ -3,7 +3,7 @@ include "../../includes/stracker/mysql.php";
 include "../../includes/stracker/apiHeaders.php";
 include "../../includes/stracker/validation.php";
 include "../../includes/stracker/sessions.php";
-require_once '../../includes/vendor/autoload.php';
+// require_once '../../includes/vendor/autoload.php'; // enabling this causes 500s.
 
 $task = $_POST['task'] ?? "";
 $userId = $_POST['userId'] ?? "";
@@ -141,9 +141,12 @@ if(!$tokenId) {
 }
 
 $data = json_encode($data);
-// header('Content-type: application/json');
-// header('Access-Control-Allow-Origin: *');
-// header('Access-Control-Allow-Methods: GET, POST');
-// header("Access-Control-Allow-Headers: X-Requested-With");
+header('Content-type: application/json');
+header('Access-Control-Allow-Methods: GET, POST');
+header("Access-Control-Allow-Headers: X-Requested-With");
+
+// header('Access-Control-Allow-Origin: *'); // http://localhost:5173, https://www.visegripped.com, https://visegripped.com
 print($data);
+
+// print("Hello World")
 ?>
