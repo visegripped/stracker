@@ -142,9 +142,10 @@ if(!$tokenId) {
 
 $data = json_encode($data);
 header('Content-type: application/json');
-header('Access-Control-Allow-Origin: http://localhost:5173, https://www.visegripped.com, https://visegripped.com');
 header('Access-Control-Allow-Methods: GET, POST');
 header("Access-Control-Allow-Headers: X-Requested-With");
+
+// header('Access-Control-Allow-Origin: *'); // http://localhost:5173, https://www.visegripped.com, https://visegripped.com
 print($data);
 
 // print("Hello World")
