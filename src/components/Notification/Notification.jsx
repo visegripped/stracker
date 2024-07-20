@@ -30,12 +30,11 @@ export const Notification = (props) => {
     }, autoClearDuration)
   }
 
-
   return (
     <div className={`notification ${type} animate__fadeInDown ${exitAnimationClassname}`}>
       <pre className="notification--pre">{message}</pre>
       <button
-        className={`notification--button .${type}`}
+        className={`notification--button ${type}`}
         data-uuid={uuid}
         onClick={handleClick}
       >
