@@ -1,7 +1,7 @@
-import React, { useContext } from "react";
-import { GoogleLogin, googleLogout } from "@react-oauth/google"; // docs: https://www.npmjs.com/package/@react-oauth/google
+import React, { useContext, useState, useEffect } from "react";
+import { googleLogout, useGoogleLogin } from "@react-oauth/google"; // docs: https://www.npmjs.com/package/@react-oauth/google
 import { AuthContext } from "../../context/AuthContext";
-// import useNotification from "@hooks/useNotification";
+// import useNotifications from "@hooks/useNotifications";
 import "./styles.css";
 
 const clientId =
@@ -9,76 +9,97 @@ const clientId =
 
 export const AuthButton = () => {
   const [Auth, setAuth] = useContext(AuthContext);
-  // const { addNotification } = useNotification();
-  const addNotification = (p) => {
-    console.log(p);
-  };
+  // get and set user profile after a successful login.
+  const [user, setUser] = useState([]);
+  const [profile, setProfile] = useState([]);
+  // console.log(' -> useNotifications(): ', useNotifications())
+  // const { addNotification } = useNotifications();
+
   const { tokenId } = Auth;
 
   const logout = () => {
     sessionStorage.setItem("tokenId", "");
-    sessionStorage.setItem("userId", "");
+    // sessionStorage.setItem("userId", "");
     setAuth({ tokenId: "" });
-    addNotification({
-      message: "Thank you for your visit.  You have been logged out.",
-      type: "info",
-    });
+    // addNotification({
+    //   message: "Thank you for your visit.  You have been logged out.",
+    //   type: "info",
+    // });
     googleLogout();
-  };
-
-  const setToken = (authResponse) => {
-    const { credential } = authResponse;
-    sessionStorage.setItem("tokenId", tokenId);
-    setAuth({ tokenId: credential });
+    setProfile(null);
   };
 
   const onLoginSuccess = (authResponse) => {
-    console.log("Auth Success: currentUser:", authResponse);
-    setToken(authResponse);
-    refreshAuthTokenBeforeExpiration(authResponse);
-    addNotification({
-      message: "Thank you for your visit.  You are now logged in.",
-      type: "info",
-    });
+    console.log("Auth Success: authResponse:", authResponse);
+    const { access_token } = authResponse;
+    sessionStorage.setItem("tokenId", access_token);
+    setAuth({ tokenId: access_token });
+    // addNotification({
+    //   message: "Thank you for your visit.  You are now logged in.",
+    //   type: "info",
+    // });
+    setUser(authResponse);
   };
 
   const onLoginFailure = (authResponse) => {
     console.log(" - - - -- > authResponse: ", authResponse);
-    addNotification({
-      message: `Something has gone wrong with your authentication.  This may help: ${JSON.stringify(
-        authResponse
-      )}`,
-      type: "info",
-    });
+    // addNotification({
+    //   message: `Something has gone wrong with your authentication.  This may help: ${JSON.stringify(
+    //     authResponse
+    //   )}`,
+    //   type: "error",
+    // });
   };
 
   const onLogoutSuccess = (authResponse) => {
     console.log("Logout made successfully", authResponse);
     logout();
   };
+// https://muhammedsahad.medium.com/react-js-a-step-by-step-guide-to-google-authentication-926d0d85edbd
+  const login = useGoogleLogin({
+    onSuccess: onLoginSuccess,
+    onError: onLoginFailure,
+  });
 
-  // const refreshAuthTokenBeforeExpiration = (res) => {
-  //   // Timing to renew access token
-  //   let durationBetweenAutoRefresh =
-  //     (res.tokenObj.expires_in || 3600 - 5 * 60) * 1000;
-  //   const refreshToken = async () => {
-  //     const newAuthRes = await res.reloadAuthResponse();
-  //     console.log(" - - - > newAuthRes: ", newAuthRes);
-  //     durationBetweenAutoRefresh =
-  //       (newAuthRes.expires_in || 3600 - 5 * 60) * 1000;
-  //     setToken(newAuthRes);
-  //     setTimeout(refreshToken, durationBetweenAutoRefresh);
-  //   };
-  //   setTimeout(refreshToken, durationBetweenAutoRefresh);
-  // };
+  // useEffect(() => {
+  //   if (user) {
+  //     console.log(" -user ", user);
+  //     sessionStorage.setItem("tokenId", user.access_token);
+  //     fetch(
+  //       `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`,
+  //       {
+  //         headers: {
+  //           Authorization: `Bearer ${user.access_token}`,
+  //           Accept: "application/json",
+  //         },
+  //       }
+  //     )
+  //       .then((res) => {
+  //         setProfile(res.data);
+  //         // console.log( ' --------> res', res);
+  //       })
+  //       .catch((err) => {
+  //         // throw an error w/ a notification
+  //         console.log(err);
+  //       });
+  //   }
+  // }, [user]);
   return (
-    <GoogleLogin
-      onSuccess={onLoginSuccess}
-      onError={onLoginFailure}
-      // useOneTap
-      theme="filled_black"
-      // size="medium"
-    />
+    <div>
+      {tokenId ? (
+        <div>
+          {/* <img src={profile.picture} alt="user image" />
+          <h3>User Logged in</h3>
+          <p>Name: {profile.name}</p>
+          <p>Email Address: {profile.email}</p>
+          <br />
+          <br /> */}
+          <button onClick={onLogoutSuccess}>Sign out</button>
+        </div>
+      ) : (
+        <button onClick={() => login()}>Sign in with Google 🚀 </button>
+      )}
+    </div>
   );
 };
 

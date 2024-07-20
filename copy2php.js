@@ -1,14 +1,31 @@
-import fs from 'fs'
+import fs from "fs";
 
-// File destination.txt will be created or overwritten by default.
-fs.copyFile('./dist/index.html', './doc_root/index.html', (err) => {
+const indexDestPath = "./doc_root/public_html/stracker/index.html";
+fs.copyFile("./dist/index.html", indexDestPath, (err) => {
   if (err) throw err;
-  console.log('index moved');
+  console.log("index moved");
+  fs.readFile(indexDestPath, "utf8", (err, content) => {
+    if (err) throw err;
+    let newContent = content.toString();
+    // newContent.replaceAll("/assets/", "assets/");
+    newContent.replace("WIP Stracker", "Docker Stracker"); 
+    fs.writeFile(indexDestPath, newContent, function (err) {
+      if (err) throw err;
+      console.log(" -> newContent: ", newContent);
+      console.log(" -> changed assets ref to relative path");
+    });
+  });
+
 });
 
-fs.cp('./dist/assets/', './doc_root/assets/', { recursive: true }, (err) => {
-  if (err) {
-    console.error(err);
+fs.cp(
+  "./dist/assets/",
+  "./doc_root/public_html/stracker/assets/",
+  { recursive: true },
+  (err) => {
+    if (err) {
+      console.error(err);
+    }
+    console.log("assets moved");
   }
-  console.log('assets moved');
-});
+);

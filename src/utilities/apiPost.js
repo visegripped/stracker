@@ -1,5 +1,3 @@
-import useNotification from "@hooks/useNotification";
-
 export const formatDate = (date) => {
   const monthAdjustedForJS = (date.getMonth() + 1).toString().padStart(2, "0");
   const dayPadded = date.getDate().toString().padStart(2, "0");

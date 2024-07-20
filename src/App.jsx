@@ -9,7 +9,7 @@ import AuthButton from "@components/AuthButton";
 import Notification from "@components/Notification";
 import { ErrorBoundary } from "react-error-boundary";
 import PathConstants from "@routes/pathConstants";
-import useNotification from "@hooks/useNotification";
+import useNotifications from "@hooks/useNotifications";
 
 import "./App.css";
 
@@ -29,7 +29,7 @@ const logError = (error, info) => {
 };
 
 const Notifications = () => {
-  const { notifications } = useNotification();
+  const { notifications } = useNotifications();
   // console.log(" -> Notifications: ", notifications);
   const notificationList = [];
   const keys = Object.keys(notifications);

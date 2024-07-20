@@ -2,8 +2,9 @@ import { UUID } from "uuidjs";
 import { useContext } from "react";
 import NotificationContext from "@context/NotificationContext";
 
-const useNotification = () => {
+const useNotifications = () => {
   const context = useContext(NotificationContext);
+  // console.log(' -> notifications context: ', context)
   const [ notifications, setNotifications ] = context;
 
   const removeNotification = (uuid) => {
@@ -24,4 +25,4 @@ const useNotification = () => {
   return { notifications, addNotification, removeNotification };
 }
 
-export default useNotification;
+export default useNotifications;

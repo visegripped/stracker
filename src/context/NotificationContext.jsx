@@ -1,9 +1,12 @@
 import React, { useState, createContext } from "react";
+
 const NotificationContext = createContext({
   notifications: {},
   setNotifications: () => {},
 });
+
 const NotificationConsumer = NotificationContext.Consumer;
+
 const NotificationProvider = (props) => {
   const [notifications, setNotifications] = useState({});
   return (

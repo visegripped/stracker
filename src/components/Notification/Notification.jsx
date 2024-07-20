@@ -1,12 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import "./Notification.css";
-import useNotification from "@hooks/useNotification";
+import useNotifications from "@hooks/useNotifications";
 import 'animate.css';
 
 export const Notification = (props) => {
   // console.log('notification props:' , props)
   const {type, message, uuid, autoClear = true, autoClearDuration = 5000 } = props;
-  const { removeNotification } = useNotification();
+  const { removeNotification } = useNotifications();
   const [ exitAnimationClassname , setExitAnimationClassname ] = useState('');
   let wasManuallyCleared = false;
 
