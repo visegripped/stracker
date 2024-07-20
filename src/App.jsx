@@ -29,26 +29,24 @@ const logError = (error, info) => {
 
 const Notifications = () => {
   const { notifications } = useNotification();
-  console.log(" -> Notifications: ", notifications);
+  // console.log(" -> Notifications: ", notifications);
   const notificationList = [];
   const keys = Object.keys(notifications);
-  console.log(" -> rerendering Notifications");
   if (keys.length) {
-    console.log(" -> keys.length is set");
     keys.forEach((uuid) => {
-      const { message, classification } = notifications[uuid];
+      const { message, type } = notifications[uuid];
       notificationList.push(
         <Notification
           uuid={uuid}
           key={uuid}
           message={message}
-          classification={classification}
+          type={type}
         />
       );
     });
   }
   return (
-    <section className="notificationsContainer">{notificationList}</section>
+    <section className="notifications-container">{notificationList}</section>
   );
 };
 

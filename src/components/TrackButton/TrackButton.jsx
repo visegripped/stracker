@@ -13,9 +13,9 @@ export const TrackButton = (props) => {
   const [buttonAction, setButtonAction] = useState("Track");
   const { addNotification } = useNotifications();
   const handleClick = (clickEvent) => {
-    console.log(
-      `-> trackButton handleClick was triggered for ${symbol}. tokenId is set: ${!!tokenId} and userId: ${userId} and buttonAction: ${buttonAction}`
-    );
+    // console.log(
+    //   `-> trackButton handleClick was triggered for ${symbol}. tokenId is set: ${!!tokenId} and userId: ${userId} and buttonAction: ${buttonAction}`
+    // );
     if (tokenId && userId) {
       const response = apiPost({
         tokenId,

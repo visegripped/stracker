@@ -13,11 +13,11 @@ const useNotification = () => {
   };
 
   const addNotification = (notificationObj) => {
-    console.log(' -> Notification added: ', notificationObj);
-    let updatedNotifications = {...notificationObj};
+    let updatedNotifications = {...notifications};
     const uuid = UUID.generate();
+    notificationObj.uuid = uuid; // add to the individual notification for easy lookup later.
     updatedNotifications[uuid] = notificationObj;
-    console.log(' -> ')
+    // console.log(' -> updatedNotifications: ', updatedNotifications);
     setNotifications(updatedNotifications);
   };
 

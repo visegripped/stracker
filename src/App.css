@@ -114,3 +114,7 @@ label {display: block;}
   text-align: center;
 }
 
+.notifications-container {
+  position: absolute;
+  right: var(--spacing);
+}
