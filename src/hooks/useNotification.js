@@ -5,7 +5,6 @@ import NotificationContext from "@context/NotificationContext";
 const useNotification = () => {
   const context = useContext(NotificationContext);
   const [ notifications, setNotifications ] = context;
-  const uuid = UUID.generate();
 
   const removeNotification = (uuid) => {
     let updatedNotifications = {...notifications};
@@ -15,9 +14,11 @@ const useNotification = () => {
 
   const addNotification = (notificationObj) => {
     console.log(' -> Notification added: ', notificationObj);
-    const uuid = uuidv4();
-    notifications[uuid] = notificationObj;
-    setNotifications(notifications);
+    let updatedNotifications = {...notificationObj};
+    const uuid = UUID.generate();
+    updatedNotifications[uuid] = notificationObj;
+    console.log(' -> ')
+    setNotifications(updatedNotifications);
   };
 
   return { notifications, addNotification, removeNotification };

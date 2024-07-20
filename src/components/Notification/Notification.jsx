@@ -1,13 +1,12 @@
 import React, { useContext, useEffect, useState } from "react";
 import "./Notification.css";
-import useNotifications from "@hooks/useNotifications";
+import useNotification from "@hooks/useNotification";
 
 export const Notification = (props) => {
-  const {type, message } = props;
-  const { removeNotification } = useNotifications();
+  const {type, message, uuid } = props;
+  const { removeNotification } = useNotification();
   const handleClick = (clickEvent) => {
-    const uuid = clickEvent.target.dataset.uuid;
-    removeMessage(uuid);
+    removeNotification(uuid);
   };
   return (
     <div className={`notification ${type}`}>

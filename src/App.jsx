@@ -6,9 +6,10 @@ import Page404 from "@pages/Page404";
 import { AuthProvider } from "@context/AuthContext";
 import { NotificationProvider } from "@context/NotificationContext";
 import AuthButton from "@components/AuthButton";
+import Notification from "@components/Notification";
 import { ErrorBoundary } from "react-error-boundary";
 import PathConstants from "@routes/pathConstants";
-import useNotification from "@hooks/useNotification"
+import useNotification from "@hooks/useNotification";
 import "./App.css";
 
 // https://medium.com/@vnkelkar11/using-error-boundary-in-react-a29ded725eee - has some examples for async/fetch as well.
@@ -28,9 +29,12 @@ const logError = (error, info) => {
 
 const Notifications = () => {
   const { notifications } = useNotification();
+  console.log(" -> Notifications: ", notifications);
   const notificationList = [];
   const keys = Object.keys(notifications);
-  if (keys) {
+  console.log(" -> rerendering Notifications");
+  if (keys.length) {
+    console.log(" -> keys.length is set");
     keys.forEach((uuid) => {
       const { message, classification } = notifications[uuid];
       notificationList.push(
@@ -81,18 +85,18 @@ const App = () => {
               // Reset the state of your app so the error doesn't happen again - NEED TO EXPLORE THIS
             }}
           >
-            <NotificationProvider >
-            <Notifications />
-            <Routes>
-              <Route path={PathConstants.HOME} Component={Home} />
-              <Route path={PathConstants.ALERTS} Component={Alerts} />
-              <Route path={PathConstants.SYMBOL} Component={Symbol} />
-              <Route
-                path={`${PathConstants.SYMBOL}/:symbol`}
-                Component={Symbol}
-              />
-              <Route Component={Page404} />
-            </Routes>
+            <NotificationProvider>
+              <Notifications />
+              <Routes>
+                <Route path={PathConstants.HOME} Component={Home} />
+                <Route path={PathConstants.ALERTS} Component={Alerts} />
+                <Route path={PathConstants.SYMBOL} Component={Symbol} />
+                <Route
+                  path={`${PathConstants.SYMBOL}/:symbol`}
+                  Component={Symbol}
+                />
+                <Route Component={Page404} />
+              </Routes>
             </NotificationProvider>
           </ErrorBoundary>
         </main>
