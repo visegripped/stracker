@@ -3,7 +3,7 @@ include "../../includes/stracker/mysql.php";
 include "../../includes/stracker/apiHeaders.php";
 include "../../includes/stracker/validation.php";
 include "../../includes/stracker/sessions.php";
-// require_once '../../includes/vendor/autoload.php'; // enabling this causes 500s.
+
 
 $task = $_POST['task'] ?? "";
 $userId = $_POST['userId'] ?? "";
@@ -35,6 +35,50 @@ function getAlerts($symbol, $limit, $pdo) {
     $stmt->execute(array('symbol' => $symbol));
     return $stmt->fetchAll();
 }
+
+function getAlertHistoryList($limit, $alertTypes, $pdo) {
+    // Initial query to get alerts
+    $query = "SELECT a.symbol, a.date, a.type, a.id, s.name 
+              FROM _alerts a 
+              JOIN _symbols s ON a.symbol = s.symbol ";
+              
+    if ($alertTypes) {
+        $query .= "WHERE a.type IN ( ";
+        foreach ($alertTypes as $key) {
+            $query .= "'$key',";
+        }
+        $query = rtrim($query, ',');
+        $query .= " ) ";
+    }
+    
+    $query .= "ORDER BY a.date DESC LIMIT $limit";
+    $stmt = $pdo->query($query);
+    $alerts = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+    // Process each alert to get additional data from respective symbol table
+    foreach ($alerts as &$alert) {
+        $symbolTable = $alert['symbol'];
+        $currentYear = date('Y');
+        
+        // Query to get yearStartEOD, lastEOD, and previousDayEOD
+        $subQuery = "SELECT 
+                        MAX(CASE WHEN date = :yearStartDate THEN EOD END) as yearStartEOD,
+                        MAX(CASE WHEN date = (SELECT MAX(date) FROM $symbolTable) THEN EOD END) as lastEOD,
+                        MAX(CASE WHEN date = (SELECT MAX(date) FROM $symbolTable WHERE date < (SELECT MAX(date) FROM $symbolTable)) THEN EOD END) as previousDayEOD
+                     FROM $symbolTable";
+                     
+        $subStmt = $pdo->prepare($subQuery);
+        $yearStartDate = "$currentYear-01-02"; // Assuming this is the format for the first trading day of the year
+        $subStmt->bindParam(':yearStartDate', $yearStartDate, PDO::PARAM_STR);
+        $subStmt->execute();
+        
+        $additionalData = $subStmt->fetch(\PDO::FETCH_ASSOC);
+        $alert = array_merge($alert, $additionalData);
+    }
+
+    return $alerts;
+}
+
 
 function getAlertHistory($limit, $alertTypes, $pdo) {
     $query = "select a.symbol, a.date, a.type, a.id, s.name from _alerts a ";
@@ -112,7 +156,7 @@ $db = dbConnect();
 if(!$tokenId) {
     $data = '{"err":"Token not specified on API request."}';
     $data = json_decode($data);
-} else if(!isValidSession($tokenId)) {
+} else if(!isValidGoogleAccessToken($tokenId)) {
     $data = '{"err":"Invalid/expired token.  Please sign (or re-sign) in."}';
     $data = json_decode($data);
 } else if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
@@ -135,6 +179,8 @@ if(!$tokenId) {
     $data = getSymbols($db);
 } else if($task == 'getAlertHistory' ) {
     $data = getAlertHistory($limit, $alertTypes, $db);
+}  else if($task == 'getAlertHistoryList' ) {
+    $data = getAlertHistoryList($limit, $alertTypes, $db);
 } else {
     $data = '{"err":"No/Invalid task defined ['.$task.'] or required params are not present. (symbol = ['.$symbol.'] and '.(isValidSymbol($symbol) ? 'is valid' : 'is not valid').'). userId: ['.$userId.'] and dates [startDate: '.$startDate.' and endDate: '.$endDate.'] are valid: '.(areValidDates($startDate, $endDate) ? 'true' : 'false').' and isValidEmail: '.(isValidEmail($userId)).'"}';
     $data = json_decode($data);

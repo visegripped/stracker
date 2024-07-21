@@ -1,3 +1,5 @@
+const apiUrl = import.meta.env.VITE_API_URL;
+
 export const formatDate = (date) => {
   const monthAdjustedForJS = (date.getMonth() + 1).toString().padStart(2, "0");
   const dayPadded = date.getDate().toString().padStart(2, "0");
@@ -12,21 +14,17 @@ export const apiPost = (config) => {
   const makeAsyncRequest = async (theFormData) => {
     let jsonPayload = {};
     let errorMessage = "";
-    const apiResponse = await fetch(
-      "https://visegripped.com/stracker/api.php",
-      // "http://localhost/public_html/stracker/api.php",
-      {
-        body: theFormData,
-        method: "POST",
-        // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-        // mode: "cors",
-        // headers: {
-        //   "Content-Type": "application/json",
-        //   "Sec-Fetch-Site": "cross-site",
-        //   "X-PINGOTHER": "pingpong",
-        // },
-      }
-    )
+    const apiResponse = await fetch(apiUrl, {
+      body: theFormData,
+      method: "POST",
+      // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+      // mode: "cors",
+      headers: {
+        // "Content-Type": "application/json",
+        // "Sec-Fetch-Site": "cross-site",
+        // "X-PINGOTHER": "pingpong",
+      },
+    });
 
     if (apiResponse.status >= 200 && apiResponse.status < 300) {
       jsonPayload = await apiResponse.json();
@@ -36,7 +34,6 @@ export const apiPost = (config) => {
     // console.log(`Historical data for ${symbol} was fetched`, jsonPayload);
     if (jsonPayload.err) {
       throw new Error(jsonPayload.err);
-
     }
     return jsonPayload;
   };
@@ -44,6 +41,7 @@ export const apiPost = (config) => {
   if (tokenId) {
     let formData = new FormData();
     formData.append("tokenId", tokenId);
+    formData.append("token", tokenId);
     formData.append("task", task);
     if (symbol) formData.append("symbol", symbol);
     if (symbols) formData.append("symbols", symbol);
