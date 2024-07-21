@@ -33,10 +33,6 @@ export const AuthButton = () => {
     const { access_token } = authResponse;
     sessionStorage.setItem("tokenId", access_token);
     setAuth({ tokenId: access_token });
-    addNotification({
-      message: "Thank you for your visit.  You are now logged in.",
-      type: "info",
-    });
     setUser(authResponse);
   };
 
