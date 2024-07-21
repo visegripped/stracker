@@ -19,12 +19,12 @@ export const apiPost = (config) => {
         body: theFormData,
         method: "POST",
         // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-        mode: "cors",
-        headers: {
-          "Content-Type": "application/json",
-          "Sec-Fetch-Site": "cross-site",
-          "X-PINGOTHER": "pingpong",
-        },
+        // mode: "cors",
+        // headers: {
+        //   "Content-Type": "application/json",
+        //   "Sec-Fetch-Site": "cross-site",
+        //   "X-PINGOTHER": "pingpong",
+        // },
       }
     )
 
