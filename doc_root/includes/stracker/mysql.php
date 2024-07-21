@@ -24,6 +24,7 @@ function tableExists($tableId, $db) {
    return $is_table->rowCount();
 }
 
+
 function createSymbolTable($symbol, $db) {
   $statement = "CREATE TABLE $symbol(
     EOD decimal(10,2) NOT NULL,
