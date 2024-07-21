@@ -141,11 +141,15 @@ if(!$tokenId) {
 }
 
 $data = json_encode($data);
-header('Content-type: application/json');
-header('Access-Control-Allow-Methods: GET, POST');
-header("Access-Control-Allow-Headers: X-Requested-With");
-
 // header('Access-Control-Allow-Origin: *'); // http://localhost:5173, https://www.visegripped.com, https://visegripped.com
+header('Content-type: application/json');
+header('Access-Control-Allow-Methods: POST, OPTIONS, HEAD');
+header("Access-Control-Allow-Headers: X-Requested-With");
+header("Access-Control-Request-Headers: X-PINGOTHER, Content-Type");
+header("Access-Control-Max-Age: 86400");
+// header("Sec-Fetch-Site: cross-site");
+// header("POST: /stracker/api.php");
+
 print($data);
 
 // print("Hello World")

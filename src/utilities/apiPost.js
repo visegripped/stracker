@@ -14,9 +14,17 @@ export const apiPost = (config) => {
     let errorMessage = "";
     const apiResponse = await fetch(
       "https://visegripped.com/stracker/api.php",
+      // "http://localhost/public_html/stracker/api.php",
       {
         body: theFormData,
-        method: "post",
+        method: "POST",
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json",
+          "Sec-Fetch-Site": "cross-site",
+          "X-PINGOTHER": "pingpong",
+        },
       }
     )
 
