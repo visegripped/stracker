@@ -1,15 +1,15 @@
+import { useContext } from "react";
 import { HashRouter as Router, Route, Routes, Link } from "react-router-dom";
 import Home from "@pages/Home";
 import Alerts from "@pages/Alerts";
 import Symbol from "@pages/Symbol";
 import Page404 from "@pages/Page404";
-import { AuthProvider } from "@context/AuthContext";
-import { NotificationProvider } from "@context/NotificationContext";
+import { AuthProvider, AuthContext } from "@context/AuthContext";
+import { NotificationsContext }  from "@context/NotificationsContext";
 import AuthButton from "@components/AuthButton";
 import Notification from "@components/Notification";
 import { ErrorBoundary } from "react-error-boundary";
 import PathConstants from "@routes/pathConstants";
-import useNotifications from "@hooks/useNotifications";
 
 import "./App.css";
 
@@ -29,8 +29,9 @@ const logError = (error, info) => {
 };
 
 const Notifications = () => {
-  const { notifications } = useNotifications();
-  // console.log(" -> Notifications: ", notifications);
+
+  const [Auth, setAuth] = useContext(AuthContext);
+  const {notifications} = useContext(NotificationsContext);
   const notificationList = [];
   const keys = Object.keys(notifications);
   if (keys.length) {
@@ -84,7 +85,6 @@ const App = () => {
               // Reset the state of your app so the error doesn't happen again - NEED TO EXPLORE THIS
             }}
           >
-            <NotificationProvider>
               <Notifications />
               <Routes>
                 <Route path={PathConstants.HOME} Component={Home} />
@@ -96,7 +96,6 @@ const App = () => {
                 />
                 <Route Component={Page404} />
               </Routes>
-            </NotificationProvider>
           </ErrorBoundary>
         </main>
 

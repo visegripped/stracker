@@ -2,16 +2,16 @@ import React, { useContext, useEffect, useState } from "react";
 import { AuthContext } from "@context/AuthContext";
 import "./TrackButton.css";
 import apiPost from "@utilities/apiPost";
-import useNotifications from "@hooks/useNotifications";
+import { NotificationsContext } from "@context/NotificationsContext";
 
 export const TrackButton = (props) => {
   const { symbol } = props;
   const [Auth] = useContext(AuthContext);
+  const { addNotification } = useContext(NotificationsContext);
 
   const { tokenId, userId } = Auth;
   const [trackedSymbols, setTrackedSymbols] = useState([]);
   const [buttonAction, setButtonAction] = useState("Track");
-  const { addNotification } = useNotifications();
   const handleClick = (clickEvent) => {
     // console.log(
     //   `-> trackButton handleClick was triggered for ${symbol}. tokenId is set: ${!!tokenId} and userId: ${userId} and buttonAction: ${buttonAction}`

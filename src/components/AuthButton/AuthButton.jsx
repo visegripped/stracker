@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { googleLogout, useGoogleLogin } from "@react-oauth/google"; // docs: https://www.npmjs.com/package/@react-oauth/google
-import { AuthContext } from "../../context/AuthContext";
-// import useNotifications from "@hooks/useNotifications";
+import { AuthContext } from "@context/AuthContext";
+import { NotificationsContext } from "@context/NotificationsContext";
 import "./styles.css";
 
 const clientId =
@@ -9,11 +9,10 @@ const clientId =
 
 export const AuthButton = () => {
   const [Auth, setAuth] = useContext(AuthContext);
-  // get and set user profile after a successful login.
+  const {addNotification} = useContext(NotificationsContext);
   const [user, setUser] = useState([]);
   const [profile, setProfile] = useState([]);
-  // console.log(' -> useNotifications(): ', useNotifications())
-  // const { addNotification } = useNotifications();
+
 
   const { tokenId } = Auth;
 
@@ -21,10 +20,10 @@ export const AuthButton = () => {
     sessionStorage.setItem("tokenId", "");
     // sessionStorage.setItem("userId", "");
     setAuth({ tokenId: "" });
-    // addNotification({
-    //   message: "Thank you for your visit.  You have been logged out.",
-    //   type: "info",
-    // });
+    addNotification({
+      message: "Thank you for your visit.  You have been logged out.",
+      type: "info",
+    });
     googleLogout();
     setProfile(null);
   };
@@ -34,21 +33,17 @@ export const AuthButton = () => {
     const { access_token } = authResponse;
     sessionStorage.setItem("tokenId", access_token);
     setAuth({ tokenId: access_token });
-    // addNotification({
-    //   message: "Thank you for your visit.  You are now logged in.",
-    //   type: "info",
-    // });
     setUser(authResponse);
   };
 
   const onLoginFailure = (authResponse) => {
     console.log(" - - - -- > authResponse: ", authResponse);
-    // addNotification({
-    //   message: `Something has gone wrong with your authentication.  This may help: ${JSON.stringify(
-    //     authResponse
-    //   )}`,
-    //   type: "error",
-    // });
+    addNotification({
+      message: `Something has gone wrong with your authentication.  This may help: ${JSON.stringify(
+        authResponse
+      )}`,
+      type: "error",
+    });
   };
 
   const onLogoutSuccess = (authResponse) => {
