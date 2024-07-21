@@ -13,9 +13,10 @@ import PathConstants from "../routes/pathConstants";
 
 
 const getSpanFromDiff = (EOD, earlier) => {
+  if(isNaN(EOD) || isNaN(earlier)) return "";
   const diff = EOD - earlier;
   const className = diff >= 0 ? 'positive' : 'negative';
-  return <span className={`price-${className}`}>{diff}</span>;
+  return <span className={`price-${className}`}>{parseFloat(diff).toFixed(2)}</span>;
 }
 
 const LinkedSymbol = (props) => {
@@ -28,7 +29,7 @@ const YTDSymbol = (props) => {
   return getSpanFromDiff(lastEOD, yearStartDate);
 };
 const DODSymbol = (props) => {
-  const { value: symbol, previousDayEOD, lastEOD } = props;
+  const { value: symbol, previousDayEOD, lastEOD } = props.data;
   return getSpanFromDiff(lastEOD, previousDayEOD);
 };
 
@@ -39,8 +40,8 @@ const Table = (props) => {
     { field: "name", flex: 2 },
     { field: "type", filter: "agSetColumnFilter" },
     { field: "lastEOD" },
-    { field: "yearToDay", YTDSymbol },
-    { field: "dayOverDay", DODSymbol },
+    { field: "yearToDay", cellRenderer:YTDSymbol },
+    { field: "dayOverDay", cellRenderer:DODSymbol },
     { field: "date", sort: "asc" },
   ]);
 

@@ -22,7 +22,7 @@ export const apiPost = (config) => {
       headers: {
         // "Content-Type": "application/json",
         // "Sec-Fetch-Site": "cross-site",
-        // "X-PINGOTHER": "pingpong",
+        // "X-PINGOTHER": task,
       },
     });
 

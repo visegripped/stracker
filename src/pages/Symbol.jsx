@@ -130,11 +130,11 @@ const PageContent = (props) => {
           </Fieldset>
         </div>
         <div>
-          <Graph
+          {history.length ? <Graph
             symbol={symbol}
             history={history}
             enabledDataPoints={lsDataPoints}
-          />
+          /> : <h2>There does not appear to be any data for the symbol and date range you have selected.  Please adjust the dates to a more recent time.</h2>}
         </div>
       </section>
     </>
