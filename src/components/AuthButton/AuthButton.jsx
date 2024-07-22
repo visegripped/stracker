@@ -10,15 +10,15 @@ const clientId =
 export const AuthButton = () => {
   const [Auth, setAuth] = useContext(AuthContext);
   const {addNotification} = useContext(NotificationsContext);
+
+  const [access_token, setAccessToken] = useState('');
   const [user, setUser] = useState([]);
   const [profile, setProfile] = useState([]);
-
-
   const { tokenId } = Auth;
 
   const logout = () => {
     sessionStorage.setItem("tokenId", "");
-    // sessionStorage.setItem("userId", "");
+    sessionStorage.setItem("userId", "");
     setAuth({ tokenId: "" });
     addNotification({
       message: "Thank you for your visit.  You have been logged out.",
@@ -28,12 +28,43 @@ export const AuthButton = () => {
     setProfile(null);
   };
 
+// https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses -> returned a 403.
+// https://www.googleapis.com/auth/userinfo.email -> 200 response but CORS issue from localhost.
+
+  const getProfile = async (access_token) => {
+    // Fetch user profile information
+    if(!access_token) {
+      console.error('Access token was not passed to getProfile.  No request attempt has been made to retrieve the user profile');
+      return;
+    }
+    try {
+      const response = await fetch('https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses', {
+        headers: {
+          Authorization: `Bearer ${access_token}` // this is the access_token.
+        }
+      });
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const userProfile = await response.json();
+      console.log('Profile:', userProfile);
+      const emailAddress = userProfile?.emailAddresses[0]?.value;
+      sessionStorage.setItem("userId", emailAddress);
+      setAuth({ tokenId: access_token, userId: emailAddress });
+      setProfile(userProfile);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  }
+
+
   const onLoginSuccess = (authResponse) => {
     console.log("Auth Success: authResponse:", authResponse);
     const { access_token } = authResponse;
     sessionStorage.setItem("tokenId", access_token);
     setAuth({ tokenId: access_token });
-    setUser(authResponse);
+    setUser(authResponse); // probably not what we want here.  FIXME
+    getProfile(access_token)
   };
 
   const onLoginFailure = (authResponse) => {
@@ -54,31 +85,9 @@ export const AuthButton = () => {
   const login = useGoogleLogin({
     onSuccess: onLoginSuccess,
     onError: onLoginFailure,
+    scope: 'openid profile email' // Include necessary scopes
   });
 
-  // useEffect(() => {
-  //   if (user) {
-  //     console.log(" -user ", user);
-  //     sessionStorage.setItem("tokenId", user.access_token);
-  //     fetch(
-  //       `https://www.googleapis.com/oauth2/v1/userinfo?access_token=${user.access_token}`,
-  //       {
-  //         headers: {
-  //           Authorization: `Bearer ${user.access_token}`,
-  //           Accept: "application/json",
-  //         },
-  //       }
-  //     )
-  //       .then((res) => {
-  //         setProfile(res.data);
-  //         // console.log( ' --------> res', res);
-  //       })
-  //       .catch((err) => {
-  //         // throw an error w/ a notification
-  //         console.log(err);
-  //       });
-  //   }
-  // }, [user]);
   return (
     <div>
       {tokenId ? (

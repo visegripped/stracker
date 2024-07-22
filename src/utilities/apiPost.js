@@ -17,13 +17,6 @@ export const apiPost = (config) => {
     const apiResponse = await fetch(apiUrl, {
       body: theFormData,
       method: "POST",
-      // https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
-      // mode: "cors",
-      headers: {
-        // "Content-Type": "application/json",
-        // "Sec-Fetch-Site": "cross-site",
-        // "X-PINGOTHER": task,
-      },
     });
 
     if (apiResponse.status >= 200 && apiResponse.status < 300) {

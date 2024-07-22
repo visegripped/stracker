@@ -11,6 +11,7 @@ dist/
 /.pnp
 .pnp.js
 vendor/
+deploy.js
 
 # testing
 /coverage
