@@ -11,6 +11,7 @@ dist/
 /.pnp
 .pnp.js
 vendor/
+deploy.js
 
 # testing
 /coverage
@@ -20,10 +21,7 @@ vendor/
 
 # misc
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env*
 stracker.code-workspace
 npm-debug.log*
 yarn-debug.log*

@@ -10,12 +10,24 @@
 
 function addHistoricalData($symbol, $db) {
     // period 1 is start data. period 2 is end date.
+    $period1 = 1672574400; //jan 1 2023
     // stock data comes back as follows:  data, open, high, low, close, adj close, volume
-    $csvUri = "https://query1.finance.yahoo.com/v7/finance/download/$symbol?period1=1577889599&period2=".time()."&interval=1d&events=history&includeAdjustedClose=true";
+    $csvUri = "https://query1.finance.yahoo.com/v7/finance/download/$symbol?period1=$$period1&period2=".time()."&interval=1d&events=history&includeAdjustedClose=true";
     $stockData = getCsv($csvUri);
-    $formattedStockData = formatHistoryCsv($stockData);
-    $history = getDataFromHistory($formattedStockData);
-    writeHistoryToDB($symbol, $history, $db);
+    $historicalDays = count($stockData);
+    print("<h6>Stock Data: </h6>");
+    print("<br />Days in history: $historicalDays<br />");
+    print_r($stockData);    
+    print("<br /><br />");
+    if($historicalDays > 0) {
+        $formattedStockData = formatHistoryCsv($stockData);
+        $history = getDataFromHistory($formattedStockData);
+        writeHistoryToDB($symbol, $history, $db);
+        return true;
+    } else {
+        return false;
+    }
+
 }
 
 function csvDateTimeToDate($dateTime) {
@@ -53,6 +65,8 @@ function handleDailies($dailyEodPriceCsv) {
     $errors = array();
     $trackedSymbolData = getCsv($dailyEodPriceCsv);
     $db = dbConnect();
+    $maxDailiesToFetch = 15; // there is rate limiting in place on the yahoo endpoint.
+    $currentCountForDailyFetches = 0;
 
     foreach($trackedSymbolData as $row) {
         $symbol = $row[0];
@@ -84,9 +98,22 @@ function handleDailies($dailyEodPriceCsv) {
                 $alerts[$symbol] = $alertState;
             }
         } elseif($symbol) {
-            echo "$symbol is not presently tracked.  adding...";
-            trackNewSymbol($symbol, $companyName, $db);
-            echo " success!<br>";
+            echo "$symbol is not presently tracked...<br>";
+            if($currentCountForDailyFetches <= $maxDailiesToFetch ) {
+                $trackSuccess = trackNewSymbol($symbol, $companyName, $db);
+                if($trackSuccess) {
+                    echo " success!<br>";
+                }
+                else {
+                    echo " Failed.<br>";
+                    array_push($errors, "Symbol $symbol was not added. Issue getting historical data. Table was deleted but $symbol remains tracked. Should get picked up tomorrow.");
+                }
+                
+            } else {
+                echo " Did not get history due to rate limit concerns. Another attempt will be made tomorrow.";
+                array_push($errors, "Symbol $symbol was not added due to rate limit concerns. It may be added on next run");
+            }
+
         } else {
             echo "symbol was blank.<br>";
         }

@@ -40,7 +40,7 @@ export const TrackButton = (props) => {
   };
 
   useEffect(() => {
-    if (tokenId) {
+    if (tokenId && userId && symbol) {
       const response = apiPost({
         tokenId,
         task: "symbolIsTrackedByUser",
@@ -55,7 +55,7 @@ export const TrackButton = (props) => {
         console.log(err);
       });
     }
-  }, [tokenId, symbol]);
+  }, [tokenId, symbol, userId]);
 
   return (
     <button onClick={handleClick} className="trackButton">

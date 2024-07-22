@@ -1,1 +1,3 @@
 .table-container { height: 100%; padding: var(--spacing);}
+.price-positive {color: green;}
+.price-negative {color: red;}
