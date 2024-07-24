@@ -1,4 +1,5 @@
 import { useParams } from "react-router-dom";
+import { useState, useEffect, useContext } from "react";
 import {
   DateRangePicker,
   Fieldset,
@@ -7,18 +8,16 @@ import {
   PlotPicker,
   TrackButton,
 } from "../components";
-import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import "./Symbol.css";
 import apiPost from "../utilities/apiPost";
 
 const PageContent = (props) => {
   const defaultSymbol =
     localStorage.getItem("mostRecentlyViewedSymbol") || "INTU";
-  const { symbol = defaultSymbol, tokenId } = props;
+  const { symbol = defaultSymbol } = props;
   const [history, setHistory] = useState([]);
   const [alertHistory, setAlertHistory] = useState([]);
 
-  // console.log(`Token ID: ${tokenId}`);
   const dp = localStorage.getItem("dataPoints") || "{}";
   const lsDataPoints = JSON.parse(dp) || {
     EOD: true,
@@ -63,9 +62,8 @@ const PageContent = (props) => {
   };
 
   useEffect(() => {
-    if (startDate && endDate && tokenId && symbol) {
+    if (startDate && endDate && symbol) {
       const response = apiPost({
-        tokenId,
         task: "history",
         symbol,
         startDate,
@@ -76,34 +74,32 @@ const PageContent = (props) => {
           setHistory(data);
         });
     }
-  }, [symbol, startDate, endDate, tokenId]); // The response always has all the graph data, so no need to trigger on dataPoints change
+  }, [symbol, startDate, endDate]); // The response always has all the graph data, so no need to trigger on dataPoints change
 
   useEffect(() => {
-    if (symbol && tokenId) {
+    if (symbol) {
       localStorage.setItem("mostRecentlyViewedSymbol", symbol);
-      const response = apiPost({
-        tokenId,
+      const alertsResponse = apiPost({
         task: "alerts",
         symbol,
         limit: 20,
       });
 
-      response &&
-        response.then((data) => {
+      alertsResponse &&
+        alertsResponse.then((data) => {
           setAlertHistory(data);
         });
     }
-  }, [symbol, tokenId]);
+  }, [symbol]);
 
   return (
     <>
       <section className="search-bar">
-        <SymbolPicker /> 
+        <SymbolPicker />
       </section>
       <section className="grid-container grid-sidebar">
-
-      <TrackButton symbol={symbol} />
-      <br />
+        <TrackButton symbol={symbol} />
+        <br />
         <div>
           <Fieldset legend="Data Points">
             <PlotPicker
@@ -130,11 +126,18 @@ const PageContent = (props) => {
           </Fieldset>
         </div>
         <div>
-          {history.length ? <Graph
-            symbol={symbol}
-            history={history}
-            enabledDataPoints={lsDataPoints}
-          /> : <h2>There does not appear to be any data for the symbol and date range you have selected.  Please adjust the dates to a more recent time.</h2>}
+          {history.length ? (
+            <Graph
+              symbol={symbol}
+              history={history}
+              enabledDataPoints={lsDataPoints}
+            />
+          ) : (
+            <h2>
+              There does not appear to be any data for {symbol} and date range
+              you have selected. Please adjust the dates to a more recent time.
+            </h2>
+          )}
         </div>
       </section>
     </>
@@ -143,18 +146,7 @@ const PageContent = (props) => {
 
 const Symbol = () => {
   let { symbol } = useParams() || "INTU";
-  const [Auth] = useContext(AuthContext);
-  const { tokenId } = Auth;
-
-  return (
-    <>
-      {tokenId ? (
-        <PageContent symbol={symbol} tokenId={tokenId} />
-      ) : (
-        <h3>Please log in</h3>
-      )}
-    </>
-  );
+  return <PageContent symbol={symbol} />;
 };
 
 export default Symbol;

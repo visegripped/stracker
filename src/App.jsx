@@ -5,7 +5,7 @@ import Alerts from "@pages/Alerts";
 import Symbol from "@pages/Symbol";
 import Page404 from "@pages/Page404";
 import { AuthProvider, AuthContext } from "@context/AuthContext";
-import { NotificationsContext }  from "@context/NotificationsContext";
+import { NotificationsContext } from "@context/NotificationsContext";
 import AuthButton from "@components/AuthButton";
 import Notification from "@components/Notification";
 import { ErrorBoundary } from "react-error-boundary";
@@ -29,21 +29,14 @@ const logError = (error, info) => {
 };
 
 const Notifications = () => {
-
-  const [Auth, setAuth] = useContext(AuthContext);
-  const {notifications} = useContext(NotificationsContext);
+  const { notifications } = useContext(NotificationsContext);
   const notificationList = [];
   const keys = Object.keys(notifications);
   if (keys.length) {
     keys.forEach((uuid) => {
       const { message, type } = notifications[uuid];
       notificationList.push(
-        <Notification
-          uuid={uuid}
-          key={uuid}
-          message={message}
-          type={type}
-        />
+        <Notification uuid={uuid} key={uuid} message={message} type={type} />
       );
     });
   }
@@ -53,54 +46,66 @@ const Notifications = () => {
 };
 
 const App = () => {
+  let currentDate = new Date();
+  const { accessToken } = useContext(AuthContext);
   return (
     <Router>
-      <AuthProvider>
-        <header>
-          <h1 className="logo">
-            <Link to={PathConstants.HOME}>Stracker</Link>
-          </h1>
 
-          <nav className="navbar">
-            <ul className="nav-list">
-              <li className="nav-item">
-                <Link to={PathConstants.SYMBOL}>Symbol</Link>
-              </li>
-              <li className="nav-item">
-                <Link to={PathConstants.ALERTS}>Alert History</Link>
-              </li>
-            </ul>
-          </nav>
+          <header>
+            <h1 className="logo">
+              <Link to={PathConstants.HOME}>Stracker</Link>
+            </h1>
 
-          <div className="auth">
-            <AuthButton />
-          </div>
-        </header>
+            <nav className="navbar">
+              <ul className="nav-list">
+                <li className="nav-item">
+                  <Link to={PathConstants.SYMBOL}>Symbol</Link>
+                </li>
+                <li className="nav-item">
+                  <Link to={PathConstants.ALERTS}>Alert History</Link>
+                </li>
+              </ul>
+            </nav>
 
-        <main>
+            <div className="auth">
+              <AuthButton />
+            </div>
+          </header>
+
+          <main>
           <ErrorBoundary
-            fallbackRender={fallbackRender}
-            onError={logError}
-            onReset={(details) => {
-              // Reset the state of your app so the error doesn't happen again - NEED TO EXPLORE THIS
-            }}
-          >
+              fallbackRender={fallbackRender}
+              onError={logError}
+              onReset={(details) => {
+                // Reset the state of your app so the error doesn't happen again - NEED TO EXPLORE THIS
+              }}
+            >
               <Notifications />
-              <Routes>
-                <Route path={PathConstants.HOME} Component={Home} />
-                <Route path={PathConstants.ALERTS} Component={Alerts} />
-                <Route path={PathConstants.SYMBOL} Component={Symbol} />
-                <Route
-                  path={`${PathConstants.SYMBOL}/:symbol`}
-                  Component={Symbol}
-                />
-                <Route Component={Page404} />
-              </Routes>
-          </ErrorBoundary>
-        </main>
+              {accessToken ? (
+                <Routes>
+                  <Route path={PathConstants.HOME} Component={Home} />
+                  <Route path={PathConstants.ALERTS} Component={Alerts} />
+                  <Route path={PathConstants.SYMBOL} Component={Symbol} />
+                  <Route
+                    path={`${PathConstants.SYMBOL}/:symbol`}
+                    Component={Symbol}
+                  />
+                  <Route Component={Page404} />
+                </Routes>
+              ) : (
+                <div className='unauthenticated'>
+                  <h2>You are not logged in.</h2>
+                  <h3>Please use the sign in button in the upper right corner.</h3>
+                </div>
+              )}
+            </ErrorBoundary>
+          </main>
 
-        <footer></footer>
-      </AuthProvider>
+          <footer>
+            &copy; Copyright 2018 - {currentDate.getFullYear()}. All rights
+            reserved.
+          </footer>
+
     </Router>
   );
 };

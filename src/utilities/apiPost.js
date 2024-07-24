@@ -1,4 +1,4 @@
-const apiUrl = import.meta.env.VITE_API_URL;
+const apiUrl = import.meta.env.VITE_STRACKER_API_URL;
 
 export const formatDate = (date) => {
   const monthAdjustedForJS = (date.getMonth() + 1).toString().padStart(2, "0");
@@ -7,10 +7,9 @@ export const formatDate = (date) => {
 };
 
 export const apiPost = (config) => {
-  // refactor this so that tokenId is grabbed out of the session. That'll be lighter than every requesting component requiring authContext.
-  const { tokenId, task, symbol, startDate, endDate, limit, symbols, userId } =
+  const { task, symbol, startDate, endDate, limit, symbols, userId } =
     config;
-
+  const accessToken = sessionStorage.getItem("access_token");
   const makeAsyncRequest = async (theFormData) => {
     let jsonPayload = {};
     let errorMessage = "";
@@ -31,10 +30,10 @@ export const apiPost = (config) => {
     return jsonPayload;
   };
 
-  if (tokenId) {
+  if (accessToken) {
     let formData = new FormData();
-    formData.append("tokenId", tokenId);
-    formData.append("token", tokenId);
+    formData.append("tokenId", accessToken); // api hasn't been updated yet to use access_token.
+    formData.append("access_token", accessToken);
     formData.append("task", task);
     if (symbol) formData.append("symbol", symbol);
     if (symbols) formData.append("symbols", symbol);

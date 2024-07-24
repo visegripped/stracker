@@ -3,11 +3,9 @@ import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Select from "react-select"; // https://react-select.com/home
 import apiPost from "../../utilities/apiPost";
-import { AuthContext } from "../../context/AuthContext";
 
 export const SymbolPicker = ({ symbol, symbolName }) => {
-  const [Auth] = useContext(AuthContext);
-  const { tokenId } = Auth;
+
   const navigate = useNavigate();
   let [symbols, setSymbols] = useState({});
   const selectedOption = {
@@ -25,8 +23,8 @@ export const SymbolPicker = ({ symbol, symbolName }) => {
   };
 
   useEffect(() => {
-    if (!symbols.length && tokenId) {
-      const response = apiPost({ task: "symbols", tokenId });
+    if (!symbols.length ) {
+      const response = apiPost({ task: "symbols" });
       response &&
         response.then((data) => {
           setSymbols(handleDataResponse(data));

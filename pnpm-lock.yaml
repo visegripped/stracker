@@ -29,9 +29,9 @@ importers:
       chart.js:
         specifier: ^4.4.3
         version: 4.4.3
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
+      jwt-decode:
+        specifier: ^4.0.0
+        version: 4.0.0
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -53,12 +53,6 @@ importers:
       react-select:
         specifier: ^5.8.0
         version: 5.8.0(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      scp2:
-        specifier: ^0.5.0
-        version: 0.5.0
-      ssh2:
-        specifier: ^1.15.0
-        version: 1.15.0
       uuidjs:
         specifier: ^5.1.0
         version: 5.1.0
@@ -81,6 +75,9 @@ importers:
       '@vitejs/plugin-react-swc':
         specifier: ^3.5.0
         version: 3.7.0(@swc/helpers@0.5.12)(vite@5.3.3)
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
       eslint:
         specifier: ^8.57.0
         version: 8.57.0
@@ -90,6 +87,12 @@ importers:
       eslint-plugin-react-refresh:
         specifier: ^0.4.7
         version: 0.4.8(eslint@8.57.0)
+      scp2:
+        specifier: ^0.5.0
+        version: 0.5.0
+      ssh2:
+        specifier: ^1.15.0
+        version: 1.15.0
       typescript:
         specifier: ^5.2.2
         version: 5.5.3
@@ -1371,6 +1374,10 @@ packages:
 
   json-stable-stringify-without-jsonify@1.0.1:
     resolution: {integrity: sha512-Bdboy+l7tA3OGW6FjyFHWkP5LuByj1Tk33Ljyq0axyzdk9//JSi2u3fP1QSmd1KNwq6VOKYGlAu87CisVir6Pw==}
+
+  jwt-decode@4.0.0:
+    resolution: {integrity: sha512-+KJGIyHgkGuIq3IEBNftfhW/LfWhXUIY6OmyVWjliu5KH1y0fw7VQ8YndE2O4qZdMSd9SqbnC8GOcZEy0Om7sA==}
+    engines: {node: '>=18'}
 
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
@@ -3268,6 +3275,8 @@ snapshots:
   json-schema-traverse@0.4.1: {}
 
   json-stable-stringify-without-jsonify@1.0.1: {}
+
+  jwt-decode@4.0.0: {}
 
   keyv@4.5.4:
     dependencies:

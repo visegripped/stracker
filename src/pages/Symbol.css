@@ -1,0 +1,5 @@
+.search-bar {
+  background: #000;
+  padding: var(--spacing);
+  text-align: center;
+}
