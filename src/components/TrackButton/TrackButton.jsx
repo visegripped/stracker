@@ -1,26 +1,23 @@
 import React, { useContext, useEffect, useState } from "react";
-import { AuthContext } from "@context/AuthContext";
-import "./TrackButton.css";
+import { ProfileContext } from "@context/ProfileContext";
 import apiPost from "@utilities/apiPost";
 import { NotificationsContext } from "@context/NotificationsContext";
 
 export const TrackButton = (props) => {
   const { symbol } = props;
-  const [Auth] = useContext(AuthContext);
+  const { emailAddress } = useContext(ProfileContext);
   const { addNotification } = useContext(NotificationsContext);
-
-  const { tokenId, userId } = Auth;
   const [trackedSymbols, setTrackedSymbols] = useState([]);
   const [buttonAction, setButtonAction] = useState("Track");
+
   const handleClick = (clickEvent) => {
     // console.log(
-    //   `-> trackButton handleClick was triggered for ${symbol}. tokenId is set: ${!!tokenId} and userId: ${userId} and buttonAction: ${buttonAction}`
+    //   `-> trackButton handleClick was triggered for ${symbol} and emailAddress: ${emailAddress} and buttonAction: ${buttonAction}`
     // );
-    if (tokenId && userId) {
+    if (emailAddress) {
       const response = apiPost({
-        tokenId,
         task: buttonAction.toLocaleLowerCase(),
-        userId,
+        emailAddress,
         symbol,
       });
       response &&
@@ -40,11 +37,10 @@ export const TrackButton = (props) => {
   };
 
   useEffect(() => {
-    if (tokenId && userId && symbol) {
+    if (emailAddress && symbol) {
       const response = apiPost({
-        tokenId,
         task: "symbolIsTrackedByUser",
-        userId,
+        emailAddress,
         symbol,
       });
       response &&
@@ -55,7 +51,7 @@ export const TrackButton = (props) => {
         console.log(err);
       });
     }
-  }, [tokenId, symbol, userId]);
+  }, [symbol, emailAddress]);
 
   return (
     <button onClick={handleClick} className="trackButton">

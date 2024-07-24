@@ -7,13 +7,13 @@ const NotificationsProvider = (props) => {
   const [notifications, setNotifications] = useState({});
 
   const removeNotification = (uuid) => {
-    let updatedNotifications = {...notifications};
+    let updatedNotifications = { ...notifications };
     delete updatedNotifications[uuid];
     setNotifications(updatedNotifications);
   };
 
   const addNotification = (notificationObj) => {
-    let updatedNotifications = {...notifications};
+    let updatedNotifications = { ...notifications };
     const uuid = UUID.generate();
     notificationObj.uuid = uuid; // add to the individual notification for easy lookup later.
     updatedNotifications[uuid] = notificationObj;
@@ -21,12 +21,14 @@ const NotificationsProvider = (props) => {
   };
 
   return (
-    <NotificationsContext.Provider value={{
-      notifications, 
-      setNotifications,
-      addNotification,
-      removeNotification,
-    }}>
+    <NotificationsContext.Provider
+      value={{
+        notifications,
+        setNotifications,
+        addNotification,
+        removeNotification,
+      }}
+    >
       {props.children}
     </NotificationsContext.Provider>
   );

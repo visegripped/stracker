@@ -1,18 +1,19 @@
 import { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import apiPost from "../utilities/apiPost";
 import { Link } from "react-router-dom";
-import PathConstants from "../routes/pathConstants";
+import apiPost from "@utilities/apiPost";
+import PathConstants from "@routes/pathConstants";
+import { ProfileContext } from "@context/ProfileContext";
 
 const PageContent = (props) => {
-  const { tokenId } = props;
+  const { profile: userProfile } = useContext(ProfileContext);
   const [usersTrackedSymbols, setUsersTrackedSymbols] = useState([]);
   const [recentSignals, setRecentSignals] = useState([]);
   const [recent20Signals, setRecent20Signals] = useState([]);
   const [recentTrackedBuySignals, setRecentTrackedBuySignals] = useState([]);
   const [recentTrackedSellSignals, setRecentTrackedSellSignals] = useState([]);
-  const [Auth] = useContext(AuthContext);
-  const { userId } = Auth;
+
+  const { emailAddress } = userProfile;
+  const [userId, setUserId] = useState(emailAddress || '');
 
   const getLast20 = (data) => {
     const arr = [];
@@ -52,39 +53,47 @@ const PageContent = (props) => {
     return filteredList;
   };
 
+
+  //recentSignals does not require userId so handle it separately.
   useEffect(() => {
-    if (tokenId && userId) {
-      const response = apiPost({
-        task: "getTrackedSymbolList",
-        tokenId,
-        userId,
-      });
-      response &&
-        response.then((data) => {
-          setUsersTrackedSymbols(data);
-        });
-    }
-    if (tokenId) {
-      const response = apiPost({
+    if(recentSignals.length === 0){
+      const alertHistoryResponse = apiPost({
         task: "getAlertHistory",
-        tokenId,
         limit: 300,
       });
-      response &&
-        response.then((data) => {
+      alertHistoryResponse &&
+        alertHistoryResponse.then((data) => {
           setRecent20Signals(getLast20(data));
           setRecentSignals(data);
         });
     }
-  }, [tokenId]);
+  }, []);
 
   useEffect(() => {
-    if (usersTrackedSymbols.length && recentSignals.length && recentTrackedBuySignals.length === 0 && recentTrackedSellSignals.length === 0) {
-      const recentSignalBySimbol = flattenObjectBySymbol(recentSignals);
-      const trackedSignalBySimbol = flattenObjectBySymbol(usersTrackedSymbols);
+    const symbolListResponse = apiPost({
+      task: "getTrackedSymbolList",
+      userId,
+    });
+    symbolListResponse &&
+      symbolListResponse.then((data) => {
+        setUsersTrackedSymbols(data);
+      });
+  }, []);
+
+
+  useEffect(() => {
+    if (
+      usersTrackedSymbols.length &&
+      recentSignals.length &&
+      recentTrackedBuySignals.length === 0 &&
+      recentTrackedSellSignals.length === 0 &&
+      userId
+    ) {
+      const recentSignalBySymbol = flattenObjectBySymbol(recentSignals);
+      const trackedSignalBySymbol = flattenObjectBySymbol(usersTrackedSymbols);
       const trackedSymbolsWithRecentAlerts = haveCommonItems(
-        trackedSignalBySimbol,
-        recentSignalBySimbol
+        trackedSignalBySymbol,
+        recentSignalBySymbol
       );
       const recentTrackedBuySignals = getTrackedAlertsBySignalType(
         "buy",
@@ -99,7 +108,7 @@ const PageContent = (props) => {
       setRecentTrackedBuySignals(recentTrackedBuySignals);
       setRecentTrackedSellSignals(recentTrackedSellSignals);
     }
-  }, [usersTrackedSymbols, recentSignals]);
+  }, [usersTrackedSymbols, recentSignals, userId]);
 
   return (
     <section className="grid-container grid-columns">
@@ -119,7 +128,11 @@ const PageContent = (props) => {
         <h2>Your recent buy signals:</h2>
         {recentTrackedBuySignals.map((data, index) => {
           return (
-            <div key={`your-recent-${data.symbol}-${data.type}-${data.date}-${Math.random()}`}>
+            <div
+              key={`your-recent-${data.symbol}-${data.type}-${
+                data.date
+              }-${Math.random()}`}
+            >
               <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
                 {data.name}
               </Link>
@@ -132,7 +145,11 @@ const PageContent = (props) => {
         <h2>Your recent sell signals:</h2>
         {recentTrackedSellSignals.map((data, index) => {
           return (
-            <div key={`your-recent-${data.symbol}-${data.type}-${data.date}-${Math.random()}`}>
+            <div
+              key={`your-recent-${data.symbol}-${data.type}-${
+                data.date
+              }-${Math.random()}`}
+            >
               <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
                 {data.name}
               </Link>
@@ -151,7 +168,6 @@ const PageContent = (props) => {
                 {data.name}
               </Link>
               : {data.type} on {data.date}
-
             </div>
           );
         })}
@@ -161,12 +177,7 @@ const PageContent = (props) => {
 };
 
 const Home = () => {
-  const [Auth] = useContext(AuthContext);
-  const { tokenId } = Auth;
-
-  return (
-    <>{tokenId ? <PageContent tokenId={tokenId} /> : <h3>Please log in</h3>}</>
-  );
+  return <PageContent />;
 };
 
 export default Home;
