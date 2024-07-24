@@ -8,7 +8,8 @@ import { Link } from "react-router-dom";
 import PathConstants from "../routes/pathConstants";
 
 const getSpanFromDiff = (EOD, earlier) => {
-  if (isNaN(EOD) || isNaN(earlier)) return "";
+  console.log(`EOD: ${EOD} and yearStart: ${earlier}`)
+  if (isNaN(EOD) || isNaN(earlier) || !earlier || !EOD) return "";
   const diff = EOD - earlier;
   const className = diff >= 0 ? "positive" : "negative";
   return (
@@ -22,11 +23,11 @@ const LinkedSymbol = (props) => {
 };
 
 const YTDSymbol = (props) => {
-  const { value: symbol, yearStartDate, lastEOD } = props;
-  return getSpanFromDiff(lastEOD, yearStartDate);
+  const { yearStartEOD, lastEOD } = props.data;
+  return getSpanFromDiff(lastEOD, yearStartEOD);
 };
 const DODSymbol = (props) => {
-  const { value: symbol, previousDayEOD, lastEOD } = props.data;
+  const { previousDayEOD, lastEOD } = props.data;
   return getSpanFromDiff(lastEOD, previousDayEOD);
 };
 
@@ -36,8 +37,8 @@ const Table = (props) => {
     { field: "symbol", sortable: true, cellRenderer: LinkedSymbol },
     { field: "name", flex: 2 },
     { field: "type", filter: "agSetColumnFilter" },
-    { field: "lastEOD" },
-    { field: "yearToDay", cellRenderer: YTDSymbol },
+    { field: "lastEOD", headerName: "EOD" },
+    { field: "yearStartEOD", cellRenderer: YTDSymbol, headerName: "Year to EOD" },
     { field: "dayOverDay", cellRenderer: DODSymbol },
     { field: "date", sort: "asc" },
   ]);
