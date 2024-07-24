@@ -22,9 +22,9 @@ export const AuthButton = () => {
   return (
     <>
       {accessToken ? (
-        <button className='authButton authButton--signout' onClick={() => authButtonLogout()}>Sign out</button>
+        <button onClick={() => authButtonLogout()}>Sign out</button>
       ) : (
-        <button className='authButton authButton--signout' onClick={() => login()}>Sign in with Google 🚀 </button>
+        <button onClick={() => login()}>Sign in with Google 🚀 </button>
       )}
     </>
   );

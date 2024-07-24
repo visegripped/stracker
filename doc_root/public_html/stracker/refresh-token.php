@@ -1,9 +1,9 @@
 <?php
 // refresh_token.php
 
-// Replace with your client ID and client secret
-$client_id = 'YOUR_CLIENT_ID';
-$client_secret = 'YOUR_CLIENT_SECRET';
+include "../../includes/stracker/passwords.php";
+$client_id = $googleClientId;
+$client_secret = $googleClientSecret;
 
 // Get the refresh token from the request
 $refresh_token = $_POST['refresh_token'] || "";
