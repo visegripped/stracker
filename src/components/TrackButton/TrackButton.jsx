@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ProfileContext } from "@context/ProfileContext";
-import "./TrackButton.css";
 import apiPost from "@utilities/apiPost";
 import { NotificationsContext } from "@context/NotificationsContext";
 

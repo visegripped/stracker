@@ -7,8 +7,8 @@ export const DateRangePicker = (props) => {
   const today = new Date();
   return (
     <>
-      <label>
-        Start:
+      <label className='flex'>
+        <span className='fixedWidth'>Start:</span>
         <DatePicker
           maxDate={endDate}
           minDate={oldestDateInHistory}
@@ -18,8 +18,8 @@ export const DateRangePicker = (props) => {
           onChange={(date) => updateStartDate(date)}
         />
       </label>
-      <label>
-        End:
+      <label className='flex'>
+        <span className='fixedWidth'>End:</span>
         <DatePicker
           maxDate={today} //can't choose a date in the future.
           minDate={startDate} //can't choose an end date before the start date

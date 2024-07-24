@@ -1,19 +1,19 @@
 import { useState, useEffect, useContext } from "react";
-// import { AuthContext } from "../context/AuthContext";
-import apiPost from "@utilities/apiPost";
 import { Link } from "react-router-dom";
+import apiPost from "@utilities/apiPost";
 import PathConstants from "@routes/pathConstants";
 import { ProfileContext } from "@context/ProfileContext";
 
 const PageContent = (props) => {
   const { profile: userProfile } = useContext(ProfileContext);
-  console.log('profile from HP: ', userProfile);
-  const { emailAddress: userId } = userProfile;
   const [usersTrackedSymbols, setUsersTrackedSymbols] = useState([]);
   const [recentSignals, setRecentSignals] = useState([]);
   const [recent20Signals, setRecent20Signals] = useState([]);
   const [recentTrackedBuySignals, setRecentTrackedBuySignals] = useState([]);
   const [recentTrackedSellSignals, setRecentTrackedSellSignals] = useState([]);
+
+  const { emailAddress } = userProfile;
+  const [userId, setUserId] = useState(emailAddress || '');
 
   const getLast20 = (data) => {
     const arr = [];

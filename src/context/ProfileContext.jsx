@@ -41,6 +41,7 @@ const ProfileProvider = (props) => {
       return;
     }
     try {
+      //https://developers.google.com/people/api/rest/v1/people/get
       const response = await fetch(
         "https://people.googleapis.com/v1/people/me?personFields=names,emailAddresses",
         {
