@@ -12,26 +12,27 @@
 If the API is pointed at the production endpoint, toggle the root and rootb values in endpoints.json
 
 ## Links
- * App is available at: http://localhost/
- * Stracker is available at: http://localhost/public_html/stracker/
- * PHPMyAdmin is available at: http://localhost:8000/index.php
 
-
+- App is available at: http://localhost/
+- Stracker is available at: http://localhost/public_html/stracker/
+- PHPMyAdmin is available at: http://localhost:8000/index.php
 
 ## Painful deploy process
- * Make sure that in endpoints.json, root is set to the relative API path.
- * Run `pnpm build`
- * log in to the hosting service and go to the FTP section.
- * Upload the PHP files.
- * Test the APIs.
- * upload the JS from the static folder into the corresponding folder on the server.
- * upload the CSS from the static folder into the corresponding folder on the server.
- * upload the index.html file from the static folder.
+
+- Make sure that in endpoints.json, root is set to the relative API path.
+- Run `pnpm build`
+- log in to the hosting service and go to the FTP section.
+- Upload the PHP files.
+- Test the APIs via Postman. (get accessToken from session storage)
+- upload the JS from the assets folder into the corresponding folder on the server.
+- upload the CSS from the assets folder into the corresponding folder on the server.
+- update the index.html file on the service. There are some changes there.
 
 ## TokenId
+
 You can grab this from your debug tool in session storage - localhost - tokenId (handy for postman)
 
-
+Sanity - in July 24, upgraded to the latest google auth. it returns access_token instead of tokenId. API wasn't updated but most of app was. access_token and tokenId (w/ access_token value) are passed w/ every call.
 
 # React + TypeScript + Vite
 
@@ -52,12 +53,12 @@ If you are developing a production application, we recommend updating the config
 export default {
   // other rules...
   parserOptions: {
-    ecmaVersion: 'latest',
-    sourceType: 'module',
-    project: ['./tsconfig.json', './tsconfig.node.json'],
+    ecmaVersion: "latest",
+    sourceType: "module",
+    project: ["./tsconfig.json", "./tsconfig.node.json"],
     tsconfigRootDir: __dirname,
   },
-}
+};
 ```
 
 - Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
