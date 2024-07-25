@@ -6,43 +6,70 @@
   min-height: 100vh;
 }
 :root {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-  color-scheme: light dark;
-  color: #efefef;
-  background-color: #242424;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  --primary-text-color: #efefef;
-  --primary-link-color: #0dd9f8;
-  --primary-border-color: #444;
+  --font-size: 16px;
   --spacing: 20px;
   --border-radius: 6px;
-  --button-bg-color: #0dd9f8;
-  --button-text-color: #000;
-  --font-size: 16px;
 }
+
+
+.default {
+  --primary-text-color: #efefef;
+  --secondary-text-color: gold;
+  --primary-link-color: #0dd9f8;
+  --primary-link-color-hover: #fff;
+  --primary-border-color: #444;
+  --button-bg-color: #0dd9f8;
+  --primary-bg-color: #000;
+  --button-text-color: #000;
+  --body-bg-color: #242424;
+  --input-bg-color: #000;
+  --input-text-color: #efefef;
+}
+
 
 /*
 Akira: 
-665F72
-353234
-323325
-95525F
-CEAF64
-
+665F72 - purple/gray
+353234 - dark gray
+323325 - darker gray, hint of brown
+95525F - pink
+CEAF64 - gold
 */
 
+.akira {
+  --font-size: 16px;
+  --spacing: 20px;
+  --border-radius: 6px;
 
+  --primary-text-color: #353234;
+  --secondary-text-color: #665f72;
+  --primary-link-color: #95525F;
+  --primary-link-color-hover: #323325;
+  --primary-border-color: #ceaf64;
+  --primary-bg-color: #ceaf64;
+  --button-bg-color: #95525F;
+  --button-text-color: #fff;
+  --button-bg-color-hover: #fff;
+  --button-text-color-hover: #95525F;
+  --body-bg-color: #efefef;
+  --input-bg-color: #fff;
+  --input-text-color: var(--primary-text-color);
+}
 
 body {
   margin: 0;
   padding: 0;
   font-size: var(--font-size);
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light dark;
+  color: var(--primary-text-color);
+  background-color: var(--body-bg-color);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 a {
@@ -50,7 +77,7 @@ a {
   text-decoration: inherit;
 }
 a:hover {
-  color: #ffffff;
+  color: var(--primary-link-color-hover);
 }
 
 header {
@@ -69,6 +96,8 @@ main {
 footer {
   padding: var(--spacing);
   border-top: 1px solid var(--primary-border-color);
+  display: flex;
+  justify-content: space-between;
 }
 
 button {
@@ -80,9 +109,14 @@ button {
   color: var(--button-text-color);
   font-weight: normal;
   white-space: normal;
-  padding: .3em 1.5em;
+  padding: 0.3em 1.5em;
   cursor: pointer;
   display: inline-block;
+}
+
+button:hover {
+  background: var(--button-bg-color-hover);
+  color: var(--button-text-color-hover);
 }
 
 label {
@@ -99,15 +133,17 @@ label.flex {
 /* switch all this to flex */
 
 label > span.fixedWidth {
- width: 15%;
+  width: 15%;
 }
 
-input[type='text'] {
+input[type="text"] {
   padding: 6px var(--spacing);
   font-size: var(--font-size);
   max-width: 100%;
   border-radius: var(--border-radius);
   border: 0;
+  background: var(--input-bg-color);
+  color: var(--input-text-color);
 }
 
 .logo {
@@ -160,9 +196,10 @@ input[type='text'] {
 
   > h2 {
     margin: 0 0 8px;
-    color: gold;
+    color: var(--secondary-text-color);
   }
   > h3 {
     margin: 0 0 8px;
+    font-weight: 500;
   }
 }
