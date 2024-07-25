@@ -8,7 +8,6 @@ import { Link } from "react-router-dom";
 import PathConstants from "../routes/pathConstants";
 
 const getSpanFromDiff = (EOD, earlier) => {
-  console.log(`EOD: ${EOD} and yearStart: ${earlier}`)
   if (isNaN(EOD) || isNaN(earlier) || !earlier || !EOD) return "";
   const diff = EOD - earlier;
   const className = diff >= 0 ? "positive" : "negative";
@@ -38,7 +37,11 @@ const Table = (props) => {
     { field: "name", flex: 2 },
     { field: "type", filter: "agSetColumnFilter" },
     { field: "lastEOD", headerName: "EOD" },
-    { field: "yearStartEOD", cellRenderer: YTDSymbol, headerName: "Year to EOD" },
+    {
+      field: "yearStartEOD",
+      cellRenderer: YTDSymbol,
+      headerName: "Year to EOD",
+    },
     { field: "dayOverDay", cellRenderer: DODSymbol },
     { field: "date", sort: "asc" },
   ]);
