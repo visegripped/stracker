@@ -13,7 +13,6 @@ const PageContent = (props) => {
   const [recentTrackedSellSignals, setRecentTrackedSellSignals] = useState([]);
 
   const { emailAddress } = userProfile;
-  const [userId, setUserId] = useState(emailAddress || '');
 
   const getLast20 = (data) => {
     const arr = [];
@@ -53,10 +52,9 @@ const PageContent = (props) => {
     return filteredList;
   };
 
-
-  //recentSignals does not require userId so handle it separately.
+  //recentSignals does not require emailAddress so handle it separately.
   useEffect(() => {
-    if(recentSignals.length === 0){
+    if (recentSignals.length === 0) {
       const alertHistoryResponse = apiPost({
         task: "getAlertHistory",
         limit: 300,
@@ -70,24 +68,31 @@ const PageContent = (props) => {
   }, []);
 
   useEffect(() => {
-    const symbolListResponse = apiPost({
-      task: "getTrackedSymbolList",
-      userId,
-    });
-    symbolListResponse &&
-      symbolListResponse.then((data) => {
-        setUsersTrackedSymbols(data);
+    if (emailAddress) {
+      const symbolListResponse = apiPost({
+        task: "getTrackedSymbolList",
+        userId: emailAddress,
       });
-  }, []);
-
+      symbolListResponse &&
+        symbolListResponse.then((data) => {
+          setUsersTrackedSymbols(data);
+        });
+    }
+  }, [emailAddress]);
 
   useEffect(() => {
+    // console.log(` -> useEffect the two middle columns was triggered. if emailAddress is empty it will not request.  emailAddress: ${emailAddress}
+    //   usersTrackedSymbols.length: ${usersTrackedSymbols.length}
+    //   recentSignals.length: ${recentSignals.length}
+    //   recentTrackedBuySignals.length: ${recentTrackedBuySignals.length}
+    //   recentTrackedSellSignals.length: ${recentTrackedSellSignals.length}
+    //   `)
     if (
       usersTrackedSymbols.length &&
       recentSignals.length &&
       recentTrackedBuySignals.length === 0 &&
       recentTrackedSellSignals.length === 0 &&
-      userId
+      emailAddress
     ) {
       const recentSignalBySymbol = flattenObjectBySymbol(recentSignals);
       const trackedSignalBySymbol = flattenObjectBySymbol(usersTrackedSymbols);
@@ -108,7 +113,7 @@ const PageContent = (props) => {
       setRecentTrackedBuySignals(recentTrackedBuySignals);
       setRecentTrackedSellSignals(recentTrackedSellSignals);
     }
-  }, [usersTrackedSymbols, recentSignals, userId]);
+  }, [usersTrackedSymbols, recentSignals, emailAddress]);
 
   return (
     <section className="grid-container grid-columns">

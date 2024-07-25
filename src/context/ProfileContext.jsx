@@ -5,29 +5,24 @@ const ProfileContext = createContext();
 
 const convertGoogleProfile2Stracker = (googleProfile = {}) => {
   // need the following from the profile: email. avatar? name.
-  let userProfile = {google: {}};
-  const {
-    resourceName,
-    emailAddresses,
-    names,
-  } = googleProfile;
+  let userProfile = { google: {} };
+  const { resourceName, emailAddresses, names } = googleProfile;
 
   userProfile.google.resourceName = resourceName;
   emailAddresses.forEach((emailData = {}) => {
-    if(emailData?.metadata?.primary) {
+    if (emailData?.metadata?.primary) {
       userProfile.emailAddress = emailData.value;
     }
-  })
+  });
 
   names.forEach((namesData) => {
-    if(namesData?.metadata?.primary === true) {
+    if (namesData?.metadata?.primary === true) {
       userProfile.givenName = namesData.givenName;
       userProfile.familyName = namesData.familyName;
     }
-  })
-
+  });
   return userProfile;
-}
+};
 
 const ProfileProvider = (props) => {
   const [profile, setProfile] = useState({});
