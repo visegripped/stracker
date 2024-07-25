@@ -5,19 +5,16 @@ import { NotificationsContext } from "@context/NotificationsContext";
 
 export const TrackButton = (props) => {
   const { symbol } = props;
-  const { emailAddress } = useContext(ProfileContext);
+  const { profile: userProfile } = useContext(ProfileContext);
   const { addNotification } = useContext(NotificationsContext);
   const [trackedSymbols, setTrackedSymbols] = useState([]);
   const [buttonAction, setButtonAction] = useState("Track");
-
+  const { emailAddress } = userProfile;
   const handleClick = (clickEvent) => {
-    // console.log(
-    //   `-> trackButton handleClick was triggered for ${symbol} and emailAddress: ${emailAddress} and buttonAction: ${buttonAction}`
-    // );
     if (emailAddress) {
       const response = apiPost({
         task: buttonAction.toLocaleLowerCase(),
-        emailAddress,
+        userId: emailAddress,
         symbol,
       });
       response &&
@@ -32,7 +29,13 @@ export const TrackButton = (props) => {
             type: "success",
           });
           setButtonAction(buttonAction === "Track" ? "Untrack" : "Track");
-        });
+        }).catch((error) => {
+          addNotification({
+            message: 'Something went wrong. The symbol you were trying to track was not added to your list.  Please try again later.',
+            type: "error",
+            autoClear: false,
+          });
+        }) ;
     }
   };
 
@@ -40,7 +43,7 @@ export const TrackButton = (props) => {
     if (emailAddress && symbol) {
       const response = apiPost({
         task: "symbolIsTrackedByUser",
-        emailAddress,
+        userId: emailAddress,
         symbol,
       });
       response &&

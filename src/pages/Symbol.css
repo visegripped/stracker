@@ -2,4 +2,5 @@
   background: var(--primary-bg-color);
   padding: var(--spacing);
   text-align: center;
+  position: relative;
 }

@@ -18,8 +18,10 @@
   --primary-link-color: #0dd9f8;
   --primary-link-color-hover: #fff;
   --primary-border-color: #444;
+  --secondary-border-color: #CCC;
   --button-bg-color: #0dd9f8;
   --primary-bg-color: #000;
+  --secondary-bg-color: #333;
   --button-text-color: #000;
   --body-bg-color: #242424;
   --input-bg-color: #000;
@@ -42,12 +44,14 @@ CEAF64 - gold
   --border-radius: 6px;
 
   --primary-text-color: #353234;
-  --secondary-text-color: #665f72;
+  --secondary-text-color: #ceaf64;
   --primary-link-color: #95525F;
   --primary-link-color-hover: #323325;
   --primary-border-color: #ceaf64;
+  --secondary-border-color: #323325;
   --primary-bg-color: #ceaf64;
   --button-bg-color: #95525F;
+  --secondary-bg-color: #665F72;
   --button-text-color: #fff;
   --button-bg-color-hover: #fff;
   --button-text-color-hover: #95525F;
@@ -189,6 +193,7 @@ input[type="text"] {
 .notifications-container {
   position: absolute;
   right: var(--spacing);
+  z-index: 1;
 }
 
 .unauthenticated {
