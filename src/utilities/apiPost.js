@@ -9,7 +9,7 @@ export const formatDate = (date) => {
 export const apiPost = (config) => {
   const { task, symbol, startDate, endDate, limit, symbols, userId } =
     config;
-  const accessToken = sessionStorage.getItem("access_token");
+  const accessToken = localStorage.getItem("access_token");
   const makeAsyncRequest = async (theFormData) => {
     let jsonPayload = {};
     let errorMessage = "";
