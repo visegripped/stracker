@@ -8,12 +8,12 @@ const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function AuthProvider(props) {
   const [accessToken, setAccessToken] = useState(
-    sessionStorage.getItem("access_token") || ""
+    localStorage.getItem("access_token") || ""
   );
 
   const onLoginSuccess = (authResponse) => {
     const { access_token } = authResponse;
-    sessionStorage.setItem("access_token", access_token);
+    localStorage.setItem("access_token", access_token);
     setAccessToken(access_token);
   };
 
@@ -34,8 +34,8 @@ function AuthProvider(props) {
   });
 
   const logout = () => {
-    sessionStorage.removeItem("access_token");
-    sessionStorage.removeItem("tokenId");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("tokenId");
     setAccessToken(null);
     googleLogout();
   };
@@ -70,14 +70,14 @@ function AuthProvider(props) {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          refresh_token: sessionStorage.getItem("refresh_token"),
+          refresh_token: localStorage.getItem("refresh_token"),
         }),
       });
 
       const data = await response.json();
 
       if (data.access_token) {
-        sessionStorage.setItem("access_token", data.access_token);
+        localStorage.setItem("access_token", data.access_token);
         setAccessToken(data.access_token);
         return true;
       } else {
@@ -94,7 +94,7 @@ function AuthProvider(props) {
       setTimeout(async () => {
         const refreshed = await refreshToken();
         if (refreshed) {
-          const newToken = sessionStorage.getItem("access_token");
+          const newToken = localStorage.getItem("access_token");
           const decodedToken = jwtDecode(newToken);
           const expiresIn = decodedToken.exp * 1000 - Date.now();
           scheduleTokenRefresh(expiresIn);

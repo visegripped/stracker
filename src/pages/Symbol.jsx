@@ -25,15 +25,17 @@ const PageContent = (props) => {
 
   // date uses session, not local. That way the dates reset between each visit.
   // Is a bit confusing when you log in and don't get the most recent data.
-  const lsStartDate = sessionStorage.getItem("startDate") || "";
-  const lsEndDate = sessionStorage.getItem("endDate") || "";
+  const lsStartDate = localStorage.getItem("startDate") || "";
+  const lsEndDate = localStorage.getItem("endDate") || "";
   let defaultStartDate;
 
   if (lsStartDate && lsStartDate !== "null") {
     defaultStartDate = new Date(lsStartDate);
   } else {
     defaultStartDate = new Date();
-    defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
+    // defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
+    defaultStartDate.setDate(defaultStartDate.getDate() - defaultStartDate.getMonth(-1));
+    
   }
   const defaultEndDate =
     lsEndDate && lsEndDate !== "null" ? new Date(`${lsEndDate}`) : new Date();
@@ -53,12 +55,12 @@ const PageContent = (props) => {
 
   const updateStartDate = (date) => {
     setStartDate(date);
-    sessionStorage.setItem("startDate", date);
+    localStorage.setItem("startDate", date);
   };
 
   const updateEndDate = (date) => {
     setEndDate(date);
-    sessionStorage.setItem("endDate", date);
+    localStorage.setItem("endDate", date);
   };
 
   useEffect(() => {
