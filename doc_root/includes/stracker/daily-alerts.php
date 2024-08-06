@@ -1,5 +1,5 @@
 <?php
-include "../../includes/stracker/mysql.php";
+include "mysql.php";
 
 function getAlertsByDate($date, $pdo) {
   $stmt = $pdo->prepare("select * from _alerts where date = :date");
@@ -42,19 +42,23 @@ function getTriggeredAlertsFromList($watchList, $triggeredAlerts) {
 }
 
 function formatEmailBody($matchedAlerts, $todaysAlerts) {
-  $content = "Matched alerts: \r\n";
+  $content = "<h3>Matched alerts:</h3>";
   foreach($matchedAlerts as $key) {
-    $content .= "$key \r\n";
+    $content .= "<a href='https://visegripped.com/#/symbol/$key'>$key</a><br />";
   }
-  $content .= "\r\n\r\nToday's alerts:\r\n";
+  $content .= "<br /><h3>Today's alerts:</h3>";
   foreach($todaysAlerts as $symbol => $type) {
-    $content .= $symbol." = ".$type." \r\n";
+    $content .= "<a href='https://visegripped.com/#/symbol/".$key."'>".$symbol."</a> = ".$type."<br />";
   }
   return $content;
 }
 
+// https://phppot.com/php/php-send-html-email/
 function notifyUserForTriggeredAlerts($emailAddress, $matchedAlerts, $todaysAlerts) {
   $headers = "From: stracker@visegripped.com\r\n";
+  $headers .= "Reply-To: stracker@visegripped.com" . "\r\n";
+  $headers .= "MIME-Version: 1.0" . "\r\n";
+  $headers .= "Content-type: text/html; charset=UTF-8" . "\r\n";
   $content = formatEmailBody($matchedAlerts, $todaysAlerts);
   print $content;
   mail($emailAddress,'Stracker - Tracked symbol(s) notification',$content,$headers);
