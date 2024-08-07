@@ -34,7 +34,7 @@ const PageContent = (props) => {
   } else {
     defaultStartDate = new Date();
     // defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
-    defaultStartDate.setDate(defaultStartDate.getDate() - defaultStartDate.getMonth(-1));
+    defaultStartDate.setDate(defaultStartDate.getDate() - Math.abs(35));
     
   }
   const defaultEndDate =
