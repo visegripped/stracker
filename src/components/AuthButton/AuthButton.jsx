@@ -4,7 +4,7 @@ import { AuthContext } from "@context/AuthContext";
 import { ProfileContext } from "@context/ProfileContext";
 
 export const AuthButton = () => {
-  const { logout, login, accessToken } = useContext(AuthContext);
+  const { logout, login, accessToken = '' } = useContext(AuthContext);
   const { setProfile, fetchProfile, profile } = useContext(ProfileContext);
 
   useEffect(() => {
