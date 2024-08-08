@@ -1,20 +1,32 @@
 import React, { useState, createContext, useEffect, useCallback } from "react";
 import { googleLogout, useGoogleLogin } from "@react-oauth/google"; // docs: https://www.npmjs.com/package/@react-oauth/google
-import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 const refreshTokenUrl = import.meta.env.VITE_REFRESH_TOKEN_URL;
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function AuthProvider(props) {
+  // console.log(' -> props from authProvider', props);
   const [accessToken, setAccessToken] = useState(
     localStorage.getItem("access_token") || ""
   );
+  const [accessTokenExpiration, setAccessTokenExpiration] = useState(
+    localStorage.getItem("access_token_expiration") || ""
+  );
+
+  const handleGoogleTokenExpiration = () => {
+    let currentTime = new Date().getTime();
+    const expirationTime = new Date(currentTime + 2 * 60 * 60 * 1000); // 2 hours for token life
+    setAccessTokenExpiration(expirationTime);
+    localStorage.setItem("access_token_expiration", expirationTime);
+  }
 
   const onLoginSuccess = (authResponse) => {
-    const { access_token } = authResponse;
-    localStorage.setItem("access_token", access_token);
+    const { access_token, expiresIn, refresh_token } = authResponse;
     setAccessToken(access_token);
+    localStorage.setItem("access_token", access_token);
+    localStorage.setItem("refresh_token", refresh_token);
+    handleGoogleTokenExpiration();
   };
 
   const onLoginFailure = (authResponse) => {
@@ -36,11 +48,26 @@ function AuthProvider(props) {
   const logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("tokenId");
-    setAccessToken(null);
+    setAccessToken('');
     googleLogout();
   };
 
-  const validateToken = useCallback(async () => {
+  const tokenIsValid = async () => {
+    if (!accessToken) {
+      return false;
+    }
+    const currentTime = new Date();
+    if (currentTime >= accessTokenExpiration) {
+      return false;
+    }
+    if (!validateTokenViaAPI()) {
+      return false;
+    }
+
+    return true;
+  };
+
+  const validateTokenViaAPI = useCallback(async () => {
     if (!accessToken) return false;
 
     try {
@@ -50,78 +77,48 @@ function AuthProvider(props) {
       );
       const data = await response.json();
 
-      if (data.error) {
-        console.error("Token validation error:", data.error);
+      if (data.error_description) {
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error("Error validating token:", error);
       return false;
     }
-  }, [accessToken]);
+  }, [accessToken, accessTokenExpiration]);
 
-  const refreshToken = useCallback(async () => {
-    try {
-      const response = await fetch(refreshTokenUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          refresh_token: localStorage.getItem("refresh_token"),
-        }),
-      });
+  // const refreshToken = async () => {
+  //   try {
+  //     const response = await fetch(refreshTokenUrl, {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         refresh_token: localStorage.getItem("refresh_token"),
+  //       }),
+  //     });
 
-      const data = await response.json();
-
-      if (data.access_token) {
-        localStorage.setItem("access_token", data.access_token);
-        setAccessToken(data.access_token);
-        return true;
-      } else {
-        return false;
-      }
-    } catch (error) {
-      console.error("Error refreshing token:", error);
-      return false;
-    }
-  }, []);
-
-  const scheduleTokenRefresh = useCallback(
-    (expiresIn) => {
-      setTimeout(async () => {
-        const refreshed = await refreshToken();
-        if (refreshed) {
-          const newToken = localStorage.getItem("access_token");
-          const decodedToken = jwtDecode(newToken);
-          const expiresIn = decodedToken.exp * 1000 - Date.now();
-          scheduleTokenRefresh(expiresIn);
-        } else {
-          logout();
-        }
-      }, expiresIn - 60000); // Refresh 1 minute before expiration
-    },
-    [refreshToken, logout]
-  );
+  //     const data = await response.json();
+  //     console.log(' data from refreshToken', data)
+  //     if (data.access_token) {
+  //       localStorage.setItem("access_token", data.access_token);
+  //       setAccessToken(data.access_token);
+  //       return true;
+  //     } else {
+  //       return false;
+  //     }
+  //   } catch (error) {
+  //     console.error("Error refreshing token:", error);
+  //     return false;
+  //   }
+  // };
 
   useEffect(() => {
-    const initAuth = async () => {
-      const valid = await validateToken();
-      if (valid) {
-        const decodedToken = jwtDecode(accessToken);
-        const expiresIn = decodedToken.exp * 1000 - Date.now();
-        scheduleTokenRefresh(expiresIn);
-      } else {
-        logout();
-      }
-    };
-
-    if (accessToken) {
-      initAuth();
+    if(!accessToken || !tokenIsValid()) {
+      logout();
     }
-  }, [accessToken, validateToken, scheduleTokenRefresh, logout]);
+  }, [accessToken]);
 
   return (
     <AuthContext.Provider
