@@ -19,7 +19,7 @@ function AuthProvider(props) {
     const expirationTime = new Date(currentTime + 2 * 60 * 60 * 1000); // 2 hours for token life
     setAccessTokenExpiration(expirationTime);
     localStorage.setItem("access_token_expiration", expirationTime);
-  }
+  };
 
   const onLoginSuccess = (authResponse) => {
     const { access_token, expiresIn, refresh_token } = authResponse;
@@ -48,7 +48,7 @@ function AuthProvider(props) {
   const logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("tokenId");
-    setAccessToken('');
+    setAccessToken("");
     googleLogout();
   };
 
@@ -115,7 +115,7 @@ function AuthProvider(props) {
   // };
 
   useEffect(() => {
-    if(!accessToken || !tokenIsValid()) {
+    if (!accessToken || !tokenIsValid()) {
       logout();
     }
   }, [accessToken]);
