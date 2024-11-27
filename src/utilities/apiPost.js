@@ -21,7 +21,7 @@ export const apiPost = (config) => {
     if (apiResponse.status >= 200 && apiResponse.status < 300) {
       jsonPayload = await apiResponse.json();
     } else {
-      throw new Error(response.status);
+      throw new Error(apiResponse.status);
     }
     // console.log(`Historical data for ${symbol} was fetched`, jsonPayload);
     if (jsonPayload.err) {

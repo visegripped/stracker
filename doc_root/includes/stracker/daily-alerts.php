@@ -42,13 +42,13 @@ function getTriggeredAlertsFromList($watchList, $triggeredAlerts) {
 }
 
 function formatEmailBody($matchedAlerts, $todaysAlerts) {
-  $content = "<h3>Matched alerts:</h3>";
+  $content = "<h3>Your alerts today:</h3>";
   foreach($matchedAlerts as $key) {
     $content .= "<a href='https://visegripped.com/#/symbol/$key'>$key</a><br />";
   }
   $content .= "<br /><h3>Today's alerts:</h3>";
   foreach($todaysAlerts as $symbol => $type) {
-    $content .= "<a href='https://visegripped.com/#/symbol/".$key."'>".$symbol."</a> = ".$type."<br />";
+    $content .= "<a href='https://visegripped.com/#/symbol/".$symbol."'>".$symbol."</a> = ".$type."<br />";
   }
   return $content;
 }

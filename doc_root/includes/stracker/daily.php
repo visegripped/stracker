@@ -12,7 +12,8 @@ function addHistoricalData($symbol, $db) {
     // period 1 is start data. period 2 is end date.
     $period1 = 1672574400; //jan 1 2023
     // stock data comes back as follows:  data, open, high, low, close, adj close, volume
-    $csvUri = "https://query1.finance.yahoo.com/v7/finance/download/$symbol?period1=$$period1&period2=".time()."&interval=1d&events=history&includeAdjustedClose=true";
+    // $csvUri = "https://query1.finance.yahoo.com/v7/finance/download/$symbol?period1=$$period1&period2=".time()."&interval=1d&events=history&includeAdjustedClose=true";
+    $csvUri = "https://query1.finance.yahoo.com/v7/finance/download/$symbol?period1=1691468697&period2=".time()."&interval=1d&events=history&includeAdjustedClose=true";
     $stockData = getCsv($csvUri);
     $historicalDays = count($stockData);
     print("<h6>Stock Data: </h6>");
