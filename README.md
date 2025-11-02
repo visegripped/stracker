@@ -3,19 +3,25 @@
 ## Local development
 
 1. Install docker
-1. Start docker
-1. Run `docker-compose up` in your terminal
-1. In another terminal, run `cd doc_root`
-1. Run `pnpm dev`
-1. Visit http://localhost/public_html/stracker/ in your browser
+2. Start docker
+3. Run `docker-compose up` in your terminal
+4. Visit http://localhost:5173 in your browser to access the React app
 
-If the API is pointed at the production endpoint, toggle the root and rootb values in endpoints.json
+The Docker setup automatically starts:
+- MySQL database
+- PHP/Apache server (port 80/443)
+- React/Vite dev server (port 5173)
+- Adminer database admin tool (port 8000)
+
+All services communicate through Docker's internal network, eliminating CORS issues. The Vite dev server proxies API requests to the PHP service automatically.
 
 ## Links
 
-- App is available at: http://localhost/
-- Stracker is available at: http://localhost/public_html/stracker/
-- PHPMyAdmin is available at: http://localhost:8000/index.php
+- React app is available at: http://localhost:5173
+- PHP/Apache is available at: http://localhost
+- Adminer (database admin) is available at: http://localhost:8000
+
+If the API is pointed at the production endpoint, toggle the root and rootb values in endpoints.json
 
 ## Painful deploy process
 

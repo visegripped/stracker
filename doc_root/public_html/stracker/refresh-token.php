@@ -5,8 +5,19 @@ include "../../includes/stracker/passwords.php";
 $client_id = $googleClientId;
 $client_secret = $googleClientSecret;
 
-// Get the refresh token from the request
-$refresh_token = $_POST['refresh_token'] || "";
+header('Content-Type: application/json');
+
+// Get the refresh token from the request (supports form-encoded or JSON bodies)
+$refresh_token = $_POST['refresh_token'] ?? '';
+if (!$refresh_token) {
+    $raw = file_get_contents('php://input');
+    if ($raw) {
+        $json = json_decode($raw, true);
+        if (json_last_error() === JSON_ERROR_NONE) {
+            $refresh_token = $json['refresh_token'] ?? '';
+        }
+    }
+}
 
 if (!$refresh_token) {
     http_response_code(400);
