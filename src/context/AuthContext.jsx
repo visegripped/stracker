@@ -1,5 +1,6 @@
-import React, { useState, createContext, useEffect, useCallback } from "react";
+import React, { useState, createContext, useEffect, useCallback, useContext } from "react";
 import { googleLogout, useGoogleLogin } from "@react-oauth/google"; // docs: https://www.npmjs.com/package/@react-oauth/google
+import { NotificationsContext } from "./NotificationsContext";
 
 const AuthContext = createContext();
 const refreshTokenUrl = import.meta.env.VITE_REFRESH_TOKEN_URL;
@@ -13,12 +14,13 @@ function AuthProvider(props) {
   const [accessTokenExpiration, setAccessTokenExpiration] = useState(
     localStorage.getItem("access_token_expiration") || ""
   );
+  const { addNotification } = useContext(NotificationsContext);
 
   const handleGoogleTokenExpiration = () => {
-    let currentTime = new Date().getTime();
-    const expirationTime = new Date(currentTime + 2 * 60 * 60 * 1000); // 2 hours for token life
-    setAccessTokenExpiration(expirationTime);
-    localStorage.setItem("access_token_expiration", expirationTime);
+    const currentTimeMs = Date.now();
+    const expirationTimeMs = currentTimeMs + 2 * 60 * 60 * 1000; // 2 hours in ms
+    setAccessTokenExpiration(expirationTimeMs);
+    localStorage.setItem("access_token_expiration", String(expirationTimeMs));
   };
 
   const onLoginSuccess = (authResponse) => {
@@ -56,15 +58,16 @@ function AuthProvider(props) {
     if (!accessToken) {
       return false;
     }
-    const currentTime = new Date();
-    if (currentTime >= accessTokenExpiration) {
+    const expirationMs = Number(accessTokenExpiration);
+    if (!expirationMs || Number.isNaN(expirationMs)) {
       return false;
     }
-    if (!validateTokenViaAPI()) {
+    const nowMs = Date.now();
+    if (nowMs >= expirationMs) {
       return false;
     }
-
-    return true;
+    const apiOk = await validateTokenViaAPI();
+    return apiOk;
   };
 
   const validateTokenViaAPI = useCallback(async () => {
@@ -115,9 +118,21 @@ function AuthProvider(props) {
   // };
 
   useEffect(() => {
-    if (!accessToken || !tokenIsValid()) {
-      logout();
-    }
+    let cancelled = false;
+    const check = async () => {
+      if (!accessToken) {
+        logout();
+        return;
+      }
+      const ok = await tokenIsValid();
+      if (!ok && !cancelled) {
+        logout();
+      }
+    };
+    check();
+    return () => {
+      cancelled = true;
+    };
   }, [accessToken]);
 
   return (

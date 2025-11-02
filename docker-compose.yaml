@@ -40,5 +40,30 @@ services:
       - db
     environment:
       ADMINER_DEFAULT_SERVER: db
+  frontend:
+    build:
+      context: "./"
+      dockerfile: "Dockerfile-node"
+    ports:
+      - 5173:5173
+    volumes:
+      - "./src:/app/src"
+      - "./public:/app/public"
+      - "./index.html:/app/index.html"
+      - "./vite.config.ts:/app/vite.config.ts"
+      - "./tsconfig.json:/app/tsconfig.json"
+      - "./tsconfig.app.json:/app/tsconfig.app.json"
+      - "./tsconfig.node.json:/app/tsconfig.node.json"
+      - "./package.json:/app/package.json"
+      - "node_modules:/app/node_modules"
+    environment:
+      - VITE_STRACKER_API_URL=/stracker/api.php
+      - VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID:-}
+      - VITE_REFRESH_TOKEN_URL=${VITE_REFRESH_TOKEN_URL:-}
+    depends_on:
+      - www
+    networks:
+      - default
 volumes:
   my-datavolume:
+  node_modules:
