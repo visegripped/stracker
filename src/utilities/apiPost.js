@@ -21,7 +21,7 @@ export const apiPost = (config) => {
     if (apiResponse.status >= 200 && apiResponse.status < 300) {
       jsonPayload = await apiResponse.json();
     } else {
-      throw new Error(response.status);
+      throw new Error(`API error: ${apiResponse.status}`);
     }
     // console.log(`Historical data for ${symbol} was fetched`, jsonPayload);
     if (jsonPayload.err) {
@@ -44,6 +44,9 @@ export const apiPost = (config) => {
 
     return makeAsyncRequest(formData);
   }
+  
+  // Return rejected promise if no access token
+  return Promise.reject(new Error("No access token available. Please sign in."));
 };
 
 export default apiPost;

@@ -28,10 +28,26 @@ function isValidGoogleAccessToken($token) {
     return false;
   }
 
-  $url = "https://oauth2.googleapis.com/tokeninfo?access_token=" . $token;
+  $url = "https://oauth2.googleapis.com/tokeninfo?access_token=" . urlencode($token);
 
-  $response = file_get_contents($url);
+  $context = stream_context_create([
+    'http' => [
+      'timeout' => 5,
+      'ignore_errors' => true
+    ]
+  ]);
+  
+  $response = @file_get_contents($url, false, $context);
+  
+  if ($response === false) {
+    return false;
+  }
+  
   $result = json_decode($response, true);
+
+  if (json_last_error() !== JSON_ERROR_NONE) {
+    return false;
+  }
 
   if (isset($result['aud']) && $result['aud'] === "451536185848-p0c132ugq4jr7r08k4m6odds43qk6ipj.apps.googleusercontent.com") {
     return true;
@@ -55,7 +71,11 @@ function getUserEmailFromSession($token) {
 }
 
 function isValidSession($token) {
-  if(isset($_SESSION['isValid']) || isValidGoogleToken($token)) {
+  if(isset($_SESSION['isValid']) && $_SESSION['isValid'] === true) {
+    return true;
+  }
+  // Note: isValidGoogleToken is commented out above, so we use isValidGoogleAccessToken instead
+  if($token && isValidGoogleAccessToken($token)) {
     $_SESSION['isValid'] = true;
     return true;
   }

@@ -153,10 +153,15 @@ function getTrackedSymbolList($userId, $pdo) {
 }
 
 $db = dbConnect();
-if(!$tokenId) {
+
+// Check for token in either tokenId or access_token field (for backward compatibility)
+$accessToken = $_POST['access_token'] ?? $tokenId;
+$accessToken = $accessToken ?: "";
+
+if(!$accessToken) {
     $data = '{"err":"Token not specified on API request."}';
     $data = json_decode($data);
-} else if(!isValidGoogleAccessToken($tokenId)) {
+} else if(!isValidGoogleAccessToken($accessToken)) {
     $data = '{"err":"Invalid/expired token.  Please sign (or re-sign) in."}';
     $data = json_decode($data);
 } else if($task == 'history' & areValidDates($startDate, $endDate) & isValidSymbol($symbol) ) {
