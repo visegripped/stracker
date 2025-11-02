@@ -19,9 +19,15 @@ const PageContent = (props) => {
   const [alertHistory, setAlertHistory] = useState([]);
 
   const dp = localStorage.getItem("dataPoints") || "{}";
-  const lsDataPoints = JSON.parse(dp) || {
-    EOD: true,
-  };
+  let lsDataPoints;
+  try {
+    lsDataPoints = JSON.parse(dp);
+    if (!lsDataPoints || typeof lsDataPoints !== "object") {
+      lsDataPoints = { EOD: true };
+    }
+  } catch (error) {
+    lsDataPoints = { EOD: true };
+  }
 
   // date uses session, not local. That way the dates reset between each visit.
   // Is a bit confusing when you log in and don't get the most recent data.
@@ -30,7 +36,12 @@ const PageContent = (props) => {
   let defaultStartDate;
 
   if (lsStartDate && lsStartDate !== "null") {
-    defaultStartDate = new Date(lsStartDate);
+    const parsedStartDate = new Date(lsStartDate);
+    defaultStartDate = isNaN(parsedStartDate.getTime()) ? new Date() : parsedStartDate;
+    if (isNaN(defaultStartDate.getTime())) {
+      defaultStartDate = new Date();
+      defaultStartDate.setDate(defaultStartDate.getDate() - 35);
+    }
   } else {
     defaultStartDate = new Date();
     // defaultStartDate.setFullYear(defaultStartDate.getFullYear() - 1);
@@ -38,7 +49,12 @@ const PageContent = (props) => {
     
   }
   const defaultEndDate =
-    lsEndDate && lsEndDate !== "null" ? new Date(`${lsEndDate}`) : new Date();
+    lsEndDate && lsEndDate !== "null" 
+      ? (() => {
+          const parsedEndDate = new Date(lsEndDate);
+          return isNaN(parsedEndDate.getTime()) ? new Date() : parsedEndDate;
+        })()
+      : new Date();
 
   const [startDate, setStartDate] = useState(defaultStartDate);
   const [endDate, setEndDate] = useState(defaultEndDate);
@@ -55,12 +71,16 @@ const PageContent = (props) => {
 
   const updateStartDate = (date) => {
     setStartDate(date);
-    localStorage.setItem("startDate", date);
+    // Store as ISO string for reliable parsing
+    const dateStr = date instanceof Date ? date.toISOString() : date;
+    localStorage.setItem("startDate", dateStr);
   };
 
   const updateEndDate = (date) => {
     setEndDate(date);
-    localStorage.setItem("endDate", date);
+    // Store as ISO string for reliable parsing
+    const dateStr = date instanceof Date ? date.toISOString() : date;
+    localStorage.setItem("endDate", dateStr);
   };
 
   useEffect(() => {
@@ -73,7 +93,10 @@ const PageContent = (props) => {
       });
       response &&
         response.then((data) => {
-          setHistory(data);
+          setHistory(Array.isArray(data) ? data : []);
+        }).catch((error) => {
+          console.error("Error fetching history:", error);
+          setHistory([]);
         });
     }
   }, [symbol, startDate, endDate]); // The response always has all the graph data, so no need to trigger on dataPoints change
@@ -89,7 +112,10 @@ const PageContent = (props) => {
 
       alertsResponse &&
         alertsResponse.then((data) => {
-          setAlertHistory(data);
+          setAlertHistory(Array.isArray(data) ? data : []);
+        }).catch((error) => {
+          console.error("Error fetching alerts:", error);
+          setAlertHistory([]);
         });
     }
   }, [symbol]);
@@ -118,9 +144,9 @@ const PageContent = (props) => {
             ></DateRangePicker>
           </Fieldset>
           <Fieldset legend="Alert History">
-            {alertHistory.map((alert) => {
+            {Array.isArray(alertHistory) && alertHistory.map((alert) => {
               return (
-                <div className="alertItem" key={alert.id}>
+                <div className="alertItem" key={alert.id || `${alert.date}-${alert.type}`}>
                   {alert.date}: {alert.type}
                 </div>
               );

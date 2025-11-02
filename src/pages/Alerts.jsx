@@ -68,10 +68,13 @@ const PageContent = (props) => {
       });
       response &&
         response.then((data) => {
-          setAlertHistory(data);
+          setAlertHistory(Array.isArray(data) ? data : []);
+        }).catch((error) => {
+          console.error("Error fetching alert history:", error);
+          setAlertHistory([]);
         });
     }
-  }, [alertHistory]);
+  }, []);
   //className="grid-container grid-sidebar"
   return (
     <section className="table-container ag-theme-quartz-dark">

@@ -48,11 +48,10 @@ export const TrackButton = (props) => {
       });
       response &&
         response.then((data) => {
-          setButtonAction(data.isTracked ? "Untrack" : "Track"); // button has the opposite of what is currently set
+          setButtonAction(data?.isTracked ? "Untrack" : "Track"); // button has the opposite of what is currently set
+        }).catch((err) => {
+          console.error("Error checking if symbol is tracked:", err);
         });
-      response.catch((err) => {
-        console.log(err);
-      });
     }
   }, [symbol, emailAddress]);
 

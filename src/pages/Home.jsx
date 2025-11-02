@@ -15,19 +15,27 @@ const PageContent = (props) => {
   const { emailAddress } = userProfile;
 
   const getLast20 = (data) => {
+    if (!Array.isArray(data) || data.length === 0) {
+      return [];
+    }
     const arr = [];
     const max = data.length < 20 ? data.length : 20;
-    for (let i = 0; i <= max; i++) {
+    for (let i = 0; i < max; i++) {
       arr.push(data[i]);
     }
     return arr;
   };
 
   const flattenObjectBySymbol = (data) => {
+    if (!Array.isArray(data)) {
+      return [];
+    }
     const arr = [];
     const max = data.length;
     for (let i = 0; i < max; i++) {
-      arr.push(data[i].symbol);
+      if (data[i] && data[i].symbol) {
+        arr.push(data[i].symbol);
+      }
     }
     return arr;
   };
@@ -61,11 +69,14 @@ const PageContent = (props) => {
       });
       alertHistoryResponse &&
         alertHistoryResponse.then((data) => {
-          setRecent20Signals(getLast20(data));
-          setRecentSignals(data);
+          const dataArray = Array.isArray(data) ? data : [];
+          setRecent20Signals(getLast20(dataArray));
+          setRecentSignals(dataArray);
+        }).catch((error) => {
+          console.error("Error fetching alert history:", error);
         });
     }
-  }, []);
+  }, [recentSignals.length]);
 
   useEffect(() => {
     if (emailAddress) {
@@ -75,7 +86,10 @@ const PageContent = (props) => {
       });
       symbolListResponse &&
         symbolListResponse.then((data) => {
-          setUsersTrackedSymbols(data);
+          setUsersTrackedSymbols(Array.isArray(data) ? data : []);
+        }).catch((error) => {
+          console.error("Error fetching tracked symbols:", error);
+          setUsersTrackedSymbols([]);
         });
     }
   }, [emailAddress]);
@@ -119,11 +133,11 @@ const PageContent = (props) => {
     <section className="grid-container grid-columns">
       <div>
         <h2>Your tracked symbols:</h2>
-        {usersTrackedSymbols.map((data) => {
+        {Array.isArray(usersTrackedSymbols) && usersTrackedSymbols.map((data, index) => {
           return (
-            <div key={`your-tracked-${data.symbol}-${data.type}-${data.date}`}>
-              <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
-                {data.name}
+            <div key={`your-tracked-${data?.symbol || index}-${data?.type || ''}-${data?.date || ''}`}>
+              <Link to={`${PathConstants.SYMBOL}/${data?.symbol || ''}`}>
+                {data?.name || data?.symbol || 'Unknown'}
               </Link>
             </div>
           );
@@ -131,34 +145,30 @@ const PageContent = (props) => {
       </div>
       <div>
         <h2>Your recent buy signals:</h2>
-        {recentTrackedBuySignals.map((data, index) => {
+        {Array.isArray(recentTrackedBuySignals) && recentTrackedBuySignals.map((data, index) => {
           return (
             <div
-              key={`your-recent-${data.symbol}-${data.type}-${
-                data.date
-              }-${Math.random()}`}
+              key={`your-recent-buy-${data?.symbol || index}-${data?.type || ''}-${data?.date || ''}-${index}`}
             >
-              <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
-                {data.name}
+              <Link to={`${PathConstants.SYMBOL}/${data?.symbol || ''}`}>
+                {data?.name || data?.symbol || 'Unknown'}
               </Link>
-              : {data.type} on {data.date}
+              : {data?.type || 'N/A'} on {data?.date || 'N/A'}
             </div>
           );
         })}
       </div>
       <div>
         <h2>Your recent sell signals:</h2>
-        {recentTrackedSellSignals.map((data, index) => {
+        {Array.isArray(recentTrackedSellSignals) && recentTrackedSellSignals.map((data, index) => {
           return (
             <div
-              key={`your-recent-${data.symbol}-${data.type}-${
-                data.date
-              }-${Math.random()}`}
+              key={`your-recent-sell-${data?.symbol || index}-${data?.type || ''}-${data?.date || ''}-${index}`}
             >
-              <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
-                {data.name}
+              <Link to={`${PathConstants.SYMBOL}/${data?.symbol || ''}`}>
+                {data?.name || data?.symbol || 'Unknown'}
               </Link>
-              : {data.type} on {data.date}
+              : {data?.type || 'N/A'} on {data?.date || 'N/A'}
             </div>
           );
         })}
@@ -166,13 +176,13 @@ const PageContent = (props) => {
 
       <div>
         <h2>Most recent signals:</h2>
-        {recent20Signals.map((data, index) => {
+        {Array.isArray(recent20Signals) && recent20Signals.map((data, index) => {
           return (
-            <div key={`most-recent-${data.symbol}`}>
-              <Link to={`${PathConstants.SYMBOL}/${data.symbol}`}>
-                {data.name}
+            <div key={`most-recent-${data?.symbol || index}-${index}`}>
+              <Link to={`${PathConstants.SYMBOL}/${data?.symbol || ''}`}>
+                {data?.name || data?.symbol || 'Unknown'}
               </Link>
-              : {data.type} on {data.date}
+              : {data?.type || 'N/A'} on {data?.date || 'N/A'}
             </div>
           );
         })}
