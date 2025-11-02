@@ -8,12 +8,9 @@ const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 function AuthProvider(props) {
   // console.log(' -> props from authProvider', props);
-  const [accessToken, setAccessToken] = useState(
-    localStorage.getItem("access_token") || ""
-  );
-  const [accessTokenExpiration, setAccessTokenExpiration] = useState(
-    localStorage.getItem("access_token_expiration") || ""
-  );
+  const [accessToken, setAccessToken] = useState("");
+  const [accessTokenExpiration, setAccessTokenExpiration] = useState("");
+  const [isInitializing, setIsInitializing] = useState(true);
   const { addNotification } = useContext(NotificationsContext);
 
   const handleGoogleTokenExpiration = () => {
@@ -27,7 +24,9 @@ function AuthProvider(props) {
     const { access_token, expiresIn, refresh_token } = authResponse;
     setAccessToken(access_token);
     localStorage.setItem("access_token", access_token);
-    localStorage.setItem("refresh_token", refresh_token);
+    if (refresh_token) {
+      localStorage.setItem("refresh_token", refresh_token);
+    }
     handleGoogleTokenExpiration();
   };
 
@@ -49,8 +48,11 @@ function AuthProvider(props) {
 
   const logout = () => {
     localStorage.removeItem("access_token");
+    localStorage.removeItem("access_token_expiration");
+    localStorage.removeItem("refresh_token");
     localStorage.removeItem("tokenId");
     setAccessToken("");
+    setAccessTokenExpiration("");
     googleLogout();
   };
 
@@ -78,6 +80,11 @@ function AuthProvider(props) {
         "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=" +
           accessToken
       );
+      
+      if (!response.ok) {
+        return false;
+      }
+      
       const data = await response.json();
 
       if (data.error_description) {
@@ -88,7 +95,7 @@ function AuthProvider(props) {
     } catch (error) {
       return false;
     }
-  }, [accessToken, accessTokenExpiration]);
+  }, [accessToken]);
 
   // const refreshToken = async () => {
   //   try {
@@ -117,11 +124,68 @@ function AuthProvider(props) {
   //   }
   // };
 
+  // Initial validation on mount
   useEffect(() => {
+    let cancelled = false;
+    const initializeAuth = async () => {
+      const storedToken = localStorage.getItem("access_token") || "";
+      const storedExpiration = localStorage.getItem("access_token_expiration") || "";
+      
+      if (!storedToken) {
+        setIsInitializing(false);
+        return;
+      }
+
+      // Set state first to avoid showing wrong button
+      setAccessToken(storedToken);
+      setAccessTokenExpiration(storedExpiration);
+
+      // Then validate
+      const expirationMs = Number(storedExpiration);
+      const isValidExpiration = expirationMs && !Number.isNaN(expirationMs) && Date.now() < expirationMs;
+      
+      if (!isValidExpiration) {
+        if (!cancelled) {
+          logout();
+          setIsInitializing(false);
+        }
+        return;
+      }
+
+      // Validate with Google API
+      try {
+        const response = await fetch(
+          "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token=" + storedToken
+        );
+        const data = await response.json();
+        
+        if (!cancelled) {
+          if (data.error_description) {
+            logout();
+          }
+          setIsInitializing(false);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          logout();
+          setIsInitializing(false);
+        }
+      }
+    };
+
+    initializeAuth();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // Validate token when it changes (after initial load)
+  useEffect(() => {
+    if (isInitializing) return; // Skip during initial validation
+    
     let cancelled = false;
     const check = async () => {
       if (!accessToken) {
-        logout();
         return;
       }
       const ok = await tokenIsValid();
@@ -133,11 +197,11 @@ function AuthProvider(props) {
     return () => {
       cancelled = true;
     };
-  }, [accessToken]);
+  }, [accessToken, isInitializing]);
 
   return (
     <AuthContext.Provider
-      value={{ login, logout, accessToken, setAccessToken }}
+      value={{ login, logout, accessToken, setAccessToken, isInitializing }}
     >
       {props.children}
     </AuthContext.Provider>
