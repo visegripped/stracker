@@ -12,7 +12,7 @@ export const AuthButton = () => {
     if (accessToken && Object.keys(profile).length === 0) {
       fetchProfile(accessToken);
     }
-  }, [accessToken]);
+  }, [accessToken, profile, fetchProfile]);
 
   const authButtonLogout = () => {
     logout();
