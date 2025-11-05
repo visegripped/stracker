@@ -5,7 +5,10 @@ doc_root/public_html/stracker/static/
 notes.md
 *.code-workspace
 # dependencies
-node_modules/
+node_modules
+doc_root/includes/vendor/
+doc_root/includes/.phpunit.cache/
+doc_root/includes/phpunit.xml.bak/
 build/
 dist/
 /.pnp
