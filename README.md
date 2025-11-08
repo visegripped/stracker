@@ -48,15 +48,15 @@ The deploy script automatically handles versioning, deployment, and Git tagging 
 
 ```bash
 # Deploy with patch version bump (1.0.0 → 1.0.1) - default
-pnpm deploy
+pnpm run deploy
 # or
-pnpm deploy:patch
+pnpm run deploy:patch
 
 # Deploy with minor version bump (1.0.5 → 1.1.0)
-pnpm deploy:minor
+pnpm run deploy:minor
 
 # Deploy with major version bump (1.2.3 → 2.0.0)
-pnpm deploy:major
+pnpm run deploy:major
 ```
 
 ### Deployment Process (Master Branch Only)
