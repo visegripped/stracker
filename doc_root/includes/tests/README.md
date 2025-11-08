@@ -76,3 +76,4 @@ You can add the test command to your deployment scripts:
 cd doc_root/includes && composer test
 ```
 
+
