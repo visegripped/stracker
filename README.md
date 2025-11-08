@@ -59,13 +59,36 @@ pnpm run deploy:minor
 pnpm run deploy:major
 ```
 
+### Vendor Optimization Flags
+
+The deploy script automatically detects if PHP dependencies (vendor folder) need updating by comparing `composer.lock` hashes. This significantly speeds up deployments when dependencies haven't changed.
+
+**Optional flags:**
+
+```bash
+# Force vendor upload even if composer.lock hasn't changed
+pnpm run deploy:patch -- --force-vendor
+
+# Skip vendor upload (use with caution!)
+pnpm run deploy:patch -- --skip-vendor
+```
+
+**How it works:**
+- 🔍 Script compares local `composer.lock` hash with remote hash
+- ✅ If unchanged: Skips vendor upload (saves ~30-60 seconds)
+- 🔄 If changed: Uploads vendor directory automatically
+- 📝 Stores hash on server for next deployment comparison
+
 ### Deployment Process (Master Branch Only)
 
 When deploying from `master`, the script:
 
 1. **Validates** - Fetches GitHub tags and ensures `package.json` version matches the latest tag
 2. **Bumps Version** - Updates `package.json` locally (not committed yet)
-3. **Deploys PHP** - Uploads backend files, includes, vendor, and API files first
+3. **Deploys PHP** - Uploads backend files first:
+   - Backend includes (always)
+   - Vendor directory (only if `composer.lock` changed or `--force-vendor` flag used)
+   - API files (always)
 4. **Deploys Frontend** - Uploads HTML, CSS, and JS assets (only if PHP succeeds)
 5. **Commits & Tags** - After successful deployment:
    - Commits version bump to master

@@ -1,7 +1,7 @@
 {
   "name": "stracker",
   "private": true,
-  "version": "1.0.1-canary-enhanceLocal",
+  "version": "1.0.NaN-canary-enhanceLocal",
   "type": "module",
   "scripts": {
     "dev": "vite",
