@@ -141,6 +141,7 @@ const App = () => {
           >
             Use {theme === "default" ? "akira" : "default"} theme
           </a>
+          <span className="version">v{__APP_VERSION__}</span>
         </div>
       </footer>
     </Router>
