@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Select from "react-select"; // https://react-select.com/home
 import apiPost from "../../utilities/apiPost";
 
-export const SymbolPicker = ({ symbol, symbolName }) => {
+export const SymbolPicker = ({ symbol, symbolName, navigationBasePath = "/symbol" }) => {
 
   const navigate = useNavigate();
   let [symbols, setSymbols] = useState({});
@@ -35,7 +35,7 @@ export const SymbolPicker = ({ symbol, symbolName }) => {
   const symbolChangeHandler = (event) => {
     const newSymbol = event.value;
     // const newSymbolName = event.label;
-    navigate(`/symbol/${newSymbol}`);
+    navigate(`${navigationBasePath}/${newSymbol}`);
   }
   
   const customStyles = {

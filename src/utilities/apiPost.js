@@ -35,6 +35,7 @@ export const apiPost = (config) => {
     formData.append("tokenId", accessToken); // api hasn't been updated yet to use access_token.
     formData.append("access_token", accessToken);
     formData.append("task", task);
+    formData.append("appVersion", __APP_VERSION__);
     if (symbol) formData.append("symbol", symbol);
     if (symbols) formData.append("symbols", symbol);
     if (limit) formData.append("limit", limit);

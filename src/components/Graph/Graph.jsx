@@ -87,13 +87,73 @@ export const Graph = ({ symbol, symbolName, enabledDataPoints, history }) => {
         display: true,
         position: "bottom",
         labels: {
-          fontColor: "#efefef",
-          fontSize: 14,
+          color: "#efefef",
+          font: {
+            size: 14,
+          },
+          padding: 15,
+          usePointStyle: true,
+          pointStyle: 'circle',
+          boxWidth: 8,
+          boxHeight: 8,
         },
       },
       title: {
         display: true,
         text: `History for ${symbol}`,
+        color: "#efefef",
+        font: {
+          size: 16,
+          weight: 'bold',
+        },
+        padding: {
+          top: 10,
+          bottom: 20,
+        },
+      },
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Date',
+          color: "#efefef",
+          font: {
+            size: 14,
+            weight: 'bold',
+          },
+          padding: {
+            top: 10,
+          },
+        },
+        ticks: {
+          color: "#efefef",
+          maxRotation: 45,
+          minRotation: 45,
+        },
+        grid: {
+          color: "rgba(255, 255, 255, 0.1)",
+        },
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Price',
+          color: "#efefef",
+          font: {
+            size: 14,
+            weight: 'bold',
+          },
+          padding: {
+            right: 10,
+          },
+        },
+        ticks: {
+          color: "#efefef",
+        },
+        grid: {
+          color: "rgba(255, 255, 255, 0.1)",
+        },
       },
     },
   };

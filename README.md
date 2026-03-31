@@ -23,17 +23,116 @@ All services communicate through Docker's internal network, eliminating CORS iss
 
 If the API is pointed at the production endpoint, toggle the root and rootb values in endpoints.json
 
-## Painful deploy process
-
-- Make sure that in endpoints.json, root is set to the relative API path.
-- Run `pnpm build`
-- log in to the hosting service and go to the FTP section.
-- Upload the PHP files.
-- Test the APIs via Postman. (get accessToken from session storage)
-- upload the JS from the assets folder into the corresponding folder on the server.
-- upload the CSS from the assets folder into the corresponding folder on the server.
-- update the index.html file on the service. There are some changes there.
-
 ## TokenId
 
 You can grab this from your debug tool in session storage - localhost - tokenId (handy for postman)
+
+## Deployment
+
+### Prerequisites
+
+Before deploying, ensure you have a `.env` file with SSH credentials:
+   ```
+   SSH_HOST=your.host.com
+   SSH_PORT=18765
+   SSH_USERNAME=your_username
+   SSH_PASSWORD=your_password
+   # OR use SSH key authentication:
+   SSH_KEY_PATH=/path/to/your/private/key
+   SSH_KEY_PASSPHRASE=your_passphrase_if_needed
+   ```
+
+### Deploy Commands
+
+The deploy script automatically handles versioning, deployment, and Git tagging for the `master` branch:
+
+```bash
+# Deploy with patch version bump (1.0.0 → 1.0.1) - default
+pnpm run deploy
+# or
+pnpm run deploy:patch
+
+# Deploy with minor version bump (1.0.5 → 1.1.0)
+pnpm run deploy:minor
+
+# Deploy with major version bump (1.2.3 → 2.0.0)
+pnpm run deploy:major
+```
+
+### Vendor Optimization Flags
+
+The deploy script automatically detects if PHP dependencies (vendor folder) need updating by comparing `composer.lock` hashes. This significantly speeds up deployments when dependencies haven't changed.
+
+**Optional flags:**
+
+```bash
+# Force vendor upload even if composer.lock hasn't changed
+pnpm run deploy:patch -- --force-vendor
+
+# Skip vendor upload (use with caution!)
+pnpm run deploy:patch -- --skip-vendor
+```
+
+**How it works:**
+- 🔍 Script compares local `composer.lock` hash with remote hash
+- ✅ If unchanged: Skips vendor upload (saves ~30-60 seconds)
+- 🔄 If changed: Uploads vendor directory automatically
+- 📝 Stores hash on server for next deployment comparison
+
+### Deployment Process (Master Branch Only)
+
+When deploying from `master`, the script:
+
+1. **Validates** - Fetches GitHub tags and ensures `package.json` version matches the latest tag
+2. **Bumps Version** - Updates `package.json` locally (not committed yet)
+3. **Deploys PHP** - Uploads backend files first:
+   - Backend includes (always)
+   - Vendor directory (only if `composer.lock` changed or `--force-vendor` flag used)
+   - API files (always)
+4. **Deploys Frontend** - Uploads HTML, CSS, and JS assets (only if PHP succeeds)
+5. **Commits & Tags** - After successful deployment:
+   - Commits version bump to master
+   - Pushes commit to GitHub
+   - Creates annotated Git tag (e.g., `v1.0.1`)
+   - Pushes tag to GitHub
+
+### Non-Master Branch Deployments
+
+For feature branches, the script creates a canary version (e.g., `1.0.1-canary-feature-branch`) without Git operations.
+
+### Automatic Rollback
+
+The deploy script includes automatic rollback protection:
+
+- ✅ **Connection failure** - `package.json` changes are automatically rolled back
+- ✅ **PHP deployment failure** - `package.json` changes are automatically rolled back
+- ⚠️  **Frontend deployment failure** - PHP stays deployed (backend is functional), manual intervention may be needed
+
+### Manual Rollback
+
+If you need to rollback a successful deployment:
+
+1. **Revert the version commit:**
+   ```bash
+   git revert HEAD
+   git push origin master
+   ```
+
+2. **Delete the Git tag:**
+   ```bash
+   # Delete locally
+   git tag -d v1.0.1
+   
+   # Delete from GitHub
+   git push origin :refs/tags/v1.0.1
+   ```
+
+3. **Redeploy the previous version** if needed, or manually fix files on the server via SSH/FTP
+
+### Troubleshooting
+
+**Version mismatch error:**
+If deployment fails with "Version mismatch detected", it means `package.json` and the latest GitHub tag are out of sync. Resolve this manually before deploying.
+
+**SSH authentication issues:**
+See the error messages in the deploy output for specific guidance on SSH key setup or password authentication.

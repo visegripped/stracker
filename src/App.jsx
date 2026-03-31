@@ -3,6 +3,7 @@ import { HashRouter as Router, Route, Routes, Link } from "react-router-dom";
 import Home from "@pages/Home";
 import Alerts from "@pages/Alerts";
 import Symbol from "@pages/Symbol";
+import Macd from "@pages/Macd";
 import Page404 from "@pages/Page404";
 import { AuthProvider, AuthContext } from "@context/AuthContext";
 import { NotificationsContext } from "@context/NotificationsContext";
@@ -87,6 +88,9 @@ const App = () => {
               <Link to={PathConstants.SYMBOL}>Symbol</Link>
             </li>
             <li className="nav-item">
+              <Link to={PathConstants.MACD}>MACD</Link>
+            </li>
+            <li className="nav-item">
               <Link to={PathConstants.ALERTS}>Alert History</Link>
             </li>
           </ul>
@@ -114,6 +118,11 @@ const App = () => {
               <Route
                 path={`${PathConstants.SYMBOL}/:symbol`}
                 Component={Symbol}
+              />
+              <Route path={PathConstants.MACD} Component={Macd} />
+              <Route
+                path={`${PathConstants.MACD}/:symbol`}
+                Component={Macd}
               />
               <Route Component={Page404} />
             </Routes>
