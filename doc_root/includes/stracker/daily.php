@@ -1,6 +1,7 @@
 <?php
     include "getCsv.php";
     include "formatCsv.php";
+    include "scrapeYahooHistory.php";
     include "getDataFromHistory.php";
     include "writeHistoryToDB.php";
     include "mysql.php";
@@ -11,23 +12,38 @@
 function addHistoricalData($symbol, $db) {
     // period 1 is start data. period 2 is end date.
     $period1 = 1672574400; //jan 1 2023
+    $period2 = time();
     // stock data comes back as follows:  data, open, high, low, close, adj close, volume
-    $csvUri = "https://query1.finance.yahoo.com/v7/finance/download/$symbol?period1=$$period1&period2=".time()."&interval=1d&events=history&includeAdjustedClose=true";
+    $csvUri = "https://query1.finance.yahoo.com/v7/finance/download/$symbol?period1=$period1&period2=$period2&interval=1d&events=history&includeAdjustedClose=true";
     $stockData = getCsv($csvUri);
     $historicalDays = count($stockData);
-    print("<h6>Stock Data: </h6>");
+    $dataSource = 'csv';
+
+    if ($historicalDays <= 0) {
+        echo "Yahoo CSV unavailable for $symbol, using history scrape.<br>";
+        $formattedStockData = scrapeYahooHistory($symbol, $period1, $period2);
+        $historicalDays = count($formattedStockData);
+        $dataSource = 'scrape';
+        $stockData = $formattedStockData;
+    }
+
+    print("<h6>Stock Data ($dataSource): </h6>");
     print("<br />Days in history: $historicalDays<br />");
-    print_r($stockData);    
+    print_r($stockData);
     print("<br /><br />");
-    if($historicalDays > 0) {
-        $formattedStockData = formatHistoryCsv($stockData);
+
+    if ($historicalDays > 0) {
+        if ($dataSource === 'csv') {
+            $formattedStockData = formatHistoryCsv($stockData);
+        } else {
+            $formattedStockData = $stockData;
+        }
         $history = getDataFromHistory($formattedStockData);
         writeHistoryToDB($symbol, $history, $db);
         return true;
-    } else {
-        return false;
     }
 
+    return false;
 }
 
 function csvDateTimeToDate($dateTime) {
