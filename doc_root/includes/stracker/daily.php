@@ -21,6 +21,8 @@ function addHistoricalData($symbol, $db) {
 
     if ($historicalDays <= 0) {
         echo "Yahoo CSV unavailable for $symbol, using history scrape.<br>";
+        // Brief pause so a failed CSV request does not immediately trigger chart API rate limits.
+        sleep(2);
         $formattedStockData = scrapeYahooHistory($symbol, $period1, $period2);
         $historicalDays = count($formattedStockData);
         $dataSource = 'scrape';
@@ -41,6 +43,10 @@ function addHistoricalData($symbol, $db) {
         $history = getDataFromHistory($formattedStockData);
         writeHistoryToDB($symbol, $history, $db);
         return true;
+    }
+
+    if ($dataSource === 'scrape') {
+        echo "History scrape returned no rows for $symbol (Yahoo may be rate-limiting).<br>";
     }
 
     return false;

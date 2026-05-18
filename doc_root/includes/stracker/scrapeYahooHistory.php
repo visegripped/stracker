@@ -18,7 +18,15 @@ function yahooChartApiUrl($symbol, $period1, $period2, $host = 'query1') {
     return "https://{$host}.finance.yahoo.com/v8/finance/chart/{$encoded}?period1={$period1}&period2={$period2}&interval=1d";
 }
 
-function yahooHttpGet($url, $forHtmlPage = true) {
+function yahooChartApiUrlByRange($symbol, $range = '5y', $host = 'query1') {
+    $encoded = rawurlencode($symbol);
+    $host = preg_replace('/[^a-z0-9]/i', '', $host);
+    $range = preg_replace('/[^a-z0-9]/i', '', $range);
+
+    return "https://{$host}.finance.yahoo.com/v8/finance/chart/{$encoded}?range={$range}&interval=1d";
+}
+
+function yahooHttpGet($url, $forHtmlPage = true, $maxRetries = 3) {
     $headers = $forHtmlPage
         ? [
             'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
@@ -26,33 +34,55 @@ function yahooHttpGet($url, $forHtmlPage = true) {
         ]
         : ['Accept: application/json'];
 
+    $userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36';
+
     if (function_exists('curl_init')) {
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_TIMEOUT => 60,
-            CURLOPT_HTTPHEADER => $headers,
-            CURLOPT_USERAGENT => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
-        ]);
-        $body = curl_exec($ch);
-        $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-        if ($body === false || $httpCode >= 400) {
+        for ($attempt = 0; $attempt < $maxRetries; $attempt++) {
+            $ch = curl_init($url);
+            curl_setopt_array($ch, [
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_TIMEOUT => 60,
+                CURLOPT_HTTPHEADER => $headers,
+                CURLOPT_USERAGENT => $userAgent,
+            ]);
+            $body = curl_exec($ch);
+            $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
+
+            if ($body !== false && $httpCode >= 200 && $httpCode < 300) {
+                return $body;
+            }
+
+            if ($httpCode === 429 || $httpCode >= 500) {
+                sleep(min(2 ** $attempt, 5));
+                continue;
+            }
+
             return false;
         }
-        return $body;
+
+        return false;
     }
 
     $accept = $forHtmlPage ? 'text/html' : 'application/json';
     $context = stream_context_create([
         'http' => [
             'timeout' => 60,
-            'header' => "User-Agent: Mozilla/5.0 (compatible; Stracker/1.0)\r\nAccept: {$accept}\r\n",
+            'header' => "User-Agent: {$userAgent}\r\nAccept: {$accept}\r\n",
         ],
     ]);
     $body = @file_get_contents($url, false, $context);
     return $body !== false ? $body : false;
+}
+
+function yahooFilterHistoryByPeriod($history, $period1, $period2) {
+    $startDate = gmdate('Y-m-d', $period1);
+    $endDate = gmdate('Y-m-d', $period2);
+
+    return array_values(array_filter($history, function ($row) use ($startDate, $endDate) {
+        return $row['date'] >= $startDate && $row['date'] <= $endDate;
+    }));
 }
 
 function yahooIsBlockedHistoryResponse($html) {
@@ -215,8 +245,15 @@ function scrapeYahooHistoryFromPage($symbol, $period1, $period2) {
 }
 
 function scrapeYahooHistoryFromChartApi($symbol, $period1, $period2) {
+    $urls = [];
     foreach (['query1', 'query2'] as $host) {
-        $url = yahooChartApiUrl($symbol, $period1, $period2, $host);
+        $urls[] = yahooChartApiUrl($symbol, $period1, $period2, $host);
+    }
+    foreach (['query1', 'query2'] as $host) {
+        $urls[] = yahooChartApiUrlByRange($symbol, '5y', $host);
+    }
+
+    foreach ($urls as $url) {
         $payload = yahooHttpGet($url, false);
         if ($payload === false) {
             continue;
@@ -224,7 +261,7 @@ function scrapeYahooHistoryFromChartApi($symbol, $period1, $period2) {
 
         $history = yahooParseChartApiResponse($payload);
         if (count($history) > 0) {
-            return $history;
+            return yahooFilterHistoryByPeriod($history, $period1, $period2);
         }
     }
 
@@ -242,12 +279,13 @@ function scrapeYahooHistory($symbol, $period1 = null, $period2 = null) {
     $period1 = $period1 ?? YAHOO_HISTORY_PERIOD1_DEFAULT;
     $period2 = $period2 ?? time();
 
-    $history = scrapeYahooHistoryFromPage($symbol, $period1, $period2);
+    // Chart API first: reliable JSON and avoids an extra HTML request that often triggers 429s.
+    $history = scrapeYahooHistoryFromChartApi($symbol, $period1, $period2);
     if (count($history) > 0) {
         return $history;
     }
 
-    return scrapeYahooHistoryFromChartApi($symbol, $period1, $period2);
+    return scrapeYahooHistoryFromPage($symbol, $period1, $period2);
 }
 
 ?>

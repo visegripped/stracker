@@ -7,8 +7,7 @@ function trackNewSymbol($symbol, $companyName, $pdo) {
     $historyAdded = addHistoricalData($symbol, $pdo);
     if($historyAdded == false) {
         //drop the table or the script won't try to populate it again tomorrow.
-        $dropQuery = "DROP TABLE '".$tableId."'";
-        $pdo->prepare($dropQuery)->execute([$symbol]);
+        $pdo->exec("DROP TABLE IF EXISTS `$symbol`");
         return false;
     }
     return true;

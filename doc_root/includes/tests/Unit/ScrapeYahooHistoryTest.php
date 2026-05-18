@@ -90,4 +90,19 @@ HTML;
         $this->assertTrue(yahooIsBlockedHistoryResponse('short'));
         $this->assertFalse(yahooIsBlockedHistoryResponse(str_repeat('x', 1001) . 'root.App.main'));
     }
+
+    public function testFilterHistoryByPeriod(): void
+    {
+        $history = [
+            ['date' => '2022-12-30', 'eod' => 10.0],
+            ['date' => '2023-01-03', 'eod' => 11.0],
+            ['date' => '2023-01-04', 'eod' => 12.0],
+        ];
+
+        $filtered = yahooFilterHistoryByPeriod($history, 1672574400, 1672842600);
+
+        $this->assertCount(2, $filtered);
+        $this->assertSame('2023-01-03', $filtered[0]['date']);
+        $this->assertSame('2023-01-04', $filtered[1]['date']);
+    }
 }
