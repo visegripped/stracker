@@ -65,8 +65,6 @@ If anything goes wrong:
 ## Notes
 
 - **Do NOT commit** `.env.local`, database dumps, or any file with credentials
-- `lib/secretSauce.ts` is gitignored — ensure it exists on the Vercel build machine
-  (set via Vercel env var, or store on server and load at build time if needed)
-  > Simplest: paste the secretSauce content into an environment variable called
-  > `SECRET_SAUCE_MODULE` and generate the file in `next.config.ts` before build.
-  > Or: keep it in a private GitHub secret and write it via a CI step.
+- `lib/secretSauce.ts` is gitignored. On Vercel, set `SECRET_SAUCE_MODULE_B64`
+  (generate with `pnpm encode-secret-sauce`). The `prebuild` script writes the
+  file before `next build`.

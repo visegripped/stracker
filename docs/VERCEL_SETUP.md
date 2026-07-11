@@ -44,6 +44,20 @@ In Vercel dashboard → Project Settings → Environment Variables, add:
 | `RESEND_API_KEY` | Resend API key |
 | `ERROR_EMAIL` | Where to send error emails |
 | `CRON_SECRET` | Random strong secret (e.g. `openssl rand -hex 32`) |
+| `SECRET_SAUCE_MODULE_B64` | Base64 of `lib/secretSauce.ts` (not in git) |
+
+### Secret sauce (formulas stay out of GitHub)
+
+`lib/secretSauce.ts` is gitignored. Vercel builds it from an env var at prebuild time.
+
+1. Locally (with `lib/secretSauce.ts` present):
+   ```bash
+   pnpm encode-secret-sauce
+   ```
+2. Copy the printed base64 string into Vercel → Environment Variables → `SECRET_SAUCE_MODULE_B64` (Production + Preview).
+3. Redeploy.
+
+The `prebuild` script writes `lib/secretSauce.ts` from that env var before `next build`. Locally it uses the file on disk if the env var is unset.
 
 ---
 

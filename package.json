@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/write-secret-sauce.mjs",
     "build": "next build",
+    "encode-secret-sauce": "node scripts/encode-secret-sauce.mjs",
     "start": "next start",
     "lint": "eslint app lib src",
     "lint:fix": "eslint --fix app lib src",
