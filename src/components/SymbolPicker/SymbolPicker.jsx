@@ -1,12 +1,12 @@
 import "./SymbolPicker.css";
-import { useEffect, useState, useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Select from "react-select"; // https://react-select.com/home
 import apiPost from "../../utilities/apiPost";
 
 export const SymbolPicker = ({ symbol, symbolName, navigationBasePath = "/symbol" }) => {
 
-  const navigate = useNavigate();
+  const router = useRouter();
   let [symbols, setSymbols] = useState({});
   const selectedOption = {
     value: symbol,
@@ -35,7 +35,7 @@ export const SymbolPicker = ({ symbol, symbolName, navigationBasePath = "/symbol
   const symbolChangeHandler = (event) => {
     const newSymbol = event.value;
     // const newSymbolName = event.label;
-    navigate(`${navigationBasePath}/${newSymbol}`);
+    router.push(`${navigationBasePath}/${newSymbol}`);
   }
   
   const customStyles = {

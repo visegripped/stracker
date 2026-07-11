@@ -3,8 +3,8 @@ import { googleLogout, useGoogleLogin } from "@react-oauth/google"; // docs: htt
 import { NotificationsContext } from "./NotificationsContext";
 
 const AuthContext = createContext();
-const refreshTokenUrl = import.meta.env.VITE_REFRESH_TOKEN_URL;
-const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+// Client ID is provided by GoogleOAuthProvider in app/providers.tsx
+const googleClientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID ?? '';
 
 function AuthProvider(props) {
   // console.log(' -> props from authProvider', props);
