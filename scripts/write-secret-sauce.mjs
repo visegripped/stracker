@@ -21,10 +21,18 @@ function resolveSource() {
   const plain = process.env.SECRET_SAUCE_MODULE?.trim();
   if (plain) return plain;
 
-  const b64 = process.env.SECRET_SAUCE_MODULE_B64?.trim();
+  // Strip whitespace — Vercel UI pastes can introduce newlines
+  const b64 = process.env.SECRET_SAUCE_MODULE_B64?.replace(/\s+/g, '');
   if (b64) {
     try {
-      return Buffer.from(b64, 'base64').toString('utf8');
+      const decoded = Buffer.from(b64, 'base64').toString('utf8');
+      if (!decoded.includes('export function')) {
+        console.error(
+          'SECRET_SAUCE_MODULE_B64 decoded but does not look like secretSauce.ts (missing exports). Re-run: pnpm encode-secret-sauce'
+        );
+        process.exit(1);
+      }
+      return decoded;
     } catch (err) {
       console.error('Failed to decode SECRET_SAUCE_MODULE_B64:', err.message);
       process.exit(1);
@@ -41,11 +49,22 @@ function resolveSource() {
 const source = resolveSource();
 
 if (!source) {
+  const hasPlain = process.env.SECRET_SAUCE_MODULE != null;
+  const hasB64 = process.env.SECRET_SAUCE_MODULE_B64 != null;
   console.error(`
 Missing secretSauce module.
 
-Local:  copy lib/secretSauce.template.ts → lib/secretSauce.ts and implement it
-Vercel: set SECRET_SAUCE_MODULE_B64 (run: pnpm encode-secret-sauce)
+Diagnostics:
+  SECRET_SAUCE_MODULE set:     ${hasPlain} (length: ${process.env.SECRET_SAUCE_MODULE?.length ?? 0})
+  SECRET_SAUCE_MODULE_B64 set: ${hasB64} (length: ${process.env.SECRET_SAUCE_MODULE_B64?.length ?? 0})
+  lib/secretSauce.ts on disk:  ${existsSync(targetPath)}
+  VERCEL env:                  ${process.env.VERCEL ?? 'not set'}
+  VERCEL_ENV:                  ${process.env.VERCEL_ENV ?? 'not set'}
+
+Local:  keep lib/secretSauce.ts on disk (from lib/secretSauce.template.ts)
+Vercel: Project Settings → Environment Variables → add SECRET_SAUCE_MODULE_B64
+        for Production AND Preview, then Redeploy.
+        Generate value: pnpm encode-secret-sauce
 `);
   process.exit(1);
 }
