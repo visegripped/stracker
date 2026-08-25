@@ -48,19 +48,16 @@ In Vercel dashboard → Project Settings → Environment Variables, add:
 
 ### Secret sauce (formulas stay out of GitHub)
 
-Next/Turbopack on Vercel does not reliably resolve files that only exist under
-`.gitignore`, so we commit a **stub** at `lib/secretSauce.ts` and overwrite it
-at build time.
+`lib/secretSauce.ts` is a committed **loader** (no formulas). At runtime it loads
+TypeScript from `SECRET_SAUCE_MODULE_B64` (or local `lib/secretSauce.local.ts`).
 
-1. Locally keep real formulas in `lib/secretSauce.local.ts` (gitignored).
-2. Generate the Vercel env value:
+1. Keep formulas in `lib/secretSauce.local.ts` (gitignored).
+2. Generate the Vercel value:
    ```bash
    pnpm encode-secret-sauce
    ```
 3. Vercel → Environment Variables → `SECRET_SAUCE_MODULE_B64` for **Production** and **Preview**.
 4. Redeploy.
-
-`prebuild` overwrites `lib/secretSauce.ts` from that env var before `next build`.
 
 ---
 
