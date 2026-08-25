@@ -4,9 +4,11 @@
   "version": "1.0.NaN-canary-enhanceLocal",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/write-secret-sauce.mjs",
     "dev": "next dev",
     "prebuild": "node scripts/write-secret-sauce.mjs",
     "build": "next build",
+    "pretest": "node scripts/write-secret-sauce.mjs",
     "encode-secret-sauce": "node scripts/encode-secret-sauce.mjs",
     "start": "next start",
     "lint": "eslint app lib src",

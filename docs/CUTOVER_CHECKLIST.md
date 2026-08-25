@@ -65,6 +65,6 @@ If anything goes wrong:
 ## Notes
 
 - **Do NOT commit** `.env.local`, database dumps, or any file with credentials
-- `lib/secretSauce.ts` is gitignored. On Vercel, set `SECRET_SAUCE_MODULE_B64`
-  (generate with `pnpm encode-secret-sauce`). The `prebuild` script writes the
-  file before `next build`.
+- `lib/secretSauce.ts` is a committed stub. Real formulas live in
+  `lib/secretSauce.local.ts` (gitignored) or Vercel `SECRET_SAUCE_MODULE_B64`
+  (generate with `pnpm encode-secret-sauce`). Prebuild overwrites the stub.
