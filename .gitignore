@@ -1,6 +1,6 @@
 passwords.php
 secretSauce.php
-lib/secretSauce.ts
+lib/secretSauce.local.ts
 reference-material/
 doc_root/public_html/stracker/static/
 notes.md

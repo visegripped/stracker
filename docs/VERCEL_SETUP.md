@@ -44,6 +44,20 @@ In Vercel dashboard → Project Settings → Environment Variables, add:
 | `RESEND_API_KEY` | Resend API key |
 | `ERROR_EMAIL` | Where to send error emails |
 | `CRON_SECRET` | Random strong secret (e.g. `openssl rand -hex 32`) |
+| `SECRET_SAUCE_MODULE_B64` | Base64 of `lib/secretSauce.ts` (not in git) |
+
+### Secret sauce (formulas stay out of GitHub)
+
+`lib/secretSauce.ts` is a committed **loader** (no formulas). At runtime it loads
+TypeScript from `SECRET_SAUCE_MODULE_B64` (or local `lib/secretSauce.local.ts`).
+
+1. Keep formulas in `lib/secretSauce.local.ts` (gitignored).
+2. Generate the Vercel value:
+   ```bash
+   pnpm encode-secret-sauce
+   ```
+3. Vercel → Environment Variables → `SECRET_SAUCE_MODULE_B64` for **Production** and **Preview**.
+4. Redeploy.
 
 ---
 

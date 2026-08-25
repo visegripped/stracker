@@ -1,6 +1,6 @@
 /**
- * Secret sauce template — copy to lib/secretSauce.ts and implement.
- * lib/secretSauce.ts is gitignored.
+ * Secret sauce template — copy to lib/secretSauce.local.ts and implement.
+ * lib/secretSauce.local.ts is gitignored. Vercel uses SECRET_SAUCE_MODULE_B64.
  */
 
 export interface DayData {
@@ -20,7 +20,7 @@ export interface AlertFlags {
 }
 
 export function getAlertStatusForDay(_day: DayData): AlertFlags {
-  throw new Error('Copy lib/secretSauce.template.ts to lib/secretSauce.ts and implement');
+  throw new Error('Copy lib/secretSauce.template.ts to lib/secretSauce.local.ts and implement');
 }
 
 export function alertsForDay(day: DayData): AlertFlags {
@@ -28,7 +28,7 @@ export function alertsForDay(day: DayData): AlertFlags {
 }
 
 export function getSignalAlignmentForDay(_history: DayData[]): string | undefined {
-  throw new Error('Copy lib/secretSauce.template.ts to lib/secretSauce.ts and implement');
+  throw new Error('Copy lib/secretSauce.template.ts to lib/secretSauce.local.ts and implement');
 }
 
 export function signalAlignment(history: DayData[]): string | undefined {
