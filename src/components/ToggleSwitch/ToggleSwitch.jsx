@@ -1,11 +1,20 @@
-import {Switch} from "@nextui-org/switch";
-/// https://nextui.org/docs/components/switch
-
-const ToggleSwitch = (props) => {
-  const { label, id } = props;
+/**
+ * Simple accessible toggle — replaces @nextui-org/switch (unused in app routes).
+ */
+const ToggleSwitch = ({ label, id, checked, onChange }) => {
+  const inputId = id || `toggle-${label}`;
   return (
-    <Switch color="default">{label}</Switch>
+    <label htmlFor={inputId} className="toggle-switch">
+      <input
+        id={inputId}
+        type="checkbox"
+        role="switch"
+        checked={checked}
+        onChange={onChange}
+      />
+      <span>{label}</span>
+    </label>
   );
 };
- 
+
 export default ToggleSwitch;

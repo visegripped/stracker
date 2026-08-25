@@ -68,6 +68,9 @@
   ],
   "exclude": [
     "node_modules",
-    "doc_root"
+    "doc_root",
+    "vite.config.ts",
+    "vitest.config.ts",
+    "src/__tests__"
   ]
 }
