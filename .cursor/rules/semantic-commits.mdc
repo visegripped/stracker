@@ -1,0 +1,55 @@
+---
+description: Use Conventional Commits (semantic commit messages) for all git commits
+alwaysApply: true
+---
+
+# Semantic commit messages
+
+All commits must follow [Conventional Commits](https://www.conventionalcommits.org/):
+
+```
+<type>(optional-scope): <short summary>
+```
+
+## Types
+
+| Type | Use when |
+|------|----------|
+| `feat` | New user-facing capability |
+| `fix` | Bug fix |
+| `perf` | Performance improvement |
+| `refactor` | Code change with no behavior change |
+| `chore` | Tooling, deps, config, housekeeping |
+| `docs` | Documentation only |
+| `test` | Tests only |
+| `build` | Build system or dependency upgrades that affect the build |
+| `ci` | CI configuration |
+| `style` | Formatting only (no logic change) |
+| `revert` | Revert a previous commit |
+
+## Rules
+
+- Summary in **imperative mood**, lowercase after the type (e.g. `fix: correct date binding`)
+- Keep the subject **≤ ~72 characters**; no trailing period
+- Prefer a scope when helpful: `fix(auth):`, `chore(deps):`, `feat(alerts):`
+- Use `chore(deps):` for Dependabot / security dependency bumps
+- Body optional; use it for *why*, breaking changes, or issue refs (`Closes #123`)
+- **One logical change per commit** when practical; security bumps may be a single `chore(deps):` commit
+
+## Examples
+
+```
+feat(alerts): group home signals by sector
+fix(cron): skip duplicate EOD rows for the same trade date
+chore(deps): upgrade next and remove vulnerable packages
+docs: add Vercel cutover checklist
+```
+
+## Avoid
+
+```
+Fixed stuff
+Update
+WIP
+feat: Added new feature.  # past tense + period
+```

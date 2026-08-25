@@ -5,7 +5,6 @@ reference-material/
 doc_root/public_html/stracker/static/
 notes.md
 *.code-workspace
-.cursor/rules/
 # dependencies
 node_modules
 doc_root/includes/vendor/
