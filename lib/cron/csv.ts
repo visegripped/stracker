@@ -12,9 +12,10 @@ export interface CsvSymbolRow {
 /**
  * Fetch and parse the published Google Sheet CSV.
  * Columns: [0]=symbol [1]=eod [2]=tradeDate [3]=companyName [4]=sector [5]=industry
- * Returns only the last `limit` rows (default 10).
+ * When `limit` is set, returns only the last `limit` rows (daily cron uses 10).
+ * Omit `limit` to return every parsed row (backfill walks the full sheet).
  */
-export async function fetchSheetCsv(limit = 10): Promise<CsvSymbolRow[]> {
+export async function fetchSheetCsv(limit?: number): Promise<CsvSymbolRow[]> {
   const url = process.env.GOOGLE_SHEET_CSV_URL;
   if (!url) {
     throw new Error('GOOGLE_SHEET_CSV_URL environment variable is not set');
@@ -56,8 +57,35 @@ export async function fetchSheetCsv(limit = 10): Promise<CsvSymbolRow[]> {
     });
   }
 
-  // Take the last `limit` rows
+  if (limit == null) return rows;
   return rows.slice(-limit);
+}
+
+/**
+ * First `batchCap` unique CSV symbols that are not already in the DB,
+ * in spreadsheet order. Remaining untracked tickers are returned as `pending`.
+ */
+export function selectUntrackedBatch(
+  csvRows: CsvSymbolRow[],
+  existingSymbols: Iterable<string>,
+  batchCap: number
+): { batch: CsvSymbolRow[]; pending: string[] } {
+  const existing = existingSymbols instanceof Set
+    ? existingSymbols
+    : new Set(existingSymbols);
+  const seen = new Set<string>();
+  const untracked: CsvSymbolRow[] = [];
+
+  for (const row of csvRows) {
+    if (seen.has(row.symbol) || existing.has(row.symbol)) continue;
+    seen.add(row.symbol);
+    untracked.push(row);
+  }
+
+  return {
+    batch: untracked.slice(0, batchCap),
+    pending: untracked.slice(batchCap).map((r) => r.symbol),
+  };
 }
 
 function parseCsvDate(rawDate: string): string | null {

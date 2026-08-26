@@ -1,10 +1,9 @@
 import 'server-only';
-import { eq } from 'drizzle-orm';
 import { getDb } from '../db';
 import { schema } from '../db';
 import { getDataFromHistory } from '../indicators';
 import { fetchYahooHistory, twoYearsAgo } from '../yahoo';
-import { fetchSheetCsv } from './csv';
+import { fetchSheetCsv, selectUntrackedBatch } from './csv';
 import { logError } from '../reporting';
 import { formatBackfillFailure, formatUnknownError } from '../errors';
 
@@ -73,27 +72,25 @@ export interface BackfillResult {
 }
 
 /**
- * Backfill new symbols from the Google Sheet CSV.
- * Processes at most `batchCap` symbols per run (default 5).
- * Symbols not processed this run are noted in `pending`.
+ * Backfill untracked symbols from the Google Sheet CSV.
+ * Each run processes at most `batchCap` symbols that are not yet in `symbols`
+ * (default 5), so successive runs walk the rest of the sheet.
  */
 export async function runBackfill(batchCap = 5): Promise<BackfillResult> {
-  const csvRows = await fetchSheetCsv(10);
+  const csvRows = await fetchSheetCsv();
   const db = getDb();
 
-  // Find which CSV symbols are missing from the symbols table
   const existingRows = await db
     .select({ symbol: schema.symbols.symbol })
     .from(schema.symbols);
   const existing = new Set(existingRows.map((r) => r.symbol));
 
-  const newSymbols = csvRows.filter((r) => !existing.has(r.symbol));
-  const batch = newSymbols.slice(0, batchCap);
-  const pending = newSymbols.slice(batchCap).map((r) => r.symbol);
+  const { batch, pending } = selectUntrackedBatch(csvRows, existing, batchCap);
 
   const result: BackfillResult = { added: [], failed: [], pending };
 
-  for (const { symbol, companyName, sector, industry } of batch) {
+  for (let i = 0; i < batch.length; i++) {
+    const { symbol, companyName, sector, industry } = batch[i];
     try {
       const period1 = twoYearsAgo();
       const yahooRows = await fetchYahooHistory(symbol, period1);
@@ -136,8 +133,7 @@ export async function runBackfill(batchCap = 5): Promise<BackfillResult> {
       });
     }
 
-    // Anti-rate-limit pause between symbols
-    if (batch.indexOf({ symbol, companyName, sector, industry } as (typeof batch)[0]) < batch.length - 1) {
+    if (i < batch.length - 1) {
       await new Promise((r) => setTimeout(r, 1500));
     }
   }
