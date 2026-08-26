@@ -6,6 +6,7 @@ import { getDataFromHistory } from '../indicators';
 import { fetchYahooHistory, twoYearsAgo } from '../yahoo';
 import { fetchSheetCsv } from './csv';
 import { logError } from '../reporting';
+import { formatBackfillFailure, formatUnknownError } from '../errors';
 
 /** Insert a row into the symbols table (upsert — safe to re-run) */
 async function insertSymbol(
@@ -60,9 +61,14 @@ async function bulkInsertHistory(
   }
 }
 
+export interface BackfillFailure {
+  symbol: string;
+  reason: string;
+}
+
 export interface BackfillResult {
   added: string[];
-  failed: string[];
+  failed: BackfillFailure[];
   pending: string[];
 }
 
@@ -93,22 +99,41 @@ export async function runBackfill(batchCap = 5): Promise<BackfillResult> {
       const yahooRows = await fetchYahooHistory(symbol, period1);
 
       if (yahooRows.length === 0) {
-        const message = `Yahoo returned no data for ${symbol}`;
-        result.failed.push(symbol);
-        await logError(message, { symbol });
+        const reason = 'Yahoo returned no data (empty series after CSV and chart fetch)';
+        result.failed.push({ symbol, reason });
+        await logError(formatBackfillFailure(symbol, reason), {
+          symbol,
+          reason,
+          source: 'cron/backfill',
+        });
         continue;
       }
 
       const history = getDataFromHistory(yahooRows);
+      if (history.length === 0) {
+        const reason = `Computed 0 indicator rows from ${yahooRows.length} Yahoo bars`;
+        result.failed.push({ symbol, reason });
+        await logError(formatBackfillFailure(symbol, reason), {
+          symbol,
+          reason,
+          source: 'cron/backfill',
+        });
+        continue;
+      }
 
       await insertSymbol(symbol, companyName, sector, industry);
       await bulkInsertHistory(symbol, history);
 
       result.added.push(symbol);
     } catch (err) {
-      const message = `Backfill failed for ${symbol}: ${err instanceof Error ? err.message : String(err)}`;
-      result.failed.push(symbol);
-      await logError(message, { symbol });
+      const reason = formatUnknownError(err);
+      result.failed.push({ symbol, reason });
+      await logError(formatBackfillFailure(symbol, reason), {
+        symbol,
+        reason,
+        source: 'cron/backfill',
+        stack: err instanceof Error ? err.stack : undefined,
+      });
     }
 
     // Anti-rate-limit pause between symbols

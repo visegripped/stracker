@@ -1,4 +1,5 @@
 import 'server-only';
+import { formatUnknownError } from './errors';
 
 export interface YahooRow {
   date: string;
@@ -26,6 +27,10 @@ function parseYahooCsv(csv: string): YahooRow[] {
   return rows;
 }
 
+function snippet(text: string, max = 180): string {
+  return text.replace(/\s+/g, ' ').trim().slice(0, max);
+}
+
 /** Fetch Yahoo Finance chart API (JSON) as a fallback when CSV is unavailable. */
 async function fetchYahooChartApi(
   symbol: string,
@@ -41,19 +46,36 @@ async function fetchYahooChartApi(
     signal: AbortSignal.timeout(15_000),
   });
 
-  if (!res.ok) return [];
+  const text = await res.text();
+  if (!res.ok) {
+    throw new Error(`chart HTTP ${res.status}: ${snippet(text) || res.statusText}`);
+  }
 
-  const json = (await res.json()) as {
+  let json: {
     chart?: {
+      error?: { code?: string; description?: string };
       result?: Array<{
         timestamp?: number[];
         indicators?: { adjclose?: Array<{ adjclose?: number[] }> };
       }>;
     };
   };
+  try {
+    json = JSON.parse(text) as typeof json;
+  } catch {
+    throw new Error(`chart HTTP ${res.status}: response was not JSON (${snippet(text)})`);
+  }
+
+  const chartError = json?.chart?.error;
+  if (chartError) {
+    const detail = chartError.description || chartError.code || JSON.stringify(chartError);
+    throw new Error(`chart error: ${detail}`);
+  }
 
   const result = json?.chart?.result?.[0];
-  if (!result) return [];
+  if (!result) {
+    throw new Error('chart HTTP 200: empty result');
+  }
 
   const timestamps = result.timestamp ?? [];
   const closes = result.indicators?.adjclose?.[0]?.adjclose ?? [];
@@ -67,6 +89,12 @@ async function fetchYahooChartApi(
     rows.push({ date, eod: close });
   }
 
+  if (rows.length === 0) {
+    throw new Error(
+      `chart HTTP 200: no usable closes (${timestamps.length} timestamps)`
+    );
+  }
+
   return rows;
 }
 
@@ -74,6 +102,7 @@ async function fetchYahooChartApi(
  * Fetch historical EOD data for a symbol from Yahoo Finance.
  * Tries CSV first, falls back to chart API.
  * Returns rows sorted ascending by date.
+ * Throws if both endpoints fail or return no usable bars, with both attempt notes.
  */
 export async function fetchYahooHistory(
   symbol: string,
@@ -84,26 +113,37 @@ export async function fetchYahooHistory(
     `https://query1.finance.yahoo.com/v7/finance/download/${symbol}` +
     `?period1=${period1}&period2=${period2}&interval=1d&events=history&includeAdjustedClose=true`;
 
+  let csvNote = 'csv not attempted';
+
   try {
     const res = await fetch(csvUrl, {
       headers: { 'User-Agent': 'Mozilla/5.0' },
       signal: AbortSignal.timeout(15_000),
     });
+    const text = await res.text();
 
     if (res.ok) {
-      const text = await res.text();
       const rows = parseYahooCsv(text);
       if (rows.length > 0) {
         return rows.sort((a, b) => a.date.localeCompare(b.date));
       }
+      csvNote = `csv HTTP ${res.status}: parsed 0 rows from ${text.length} bytes`;
+    } else {
+      csvNote = `csv HTTP ${res.status}: ${snippet(text) || res.statusText}`;
     }
-  } catch {
-    // CSV unavailable — fall through to chart API
+  } catch (err) {
+    csvNote = `csv ${formatUnknownError(err)}`;
   }
 
   // Brief pause so a failed CSV request doesn't immediately trigger chart API rate limits
   await new Promise((r) => setTimeout(r, 2000));
 
-  const rows = await fetchYahooChartApi(symbol, period1, period2);
-  return rows.sort((a, b) => a.date.localeCompare(b.date));
+  try {
+    const rows = await fetchYahooChartApi(symbol, period1, period2);
+    return rows.sort((a, b) => a.date.localeCompare(b.date));
+  } catch (err) {
+    throw new Error(
+      `Yahoo returned no history for ${symbol} (${csvNote}; ${formatUnknownError(err)})`
+    );
+  }
 }
