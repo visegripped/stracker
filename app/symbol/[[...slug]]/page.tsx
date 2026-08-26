@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import {
   DateRangePicker,
   Fieldset,
@@ -11,6 +12,7 @@ import {
 } from '@components/index';
 import '@views/Symbol.css';
 import apiPost from '@utilities/apiPost';
+import { resolveSymbolFromSlug } from '@utilities/symbolParam';
 import AppShell from '../../AppShell';
 
 type HistoryRow = { date: string; EOD: string | number; [key: string]: unknown };
@@ -118,12 +120,13 @@ function SymbolContent({ symbol }: { symbol: string }) {
   );
 }
 
-export default function SymbolPage({ params }: { params: { slug?: string[] } }) {
-  const defaultSymbol =
+export default function SymbolPage() {
+  const params = useParams<{ slug?: string | string[] }>();
+  const storedFallback =
     typeof window !== 'undefined'
-      ? localStorage.getItem('mostRecentlyViewedSymbol') ?? 'INTU'
+      ? (localStorage.getItem('mostRecentlyViewedSymbol') ?? 'INTU')
       : 'INTU';
-  const symbol = params?.slug?.[0]?.toUpperCase() ?? defaultSymbol;
+  const symbol = resolveSymbolFromSlug(params.slug, storedFallback);
 
   return (
     <AppShell>

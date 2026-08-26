@@ -6,6 +6,7 @@
  */
 
 import { useState, useEffect } from 'react';
+import { useParams } from 'next/navigation';
 import { DateRangePicker, Fieldset, SymbolPicker, MacdLinePicker } from '@components/index';
 import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/styles/ag-grid.css';
@@ -17,6 +18,7 @@ import 'chart.js/auto';
 import '@views/Macd.css';
 import apiPost from '@utilities/apiPost';
 import { formatMACDData } from '@utilities/macdCalculations';
+import { resolveSymbolFromSlug } from '@utilities/symbolParam';
 import AppShell from '../../AppShell';
 
 type HistoryRow = { date: string; EOD: string | number; [key: string]: unknown };
@@ -124,8 +126,16 @@ function MacdContent({ symbol }: { symbol: string }) {
   );
 }
 
-export default function MacdPage({ params }: { params: { slug?: string[] } }) {
-  const defaultSymbol = typeof window !== 'undefined' ? localStorage.getItem('mostRecentlyViewedSymbol') ?? 'INTU' : 'INTU';
-  const symbol = params?.slug?.[0]?.toUpperCase() ?? defaultSymbol;
-  return <AppShell><MacdContent symbol={symbol} /></AppShell>;
+export default function MacdPage() {
+  const params = useParams<{ slug?: string | string[] }>();
+  const storedFallback =
+    typeof window !== 'undefined'
+      ? (localStorage.getItem('mostRecentlyViewedSymbol') ?? 'INTU')
+      : 'INTU';
+  const symbol = resolveSymbolFromSlug(params.slug, storedFallback);
+  return (
+    <AppShell>
+      <MacdContent symbol={symbol} />
+    </AppShell>
+  );
 }

@@ -1,3 +1,5 @@
+'use client';
+
 import "./SymbolPicker.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
@@ -7,34 +9,31 @@ import apiPost from "../../utilities/apiPost";
 export const SymbolPicker = ({ symbol, symbolName, navigationBasePath = "/symbol" }) => {
 
   const router = useRouter();
-  let [symbols, setSymbols] = useState({});
-  const selectedOption = {
-    value: symbol,
-    label: symbolName,
-  };
+  const [symbols, setSymbols] = useState([]);
+  const selectedOption =
+    symbols.find((s) => s.value === symbol) ??
+    (symbol ? { value: symbol, label: symbolName || symbol } : null);
 
-  const handleDataResponse = (symbols = []) => {
-    const data = [];
-    symbols.forEach((symbol) => {
-      const option = { value: symbol.symbol, label: symbol.name };
-      data.push(option);
-    });
-    return data;
+  const handleDataResponse = (rows = []) => {
+    if (!Array.isArray(rows)) return [];
+    return rows.map((row) => ({
+      value: row.symbol,
+      label: row.name || row.symbol,
+    }));
   };
 
   useEffect(() => {
-    if (!symbols.length ) {
-      const response = apiPost({ task: "symbols" });
-      response &&
-        response.then((data) => {
-          setSymbols(handleDataResponse(data));
-        });
-    }
+    const response = apiPost({ task: "symbols" });
+    response &&
+      response.then((data) => {
+        setSymbols(handleDataResponse(data));
+      }).catch((err) => {
+        console.error("Error fetching symbols:", err);
+      });
   }, []);
 
   const symbolChangeHandler = (event) => {
     const newSymbol = event.value;
-    // const newSymbolName = event.label;
     router.push(`${navigationBasePath}/${newSymbol}`);
   }
   
@@ -60,8 +59,9 @@ export const SymbolPicker = ({ symbol, symbolName, navigationBasePath = "/symbol
   return (
     <div className='symbolPicker-container'>
       <Select
+        instanceId="symbol-picker"
         onChange={symbolChangeHandler}
-        defaultValue={selectedOption}
+        value={selectedOption}
         options={symbols}
         styles={customStyles}
         aria-errormessage="symbolPickerErrors"

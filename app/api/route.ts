@@ -231,7 +231,7 @@ export async function POST(request: NextRequest) {
   }
 
   const task = String(body.task ?? '');
-  const symbol = String(body.symbol ?? '');
+  const symbol = String(body.symbol ?? '').toUpperCase();
   const userId = String(body.userId ?? '');
   const startDate = String(body.startDate ?? '');
   const endDate = String(body.endDate ?? '');
