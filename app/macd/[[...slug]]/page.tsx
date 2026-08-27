@@ -21,6 +21,11 @@ import { formatMACDData } from '@utilities/macdCalculations';
 import { resolveSymbolFromSlug } from '@utilities/symbolParam';
 import { useTheme } from '@context/ThemeContext';
 import { agGridThemeClass, getChartChrome } from '@utilities/chartTheme';
+import {
+  applyFlagToggle,
+  DEFAULT_MACD_LINES,
+  readPersistedFlags,
+} from '@utilities/chartFlags';
 import AppShell from '../../AppShell';
 
 type HistoryRow = { date: string; EOD: string | number; [key: string]: unknown };
@@ -40,7 +45,7 @@ function MacdGraph({ symbol, macdData, enabledLines }: { symbol: string; macdDat
   const chrome = getChartChrome(resolvedTheme, `MACD for ${symbol}`);
   const options = { ...chrome, maintainAspectRatio: false };
 
-  return <div className="macd-graph-container chart-card"><Chart type="bar" options={options} data={{ labels, datasets }} /></div>;
+  return <div className="macd-graph-container chart-card"><Chart key={resolvedTheme} type="bar" options={options} data={{ labels, datasets }} /></div>;
 }
 
 function MacdTable({ macdData }: { macdData: MacdRow[] }) {
@@ -65,16 +70,14 @@ function MacdContent({ symbol }: { symbol: string }) {
 
   const defaultStart = (() => { const d = new Date(); d.setDate(d.getDate() - 90); return d; })();
   const parseIntLS = (key: string, fallback: number) => parseInt(localStorage.getItem(key) ?? '') || fallback;
-  const parseObjLS = (key: string, fallback: Record<string, boolean>) => {
-    try { const v = JSON.parse(localStorage.getItem(key) ?? '{}'); return (v && typeof v === 'object') ? v : fallback; } catch { return fallback; }
-  };
-
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [macdData, setMacdData] = useState<MacdRow[]>([]);
   const [fastPeriod, setFastPeriod] = useState(() => parseIntLS('macdFastPeriod', 12));
   const [slowPeriod, setSlowPeriod] = useState(() => parseIntLS('macdSlowPeriod', 26));
   const [signalPeriod, setSignalPeriod] = useState(() => parseIntLS('macdSignalPeriod', 9));
-  const [enabledLines, setEnabledLines] = useState<EnabledLines>(() => parseObjLS('macdEnabledLines', { MACD: true, Signal: true, Histogram: true }));
+  const [enabledLines, setEnabledLines] = useState<EnabledLines>(() =>
+    readPersistedFlags(localStorage.getItem('macdEnabledLines'), DEFAULT_MACD_LINES)
+  );
   const [startDate, setStartDate] = useState<Date>(() => parseLS('macdStartDate', defaultStart));
   const [endDate, setEndDate] = useState<Date>(() => parseLS('macdEndDate', new Date()));
 
@@ -117,7 +120,7 @@ function MacdContent({ symbol }: { symbol: string }) {
             </div>
           </Fieldset>
           <Fieldset legend="Display Options">
-            <MacdLinePicker clickHandler={(id: string, v: boolean) => { const u = { ...enabledLines, [id]: v }; setEnabledLines(u); setLS('macdEnabledLines', JSON.stringify(u)); }} enabledLines={enabledLines} />
+            <MacdLinePicker clickHandler={(id: string, v: boolean) => { const u = applyFlagToggle(enabledLines, id, v); setEnabledLines(u); setLS('macdEnabledLines', JSON.stringify(u)); }} enabledLines={enabledLines} />
           </Fieldset>
           <Fieldset legend="Date Range">
             <DateRangePicker startDate={startDate} endDate={endDate} updateStartDate={(d: Date) => { setStartDate(d); setLS('macdStartDate', d.toISOString()); }} updateEndDate={(d: Date) => { setEndDate(d); setLS('macdEndDate', d.toISOString()); }} />

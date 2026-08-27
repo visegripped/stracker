@@ -72,11 +72,14 @@ describe('chart theme helpers', () => {
     expect(agGridThemeClass('light')).toBe('ag-theme-quartz');
   });
 
-  it('uses high-contrast fallback colors when CSS variables are unavailable', () => {
+  it('uses high-contrast colors for the requested theme, not the live CSS variables', () => {
     const light = getChartChrome('light', 'History for LMT', { x: 'Date', y: 'Price' });
     const dark = getChartChrome('dark', 'MACD for LMT');
     expect(light.plugins.title.color).toBe('#2c292b');
     expect(dark.plugins.title.color).toBe('#f2eee9');
+    expect(dark.plugins.legend.labels.color).toBe('#f2eee9');
+    expect(dark.scales.x.ticks.color).toBe('#f2eee9');
+    expect(dark.scales.x.grid.color).toBe('rgba(242, 238, 233, 0.12)');
     expect(light.plugins.legend.labels.color).toBe(light.plugins.title.color);
     expect(light.scales.x.title?.text).toBe('Date');
     expect(light.scales.y.title?.text).toBe('Price');

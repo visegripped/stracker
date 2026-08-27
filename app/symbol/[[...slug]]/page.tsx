@@ -10,22 +10,24 @@ import {
   PlotPicker,
   TrackButton,
 } from '@components/index';
+import ChartLoading from '@components/ChartLoading/ChartLoading';
 import '@views/Symbol.css';
 import apiPost from '@utilities/apiPost';
 import { resolveSymbolFromSlug } from '@utilities/symbolParam';
+import {
+  applyFlagToggle,
+  DEFAULT_SYMBOL_DATA_POINTS,
+  readPersistedFlags,
+} from '@utilities/chartFlags';
 import AppShell from '../../AppShell';
 
 type HistoryRow = { date: string; EOD: string | number; [key: string]: unknown };
 type AlertRow = { id?: string | number; date: string; type: string };
 
 function SymbolContent({ symbol }: { symbol: string }) {
-  const defaultDataPoints = (() => {
-    try {
-      const dp = localStorage.getItem('dataPoints') ?? '{}';
-      const parsed = JSON.parse(dp);
-      return parsed && typeof parsed === 'object' ? parsed : { EOD: true };
-    } catch { return { EOD: true }; }
-  })();
+  const defaultDataPoints = (() =>
+    readPersistedFlags(localStorage.getItem('dataPoints'), DEFAULT_SYMBOL_DATA_POINTS)
+  )();
 
   const parseLS = (key: string, fallback: Date): Date => {
     const v = localStorage.getItem(key) ?? '';
@@ -39,13 +41,14 @@ function SymbolContent({ symbol }: { symbol: string }) {
   })();
 
   const [history, setHistory] = useState<HistoryRow[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
   const [alertHistory, setAlertHistory] = useState<AlertRow[]>([]);
   const [startDate, setStartDate] = useState<Date>(() => parseLS('startDate', defaultStart));
   const [endDate, setEndDate] = useState<Date>(() => parseLS('endDate', new Date()));
   const [dataPoints, setDataPoints] = useState<Record<string, boolean>>(defaultDataPoints);
 
   const updateDataPoint = (id: string, val: boolean) => {
-    const updated = { ...dataPoints, [id]: val };
+    const updated = applyFlagToggle(dataPoints, id, val);
     setDataPoints(updated);
     localStorage.setItem('dataPoints', JSON.stringify(updated));
   };
@@ -61,11 +64,24 @@ function SymbolContent({ symbol }: { symbol: string }) {
   };
 
   useEffect(() => {
-    if (startDate && endDate && symbol) {
-      apiPost({ task: 'history', symbol, startDate, endDate })
-        .then((data) => setHistory(Array.isArray(data) ? (data as HistoryRow[]) : []))
-        .catch((err) => { console.error('Error fetching history:', err); setHistory([]); });
-    }
+    if (!startDate || !endDate || !symbol) return undefined;
+    let cancelled = false;
+    setHistoryLoading(true);
+    apiPost({ task: 'history', symbol, startDate, endDate })
+      .then((data) => {
+        if (cancelled) return;
+        setHistory(Array.isArray(data) ? (data as HistoryRow[]) : []);
+      })
+      .catch((err) => {
+        console.error('Error fetching history:', err);
+        if (!cancelled) setHistory([]);
+      })
+      .finally(() => {
+        if (!cancelled) setHistoryLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [symbol, startDate, endDate]);
 
   useEffect(() => {
@@ -106,10 +122,12 @@ function SymbolContent({ symbol }: { symbol: string }) {
           </Fieldset>
         </div>
         <div>
-          {history.length ? (
+          {historyLoading ? (
+            <ChartLoading label={`Loading ${symbol}`} />
+          ) : history.length ? (
             <Graph symbol={symbol} history={history} enabledDataPoints={dataPoints} />
           ) : (
-            <h2>
+            <h2 className="chart-empty">
               There does not appear to be any data for {symbol} and the date range you have
               selected. Please adjust the dates.
             </h2>

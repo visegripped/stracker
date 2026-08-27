@@ -10,14 +10,11 @@ const DARK = {
   grid: 'rgba(242, 238, 233, 0.12)',
 };
 
-/** Chart.js canvas colors — keep in sync with --color-chart-* in App.css. */
+/** Chart.js canvas colors — keep in sync with --color-chart-* in App.css.
+ *  Use the theme argument, not getComputedStyle: data-theme is applied in
+ *  an effect, so CSS variables still reflect the previous theme during render.
+ */
 export function getChartPalette(theme: ResolvedTheme) {
-  if (typeof window !== 'undefined') {
-    const styles = getComputedStyle(document.documentElement);
-    const text = styles.getPropertyValue('--color-chart-text').trim();
-    const grid = styles.getPropertyValue('--color-chart-grid').trim();
-    if (text && grid) return { text, grid };
-  }
   return theme === 'dark' ? DARK : LIGHT;
 }
 

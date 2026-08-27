@@ -272,23 +272,13 @@ input[type="checkbox"] {
 
 .logo a:hover {
   color: var(--color-text);
+  opacity: 0.9;
 }
 
-.logo-mark {
-  display: inline-flex;
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: var(--color-gold);
-  color: var(--color-text-inverse);
-  align-items: center;
-  justify-content: center;
-}
-
-.logo-mark svg {
-  width: 16px;
-  height: 16px;
+.logo-mark-img {
   display: block;
+  height: 42px;
+  width: auto;
 }
 
 .nav-list {

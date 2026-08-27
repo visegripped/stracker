@@ -89,7 +89,7 @@ export const Graph = ({ symbol, enabledDataPoints, history }) => {
 
   return (
     <div className="chart-card">
-      <Line options={options} data={formattedHistory} ref={ref} />
+      <Line key={resolvedTheme} options={options} data={formattedHistory} ref={ref} />
     </div>
   );
 };

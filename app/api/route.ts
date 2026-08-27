@@ -223,9 +223,21 @@ export async function POST(request: NextRequest) {
   let body: Record<string, string | string[]>;
   try {
     const formData = await request.formData();
-    body = Object.fromEntries(
-      [...formData.entries()].map(([k, v]) => [k, v instanceof File ? '' : v])
-    ) as Record<string, string | string[]>;
+    body = {};
+    for (const key of new Set(formData.keys())) {
+      const values = [...formData.getAll(key)].flatMap((v) =>
+        v instanceof File ? [] : [String(v)]
+      );
+      if (values.length === 0) continue;
+      const name = key.endsWith('[]') ? key.slice(0, -2) : key;
+      if (key.endsWith('[]') || values.length > 1) {
+        const prev = body[name];
+        const existing = Array.isArray(prev) ? prev : prev != null ? [prev] : [];
+        body[name] = [...existing, ...values];
+      } else {
+        body[name] = values[0];
+      }
+    }
   } catch {
     return NextResponse.json({ err: 'Invalid request body' }, { status: 400 });
   }

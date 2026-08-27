@@ -51,18 +51,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <header>
         <h1 className="logo">
           <Link href="/">
-            <span className="logo-mark" aria-hidden="true">
-              <svg viewBox="0 0 16 16">
-                <polyline
-                  points="1,12 5,8 8,10 15,3"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </span>
+            <img
+              className="logo-mark-img"
+              src="/stracker-mark.svg"
+              alt=""
+              width={40}
+              height={44}
+            />
             Stracker
           </Link>
         </h1>

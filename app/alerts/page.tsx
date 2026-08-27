@@ -1,15 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import apiPost from '@utilities/apiPost';
 import { AgGridReact } from 'ag-grid-react';
-import type { ColDef } from 'ag-grid-community';
+import type { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import '@views/Alerts.css';
 import { useTheme } from '@context/ThemeContext';
 import { agGridThemeClass } from '@utilities/chartTheme';
+import {
+  ALERT_TYPE_FILTERS,
+  alertTypeColumnFilterModel,
+  matchesAlertTypeFilter,
+  type AlertTypeFilter,
+} from '@utilities/alertTypeFilter';
 import AppShell from '../AppShell';
 
 type AlertRow = {
@@ -42,53 +48,60 @@ const LinkedSymbol = (props: { value: string }) => (
 const YTDCell = (props: { data: AlertRow }) => getSpanFromDiff(props.data.lastEOD, props.data.yearStartEOD);
 const DODCell = (props: { data: AlertRow }) => getSpanFromDiff(props.data.lastEOD, props.data.previousDayEOD);
 
-const ALERT_TYPES = ['P0-buy', 'P1-buy', 'P2-buy', 'P0-sell', 'P1-sell', 'P2-sell'];
-const BUY_TYPES = ALERT_TYPES.filter((t) => t.includes('buy'));
-const SELL_TYPES = ALERT_TYPES.filter((t) => t.includes('sell'));
-
-const FILTER_OPTIONS = [
-  { label: 'All', types: [] },
-  { label: 'Buy only', types: BUY_TYPES },
-  { label: 'Sell only', types: SELL_TYPES },
-];
+function applyTypeColumnFilter(api: GridApi<AlertRow> | null, filter: AlertTypeFilter) {
+  if (!api) return;
+  void api.setColumnFilterModel('type', alertTypeColumnFilterModel(filter)).then(() => {
+    api.onFilterChanged();
+  });
+}
 
 function AlertsContent() {
   const { resolvedTheme } = useTheme();
   const [alertHistory, setAlertHistory] = useState<AlertRow[]>([]);
-  const [filterIdx, setFilterIdx] = useState(0);
+  const [typeFilter, setTypeFilter] = useState<AlertTypeFilter>('all');
   const [groupBySector, setGroupBySector] = useState(false);
-
-  const fetchAlerts = (types: string[]) => {
-    apiPost({ task: 'getAlertHistoryList', limit: 200, alertTypes: types })
-      .then((data) => setAlertHistory(Array.isArray(data) ? (data as AlertRow[]) : []))
-      .catch((err) => { console.error('Error fetching alert history:', err); setAlertHistory([]); });
-  };
+  const gridApiRef = useRef<GridApi<AlertRow> | null>(null);
 
   useEffect(() => {
-    fetchAlerts(FILTER_OPTIONS[filterIdx].types);
-  }, [filterIdx]);
+    apiPost({ task: 'getAlertHistoryList', limit: 200 })
+      .then((data) => setAlertHistory(Array.isArray(data) ? (data as AlertRow[]) : []))
+      .catch((err) => { console.error('Error fetching alert history:', err); setAlertHistory([]); });
+  }, []);
+
+  const onGridReady = useCallback((event: GridReadyEvent<AlertRow>) => {
+    gridApiRef.current = event.api;
+    applyTypeColumnFilter(event.api, typeFilter);
+  }, [typeFilter]);
+
+  const selectTypeFilter = (next: AlertTypeFilter) => {
+    setTypeFilter(next);
+    applyTypeColumnFilter(gridApiRef.current, next);
+  };
 
   const colDefs: ColDef<AlertRow>[] = [
     { field: 'symbol', sortable: true, cellRenderer: LinkedSymbol },
     { field: 'name', flex: 2 },
     { field: 'sector' },
     { field: 'industry', flex: 2 },
-    { field: 'type', filter: 'agSetColumnFilter' },
+    { field: 'type', filter: 'agTextColumnFilter' },
     { field: 'lastEOD', headerName: 'EOD' },
     { field: 'yearStartEOD', cellRenderer: YTDCell, headerName: 'Year to EOD' },
     { field: 'dayOverDay', cellRenderer: DODCell },
     { field: 'date', sort: 'asc' },
   ];
 
+  const visibleAlerts = alertHistory.filter((a) => matchesAlertTypeFilter(a.type, typeFilter));
+
   return (
     <>
       <div className="alerts-toolbar">
         <div className="filter-buttons">
-          {FILTER_OPTIONS.map((opt, i) => (
+          {ALERT_TYPE_FILTERS.map((opt) => (
             <button
-              key={opt.label}
-              onClick={() => setFilterIdx(i)}
-              className={filterIdx === i ? 'active' : ''}
+              key={opt.id}
+              type="button"
+              onClick={() => selectTypeFilter(opt.id)}
+              className={typeFilter === opt.id ? 'active' : ''}
             >
               {opt.label}
             </button>
@@ -103,9 +116,14 @@ function AlertsContent() {
       <section className={`table-container ${agGridThemeClass(resolvedTheme)}`}>
         {alertHistory.length ? (
           groupBySector ? (
-            <SectorGroupedView alerts={alertHistory} />
+            <SectorGroupedView alerts={visibleAlerts} />
           ) : (
-            <AgGridReact rowData={alertHistory} columnDefs={colDefs} />
+            <AgGridReact<AlertRow>
+              rowData={alertHistory}
+              columnDefs={colDefs}
+              onGridReady={onGridReady}
+              onGridPreDestroyed={() => { gridApiRef.current = null; }}
+            />
           )
         ) : (
           <h3>Fetching data...</h3>

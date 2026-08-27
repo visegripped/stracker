@@ -3,8 +3,8 @@ const Label = ({ id, clickHandler, isChecked }) => {
     <label>
       <input
         type="checkbox"
-        defaultChecked={isChecked}
-        onClick={(e) => clickHandler(id, e.target.checked)}
+        checked={!!isChecked}
+        onChange={(e) => clickHandler(id, e.target.checked)}
       />{" "}
       {id}
     </label>

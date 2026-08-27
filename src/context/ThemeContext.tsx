@@ -65,8 +65,9 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, [resolvedTheme, ready]);
 
   const setPreference = useCallback((next: ThemePreference) => {
-    setPreferenceState(next);
     localStorage.setItem(THEME_PREFERENCE_KEY, next);
+    applyResolvedTheme(resolveTheme(next, readSystemPrefersDark()));
+    setPreferenceState(next);
   }, []);
 
   const value = useMemo(
