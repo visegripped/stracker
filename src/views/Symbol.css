@@ -1,6 +1,7 @@
 .search-bar {
-  background: var(--primary-bg-color);
+  background: var(--color-bg-muted);
   padding: var(--spacing);
   text-align: center;
   position: relative;
+  border-bottom: 1px solid var(--color-border);
 }

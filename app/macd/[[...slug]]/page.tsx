@@ -19,6 +19,8 @@ import '@views/Macd.css';
 import apiPost from '@utilities/apiPost';
 import { formatMACDData } from '@utilities/macdCalculations';
 import { resolveSymbolFromSlug } from '@utilities/symbolParam';
+import { useTheme } from '@context/ThemeContext';
+import { agGridThemeClass, getChartChrome } from '@utilities/chartTheme';
 import AppShell from '../../AppShell';
 
 type HistoryRow = { date: string; EOD: string | number; [key: string]: unknown };
@@ -27,6 +29,7 @@ type MacdRow = { date: string; EOD: string | number; MACD: number | null; Signal
 type EnabledLines = Record<string, boolean>;
 
 function MacdGraph({ symbol, macdData, enabledLines }: { symbol: string; macdData: MacdRow[]; enabledLines: EnabledLines }) {
+  const { resolvedTheme } = useTheme();
   const labels = macdData.map((r) => r.date);
   const datasets: ChartDataset<'line' | 'bar', (number | null)[]>[] = [];
 
@@ -34,21 +37,23 @@ function MacdGraph({ symbol, macdData, enabledLines }: { symbol: string; macdDat
   if (enabledLines.Signal) datasets.push({ type: 'line', label: 'Signal', data: macdData.map((r) => r.Signal), fill: false, borderColor: 'rgb(255,159,64)', backgroundColor: 'rgb(255,159,64)', tension: 0.1 } as ChartDataset<'line', (number | null)[]>);
   if (enabledLines.Histogram) datasets.push({ type: 'bar', label: 'Histogram', data: macdData.map((r) => r.Histogram), backgroundColor: macdData.map((r) => (r.Histogram ?? 0) >= 0 ? 'rgba(75,192,75,.6)' : 'rgba(255,99,132,.6)'), borderColor: macdData.map((r) => (r.Histogram ?? 0) >= 0 ? 'rgb(75,192,75)' : 'rgb(255,99,132)'), borderWidth: 1 } as ChartDataset<'bar', (number | null)[]>);
 
-  const options = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: true, position: 'bottom' as const, labels: { color: '#efefef', font: { size: 14 }, padding: 15, usePointStyle: true, pointStyle: 'circle' as const, boxWidth: 8, boxHeight: 8 } }, title: { display: true, text: `MACD for ${symbol}`, color: '#efefef', font: { size: 16, weight: 'bold' as const }, padding: { top: 10, bottom: 20 } } }, scales: { x: { ticks: { color: '#efefef', maxRotation: 45, minRotation: 45 }, grid: { color: 'rgba(255,255,255,.1)' } }, y: { ticks: { color: '#efefef' }, grid: { color: 'rgba(255,255,255,.1)' } } } };
+  const chrome = getChartChrome(resolvedTheme, `MACD for ${symbol}`);
+  const options = { ...chrome, maintainAspectRatio: false };
 
-  return <div className="macd-graph-container"><Chart type="bar" options={options} data={{ labels, datasets }} /></div>;
+  return <div className="macd-graph-container chart-card"><Chart type="bar" options={options} data={{ labels, datasets }} /></div>;
 }
 
 function MacdTable({ macdData }: { macdData: MacdRow[] }) {
+  const { resolvedTheme } = useTheme();
   const fmt = (p: { value: number | null }) => (p.value != null ? p.value.toFixed(4) : 'N/A');
   const colDefs: ColDef<MacdRow>[] = [
     { field: 'date', sortable: true, sort: 'desc' as const, width: 120 },
     { field: 'EOD', sortable: true, width: 100 },
     { field: 'MACD', sortable: true, width: 120, valueFormatter: fmt },
     { field: 'Signal', sortable: true, width: 120, valueFormatter: fmt },
-    { field: 'Histogram', sortable: true, width: 120, valueFormatter: fmt, cellStyle: (p: { value: number | null }) => ({ color: (p.value ?? 0) >= 0 ? 'lightgreen' : 'lightcoral' }) },
+    { field: 'Histogram', sortable: true, width: 120, valueFormatter: fmt, cellStyle: (p: { value: number | null }) => ({ color: (p.value ?? 0) >= 0 ? '#43a047' : '#e53935' }) },
   ];
-  return <div className="macd-table-container ag-theme-quartz-dark"><AgGridReact rowData={macdData} columnDefs={colDefs} domLayout="autoHeight" /></div>;
+  return <div className={`macd-table-container ${agGridThemeClass(resolvedTheme)}`}><AgGridReact rowData={macdData} columnDefs={colDefs} domLayout="autoHeight" /></div>;
 }
 
 function MacdContent({ symbol }: { symbol: string }) {

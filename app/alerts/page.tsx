@@ -8,6 +8,8 @@ import type { ColDef } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
 import 'ag-grid-community/styles/ag-theme-quartz.css';
 import '@views/Alerts.css';
+import { useTheme } from '@context/ThemeContext';
+import { agGridThemeClass } from '@utilities/chartTheme';
 import AppShell from '../AppShell';
 
 type AlertRow = {
@@ -51,6 +53,7 @@ const FILTER_OPTIONS = [
 ];
 
 function AlertsContent() {
+  const { resolvedTheme } = useTheme();
   const [alertHistory, setAlertHistory] = useState<AlertRow[]>([]);
   const [filterIdx, setFilterIdx] = useState(0);
   const [groupBySector, setGroupBySector] = useState(false);
@@ -97,7 +100,7 @@ function AlertsContent() {
         </label>
       </div>
 
-      <section className="table-container ag-theme-quartz-dark">
+      <section className={`table-container ${agGridThemeClass(resolvedTheme)}`}>
         {alertHistory.length ? (
           groupBySector ? (
             <SectorGroupedView alerts={alertHistory} />

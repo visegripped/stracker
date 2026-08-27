@@ -107,7 +107,7 @@ function SymbolContent({ symbol }: { symbol: string }) {
         </div>
         <div>
           {history.length ? (
-            <Graph symbol={symbol} symbolName={symbol} history={history} enabledDataPoints={dataPoints} />
+            <Graph symbol={symbol} history={history} enabledDataPoints={dataPoints} />
           ) : (
             <h2>
               There does not appear to be any data for {symbol} and the date range you have

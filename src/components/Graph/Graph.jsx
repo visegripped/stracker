@@ -1,9 +1,10 @@
-import React, { useState, useRef } from 'react';
-import ReactDOM from 'react-dom/client';
-// import { AgCharts } from 'ag-charts-react'; //ex: https://charts.ag-grid.com/react/quick-start/
-import "chart.js/auto"// https://github.com/reactchartjs/react-chartjs-2/issues/1037
-import { Line } from "react-chartjs-2";
+'use client';
 
+import { useRef } from 'react';
+import "chart.js/auto";
+import { Line } from "react-chartjs-2";
+import { useTheme } from '@context/ThemeContext';
+import { getChartChrome } from '@utilities/chartTheme';
 
 const formatHistoryAsDatasets = (history = []) => {
   const dataSets = {
@@ -45,16 +46,16 @@ const formatHistoryAsDatasets = (history = []) => {
 };
 
 const colorMap = {
-  EOD: "red",
-  MA20: "blue",
-  MA50: "orange",
-  delta: "green",
-  deltaMA5: "brown",
-  deltaMA10: "purple",
-  deltaMA20: "teal",
-  M1: "white",
-  M2: "gold",
-  M3: "pink",
+  EOD: "#e53935",
+  MA20: "#1e88e5",
+  MA50: "#fb8c00",
+  delta: "#43a047",
+  deltaMA5: "#8d6e63",
+  deltaMA10: "#8e24aa",
+  deltaMA20: "#00897b",
+  M1: "#039be5",
+  M2: "#c9a227",
+  M3: "#d81b60",
 };
 
 const getData = (enabledDataPoints = { EOD: true }, historicalData = []) => {
@@ -78,91 +79,17 @@ const getData = (enabledDataPoints = { EOD: true }, historicalData = []) => {
   };
 };
 
-export const Graph = ({ symbol, symbolName, enabledDataPoints, history }) => {
+export const Graph = ({ symbol, enabledDataPoints, history }) => {
+  const { resolvedTheme } = useTheme();
   const formattedHistory = getData(enabledDataPoints, history);
   const options = {
-    responsive: true,
-    plugins: {
-      legend: {
-        display: true,
-        position: "bottom",
-        labels: {
-          color: "#efefef",
-          font: {
-            size: 14,
-          },
-          padding: 15,
-          usePointStyle: true,
-          pointStyle: 'circle',
-          boxWidth: 8,
-          boxHeight: 8,
-        },
-      },
-      title: {
-        display: true,
-        text: `History for ${symbol}`,
-        color: "#efefef",
-        font: {
-          size: 16,
-          weight: 'bold',
-        },
-        padding: {
-          top: 10,
-          bottom: 20,
-        },
-      },
-    },
-    scales: {
-      x: {
-        title: {
-          display: true,
-          text: 'Date',
-          color: "#efefef",
-          font: {
-            size: 14,
-            weight: 'bold',
-          },
-          padding: {
-            top: 10,
-          },
-        },
-        ticks: {
-          color: "#efefef",
-          maxRotation: 45,
-          minRotation: 45,
-        },
-        grid: {
-          color: "rgba(255, 255, 255, 0.1)",
-        },
-      },
-      y: {
-        title: {
-          display: true,
-          text: 'Price',
-          color: "#efefef",
-          font: {
-            size: 14,
-            weight: 'bold',
-          },
-          padding: {
-            right: 10,
-          },
-        },
-        ticks: {
-          color: "#efefef",
-        },
-        grid: {
-          color: "rgba(255, 255, 255, 0.1)",
-        },
-      },
-    },
+    ...getChartChrome(resolvedTheme, `History for ${symbol}`, { x: 'Date', y: 'Price' }),
   };
   const ref = useRef();
 
   return (
-    <div>
+    <div className="chart-card">
       <Line options={options} data={formattedHistory} ref={ref} />
-      {/* <AgCharts options={chartOptions} /> */}
     </div>
   );
 };

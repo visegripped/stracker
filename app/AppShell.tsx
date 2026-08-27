@@ -2,11 +2,13 @@
 
 import { useContext } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { AuthContext } from '@context/AuthContext';
 import AuthButton from '@components/AuthButton';
 import Notification from '@components/Notification';
 import { NotificationsContext } from '@context/NotificationsContext';
 import { ErrorBoundary } from 'react-error-boundary';
+import ThemeToggle from '@components/ThemeToggle/ThemeToggle';
 
 function fallbackRender({ error }: { error: Error }) {
   return (
@@ -28,22 +30,49 @@ const Notifications = () => {
   );
 };
 
+const NAV = [
+  { href: '/symbol', label: 'Symbol' },
+  { href: '/macd', label: 'MACD' },
+  { href: '/alerts', label: 'Alert History' },
+];
+
+function navIsActive(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
+
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { accessToken } = useContext(AuthContext as React.Context<{ accessToken: string }>);
   const currentYear = new Date().getFullYear();
   const version = process.env.NEXT_PUBLIC_APP_VERSION ?? '';
+  const pathname = usePathname() ?? '';
 
   return (
     <>
       <header>
         <h1 className="logo">
-          <Link href="/">Stracker</Link>
+          <Link href="/">
+            <span className="logo-mark" aria-hidden="true">
+              <svg viewBox="0 0 16 16">
+                <polyline
+                  points="1,12 5,8 8,10 15,3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
+            Stracker
+          </Link>
         </h1>
         <nav className="navbar">
           <ul className="nav-list">
-            <li className="nav-item"><Link href="/symbol">Symbol</Link></li>
-            <li className="nav-item"><Link href="/macd">MACD</Link></li>
-            <li className="nav-item"><Link href="/alerts">Alert History</Link></li>
+            {NAV.map(({ href, label }) => (
+              <li key={href} className={`nav-item${navIsActive(pathname, href) ? ' is-active' : ''}`}>
+                <Link href={href}>{label}</Link>
+              </li>
+            ))}
           </ul>
         </nav>
         <div className="auth">
@@ -67,6 +96,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <footer>
         <div>&copy; Copyright 2018 - {currentYear}. All rights reserved.</div>
+        <ThemeToggle />
         {version && <div className="version">v{version}</div>}
       </footer>
     </>

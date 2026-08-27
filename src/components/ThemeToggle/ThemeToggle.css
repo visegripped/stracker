@@ -1,0 +1,62 @@
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg-muted);
+}
+
+.theme-toggle__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.theme-toggle__btn:hover {
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  box-shadow: none;
+  transform: none;
+}
+
+.theme-toggle__btn.is-active {
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+}
+
+.theme-toggle__btn.is-active:hover {
+  background: var(--color-button-hover);
+  color: var(--color-button-text);
+}
+
+.theme-toggle__icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+}
+
+@media (max-width: 720px) {
+  .theme-toggle__btn {
+    padding: 6px 9px;
+  }
+
+  .theme-toggle__btn span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+}

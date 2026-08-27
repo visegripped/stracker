@@ -1,3 +1,35 @@
-.table-container { height: 100%; padding: var(--spacing);}
-.price-positive {color: green;}
-.price-negative {color: red;}
+.table-container {
+  height: 100%;
+  padding: var(--spacing);
+  border-radius: 12px;
+}
+
+.price-positive {
+  color: #43a047;
+  font-weight: 600;
+}
+
+.price-negative {
+  color: #e53935;
+  font-weight: 600;
+}
+
+.sector-grouped-alerts {
+  display: grid;
+  gap: 16px;
+}
+
+.sector-block h3 {
+  margin: 0 0 8px;
+  color: var(--color-gold);
+}
+
+.industry-block h4 {
+  margin: 12px 0 6px;
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+}
+
+.alert-row {
+  padding: 2px 0;
+}

@@ -1,19 +1,18 @@
 .notification {
   padding: var(--spacing);
-  background: var(--secondary-bg-color);
+  background: var(--color-bg-elevated);
   text-align: left;
-  border: 1px solid var(--secondary-border-color);
-  border-radius: var(--border-radius);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
   margin-top: var(--spacing);
   min-width: 15vw;
   max-width: 35vw;
   display: flex;
   gap: var(--spacing);
-  flex-flow: space-between;
   align-items: flex-start;
-  align-content: flex-start;
   position: relative;
-  color: var(--secondary-text-color);
+  color: var(--color-text);
+  box-shadow: var(--color-shadow);
 }
 
 .notification--pre {
@@ -26,3 +25,16 @@
   flex-grow: 1;
 }
 
+.notification--button {
+  padding: 4px 10px;
+  min-width: 2rem;
+  border-radius: 8px;
+  background: var(--color-bg-muted);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.notification--button:hover {
+  background: var(--color-button-bg);
+  color: var(--color-button-text);
+}
