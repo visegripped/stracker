@@ -1,5 +1,5 @@
 import React, { useState, createContext } from "react";
-import { UUID } from "uuidjs";
+import { v4 as uuidv4 } from "uuid";
 
 const NotificationsContext = createContext();
 
@@ -14,7 +14,7 @@ const NotificationsProvider = (props) => {
 
   const addNotification = (notificationObj) => {
     let updatedNotifications = { ...notifications };
-    const uuid = UUID.generate();
+    const uuid = uuidv4();
     notificationObj.uuid = uuid; // add to the individual notification for easy lookup later.
     updatedNotifications[uuid] = notificationObj;
     setNotifications(updatedNotifications);

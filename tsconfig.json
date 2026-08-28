@@ -49,12 +49,6 @@
       ],
       "@context/*": [
         "./src/context/*"
-      ],
-      "@routes": [
-        "./src/routes"
-      ],
-      "@routes/*": [
-        "./src/routes/*"
       ]
     },
     "target": "ES2017"
@@ -68,8 +62,6 @@
   ],
   "exclude": [
     "node_modules",
-    "doc_root",
-    "vite.config.ts",
     "vitest.config.ts",
     "src/__tests__"
   ]

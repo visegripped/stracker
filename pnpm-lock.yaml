@@ -32,12 +32,6 @@ importers:
       '@react-oauth/google':
         specifier: ^0.12.2
         version: 0.12.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      ag-charts-community:
-        specifier: ^10.3.9
-        version: 10.3.9
-      ag-charts-react:
-        specifier: ^10.3.9
-        version: 10.3.9(ag-charts-community@10.3.9)(react@18.3.1)
       ag-grid-community:
         specifier: ^32.3.9
         version: 32.3.9
@@ -83,9 +77,6 @@ importers:
       uuid:
         specifier: ^14.0.1
         version: 14.0.1
-      uuidjs:
-        specifier: ^5.1.0
-        version: 5.1.0
     devDependencies:
       '@testing-library/jest-dom':
         specifier: ^6.9.1
@@ -132,9 +123,6 @@ importers:
       eslint-plugin-react-hooks:
         specifier: ^5.2.0
         version: 5.2.0(eslint@9.39.5(jiti@1.21.6))
-      eslint-plugin-react-refresh:
-        specifier: ^0.4.24
-        version: 0.4.24(eslint@9.39.5(jiti@1.21.6))
       jsdom:
         specifier: ^25.0.1
         version: 25.0.1
@@ -1515,18 +1503,6 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  ag-charts-community@10.3.9:
-    resolution: {integrity: sha512-9rZneZr1xwX2yjoD+9+WJjNd0WF/FD1ODpNqOR79bqMWu1T9fTu24N51ZIMPDdGHQWEPzdpva7f+K2xmHY5ntA==}
-
-  ag-charts-locale@10.3.9:
-    resolution: {integrity: sha512-Wq0VNFFwE9+mErmeRue1vGTtuTmM0gH6PXbCnZNORv31J6smXF+uqmZ+98cZ7kXZQ27+HiVElh8HakQsBg70bA==}
-
-  ag-charts-react@10.3.9:
-    resolution: {integrity: sha512-SoMr8k+w/hpNR8i0M6xXQfUYAz4UcwrKPEAC9zphA/ZIoUfTEl/8TEcfRfEG0trwJYr2J/JwaEpdLcm8t4VJHw==}
-    peerDependencies:
-      ag-charts-community: 10.3.9
-      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
-
   ag-charts-types@10.3.9:
     resolution: {integrity: sha512-drcRiJVencliC8LnRwk4MmeQDNNBg5GzmOoLFihO3/k0CUK0VF/N+2nc7iFozwaNG0btSB9vAhYuJLjqHMtRrQ==}
 
@@ -2092,11 +2068,6 @@ packages:
     engines: {node: '>=18'}
     peerDependencies:
       eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0 || ^10.0.0
-
-  eslint-plugin-react-refresh@0.4.24:
-    resolution: {integrity: sha512-nLHIW7TEq3aLrEYWpVaJ1dRgFR+wLDPN8e8FpYAql/bMV2oBEfC37K0gLEGgv9fy66juNShSMV8OkTqzltcG/w==}
-    peerDependencies:
-      eslint: '>=8.40'
 
   eslint-plugin-react@7.37.5:
     resolution: {integrity: sha512-Qteup0SqU15kdocexFNAJMvCJEfa2xUKNV4CC1xsVMrIIqEy3SQ/rqyxCWNzfrd3/ldy6HMlD2e0JDVpDg2qIA==}
@@ -3224,10 +3195,6 @@ packages:
 
   uuid@14.0.1:
     resolution: {integrity: sha512-6ZxzVpzDXDa3bJWaHilVayA+BH/1zmxCJoVgvmqJnid/gPoKHxUrS/aC/T6LGQtNHT+XHG9fXPJB4d+IrU30Ew==}
-    hasBin: true
-
-  uuidjs@5.1.0:
-    resolution: {integrity: sha512-HAQPtUkr7t5Ud3uCwRcqtBRNagu/2aerrrBQE6PzgSluGijvFF75UaOq22Xw545GGviRjSLhc4c8CaSMI5h4Ng==}
     hasBin: true
 
   vite-node@3.2.4:
@@ -4603,18 +4570,6 @@ snapshots:
 
   acorn@8.17.0: {}
 
-  ag-charts-community@10.3.9:
-    dependencies:
-      ag-charts-locale: 10.3.9
-      ag-charts-types: 10.3.9
-
-  ag-charts-locale@10.3.9: {}
-
-  ag-charts-react@10.3.9(ag-charts-community@10.3.9)(react@18.3.1):
-    dependencies:
-      ag-charts-community: 10.3.9
-      react: 18.3.1
-
   ag-charts-types@10.3.9: {}
 
   ag-grid-community@32.3.9:
@@ -5262,10 +5217,6 @@ snapshots:
       zod-validation-error: 4.0.2(zod@4.4.3)
     transitivePeerDependencies:
       - supports-color
-
-  eslint-plugin-react-refresh@0.4.24(eslint@9.39.5(jiti@1.21.6)):
-    dependencies:
-      eslint: 9.39.5(jiti@1.21.6)
 
   eslint-plugin-react@7.37.5(eslint@9.39.5(jiti@1.21.6)):
     dependencies:
@@ -6571,8 +6522,6 @@ snapshots:
       '@types/react': 18.3.26
 
   uuid@14.0.1: {}
-
-  uuidjs@5.1.0: {}
 
   vite-node@3.2.4(@types/node@24.10.0)(jiti@1.21.6)(tsx@4.23.0)(yaml@2.9.0):
     dependencies:

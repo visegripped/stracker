@@ -20,7 +20,6 @@ export default [
       '.next/**',
       'node_modules/**',
       'dist/**',
-      'doc_root/**',
       'drizzle/**',
     ],
   },

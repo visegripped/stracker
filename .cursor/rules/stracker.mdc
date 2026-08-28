@@ -1,49 +1,20 @@
 ---
 alwaysApply: true
 ---
-This project uses pnpm, so all instructions should read accordingly
-The daily.php file is run every monday - friday at 5pm pacific time via cron
-the daily-alerts.php file is run every monday - friday at 5 pm pacific time via cron
-There is a google spreadsheet that is used to manage what symbols are tracked and the end of day prices.  That spreadsheet is made public as a csv which this site accesses for the daily close price
-EOD is End of Day
-Stracker is the name of the site (Stock Tracker)
-This is a private site
-The contents of the secretSauce file must always remain secret.  If unit tests are added, those too should be in the .gitignore file
-any password or API key required should be in the passwords.php file
+This project uses pnpm, so all instructions should read accordingly.
 
-The site checks a variety of stock prices each day and calculates based on a series of formulas and uses those to determine alerts which are buy signals.  
+Stracker (Stock Tracker) is a private site. It checks stock prices each day, runs formulas, and produces buy-signal alerts.
 
-Alerts are measured by P0, P1 and P2 where P0 is a must buy and the other two are early indicators.
+Alerts are measured by P0, P1 and P2 where P0 is a must buy and the other two are early indicators. EOD is End of Day.
 
-The hosting solution used is siteground.com.  some of the docs are here: https://www.siteground.com/tutorials/getting-started/
+A public Google Sheet CSV lists tracked symbols and is used as the source of daily close prices (`GOOGLE_SHEET_CSV_URL`).
 
-There are three tables in the DB:  gifts, users and reporting
+Hosting is Vercel (Next.js). Postgres is Neon. Crons are defined in `vercel.json`:
+- `/api/cron/backfill` at `0 0 * * 2-6` UTC (5 PM PT Mon–Fri)
+- `/api/cron/daily` at `0 1 * * 2-6` UTC (6 PM PT Mon–Fri)
 
-DESCRIBE gifts;
-itemid	int	NO	PRI	NULL	auto_increment	
-userid	int	NO		NULL		
-item_name	varchar(120)	NO		NULL		
-item_link	varchar(255)	NO		NULL		
-item_desc	tinyblob	YES		NULL		
-item_type	varchar(35)	NO		NULL		
-status	tinyint	NO		0		
-remove	tinyint	NO		0		
-create_date	int	YES		NULL		
-reserve_date	int	YES		0		
-buy_date	int	NO		NULL		
-remove_date	int	YES		0		
-received_date	int	YES		0		
-buy_userid	varchar(8)	NO		NULL		
-archive	tinyint	NO		NULL		
+The contents of the secret sauce formulas must always remain secret. Local formulas live in `lib/secretSauce.local.ts` (gitignored). Production uses `SECRET_SAUCE_MODULE_B64`. If unit tests cover formulas, those tests should also stay out of git.
 
-DESCRIBE users;
-userid	    int	            NO	    PRI	    NULL		
-firstName	varchar(15)	    NO		        NULL		
-lastName	varchar(25)	    NO		        NULL		
-email	    varchar(50)	    YES		        NULL		
+Passwords, API keys, and connection strings belong in `.env.local` (local) or Vercel environment variables (production). Never commit them.
 
-DESCRIBE reporting;
-id	        int	        NO	    PRI	    NULL	            auto_increment	
-report	    tinytext	NO		        NULL		
-meta	    json	    NO		        NULL		
-timestamp	timestamp	NO		        CURRENT_TIMESTAMP	DEFAULT_GENERATED	
+Drizzle tables: `symbols`, `symbol_data`, `alerts`, `track`, `application_reports`.
