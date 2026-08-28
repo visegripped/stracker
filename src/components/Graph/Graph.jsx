@@ -5,6 +5,7 @@ import "chart.js/auto";
 import { Line } from "react-chartjs-2";
 import { useTheme } from '@context/ThemeContext';
 import { getChartChrome } from '@utilities/chartTheme';
+import { CHART_SERIES_COLORS } from '@utilities/chartSeriesColors';
 
 const formatHistoryAsDatasets = (history = []) => {
   const dataSets = {
@@ -45,19 +46,6 @@ const formatHistoryAsDatasets = (history = []) => {
   return dataSets;
 };
 
-const colorMap = {
-  EOD: "#e53935",
-  MA20: "#1e88e5",
-  MA50: "#fb8c00",
-  delta: "#43a047",
-  deltaMA5: "#8d6e63",
-  deltaMA10: "#8e24aa",
-  deltaMA20: "#00897b",
-  M1: "#039be5",
-  M2: "#c9a227",
-  M3: "#d81b60",
-};
-
 const getData = (enabledDataPoints = { EOD: true }, historicalData = []) => {
   const formattedHistoricalData = formatHistoryAsDatasets(historicalData);
   const datasets = [];
@@ -68,8 +56,9 @@ const getData = (enabledDataPoints = { EOD: true }, historicalData = []) => {
         label: dataPoint,
         data: formattedHistoricalData[dataPoint],
         fill: false,
-        borderColor: colorMap[dataPoint],
-        backgroundColor: colorMap[dataPoint],
+        borderColor: CHART_SERIES_COLORS[dataPoint],
+        backgroundColor: CHART_SERIES_COLORS[dataPoint],
+        borderWidth: dataPoint === 'EOD' ? 2.5 : 2,
       });
     }
   });
