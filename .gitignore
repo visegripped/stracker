@@ -1,41 +1,40 @@
+# secrets
 passwords.php
 secretSauce.php
 lib/secretSauce.local.ts
+.env*
+!.env.example
+
+# local scratch
 reference-material/
-doc_root/public_html/stracker/static/
 notes.md
 *.code-workspace
+stracker.code-workspace
+ai-docs/
+
 # dependencies
 node_modules
-doc_root/includes/vendor/
-doc_root/includes/.phpunit.cache/
-doc_root/includes/phpunit.xml.bak/
-build/
-dist/
+vendor/
 /.pnp
 .pnp.js
-vendor/
-deploy.js
+
+# build
+build/
+dist/
 .next/
 .vercel/
 migration-data/
+tsconfig.tsbuildinfo
 
 # testing
 /coverage
 
-# production
-/build
-
 # misc
 .DS_Store
-.env*
-stracker.code-workspace
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
-
 
 # Windows image file caches
 Thumbs.db
@@ -80,5 +79,3 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
-
-ai-docs/

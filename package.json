@@ -26,8 +26,6 @@
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
     "@react-oauth/google": "^0.12.2",
-    "ag-charts-community": "^10.3.9",
-    "ag-charts-react": "^10.3.9",
     "ag-grid-community": "^32.3.9",
     "ag-grid-react": "^32.3.9",
     "chart.js": "^4.5.1",
@@ -42,8 +40,7 @@
     "react-select": "^5.10.2",
     "resend": "^6.17.2",
     "server-only": "^0.0.1",
-    "uuid": "^14.0.1",
-    "uuidjs": "^5.1.0"
+    "uuid": "^14.0.1"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
@@ -61,7 +58,6 @@
     "eslint": "^9.39.5",
     "eslint-config-next": "^16.2.11",
     "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.24",
     "jsdom": "^25.0.1",
     "prettier": "^3.9.5",
     "typescript": "^5.9.3",
