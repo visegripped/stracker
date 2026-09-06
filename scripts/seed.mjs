@@ -26,7 +26,9 @@ const db = drizzle(sql);
 
 // ──────────────────────────────────────────────────────────────────────────────
 
-function round2(n) { return Math.round(n * 100) / 100; }
+function round2(n) {
+  return Math.round(n * 100) / 100;
+}
 
 function calcMA(data, n) {
   const slice = data.slice(-n);
@@ -44,7 +46,15 @@ function getDataFromHistory(history) {
     if (!isFinite(eod)) continue;
     eodPrices.push(eod);
 
-    let ma20 = 0, delta = 0, deltaMa5 = 0, deltaMa10 = 0, deltaMa20 = 0, m1 = 0, m2 = 0, m3 = 0, ma50 = 0;
+    let ma20 = 0,
+      delta = 0,
+      deltaMa5 = 0,
+      deltaMa10 = 0,
+      deltaMa20 = 0,
+      m1 = 0,
+      m2 = 0,
+      m3 = 0,
+      ma50 = 0;
 
     if (i > 20) {
       ma20 = calcMA(eodPrices, 20);
@@ -62,11 +72,26 @@ function getDataFromHistory(history) {
     if (i > 50) ma50 = calcMA(eodPrices, 50);
 
     // Simple P0/P1/P2 (placeholder — real logic is in lib/secretSauce.ts)
-    const p0 = (m1 - ma20) > 0 ? 1 : 0;
-    const p1 = (m2 - m3) > 0 ? 1 : 0;
-    const p2 = (m1 - m2) > 0 ? 1 : 0;
+    const p0 = m1 - ma20 > 0 ? 1 : 0;
+    const p1 = m2 - m3 > 0 ? 1 : 0;
+    const p2 = m1 - m2 > 0 ? 1 : 0;
 
-    result.push({ date, eod, delta, deltaMa5, deltaMa10, deltaMa20, ma20, ma50, m1, m2, m3, p0, p1, p2 });
+    result.push({
+      date,
+      eod,
+      delta,
+      deltaMa5,
+      deltaMa10,
+      deltaMa20,
+      ma20,
+      ma50,
+      m1,
+      m2,
+      m3,
+      p0,
+      p1,
+      p2,
+    });
   }
   return result;
 }
@@ -97,7 +122,14 @@ async function fetchSheetCsv() {
     if (!symbol || !isFinite(parseFloat(rawPrice))) continue;
     const tradeDate = parseCsvDate(rawDate);
     if (!tradeDate) continue;
-    rows.push({ symbol: symbol.toUpperCase(), eod: parseFloat(rawPrice), tradeDate, companyName, sector, industry });
+    rows.push({
+      symbol: symbol.toUpperCase(),
+      eod: parseFloat(rawPrice),
+      tradeDate,
+      companyName,
+      sector,
+      industry,
+    });
   }
   return rows;
 }
@@ -106,25 +138,144 @@ function twoYearsAgo() {
   return Math.floor((Date.now() - 2 * 365 * 24 * 60 * 60 * 1000) / 1000);
 }
 
-async function fetchYahooCsv(symbol) {
-  const p1 = twoYearsAgo();
-  const p2 = Math.floor(Date.now() / 1000);
-  const url = `https://query1.finance.yahoo.com/v7/finance/download/${symbol}?period1=${p1}&period2=${p2}&interval=1d&events=history`;
-  const res = await fetch(url, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-  if (!res.ok) throw new Error(`Yahoo HTTP ${res.status} for ${symbol}`);
-  const text = await res.text();
-  const lines = text.trim().split('\n');
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = lines[i].split(',');
-    const date = cols[0]?.trim();
-    const close = parseFloat(cols[4] ?? '');
-    if (date && isFinite(close) && close > 0) rows.push({ date, eod: close });
-  }
-  return rows.sort((a, b) => a.date.localeCompare(b.date));
+const BROWSER_UA =
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
+const YAHOO_ALIASES = {
+  SGH: 'PENG',
+  ...(process.env.YAHOO_SYMBOL_ALIASES || '').split(',').reduce((acc, pair) => {
+    const [from, to] = pair.split(':').map((s) => s.trim().toUpperCase());
+    if (from && to) acc[from] = to;
+    return acc;
+  }, {}),
+};
+
+function yahooHeaders(cookie) {
+  const headers = {
+    'User-Agent': BROWSER_UA,
+    Accept: 'application/json,text/csv;q=0.9,*/*;q=0.8',
+    'Accept-Language': 'en-US,en;q=0.9',
+  };
+  if (cookie) headers.Cookie = cookie;
+  return headers;
 }
 
-async function sleep(ms) { return new Promise((r) => setTimeout(r, ms)); }
+async function getYahooSession() {
+  const cookies = new Map();
+  const envCookie = process.env.YAHOO_COOKIE?.trim();
+  if (envCookie) {
+    for (const part of envCookie.split(';')) {
+      const idx = part.indexOf('=');
+      if (idx > 0)
+        cookies.set(part.slice(0, idx).trim(), part.slice(idx + 1).trim());
+    }
+  }
+  const cookieHeader = () =>
+    [...cookies.entries()].map(([k, v]) => `${k}=${v}`).join('; ');
+  try {
+    const res = await fetch('https://fc.yahoo.com/', {
+      headers: yahooHeaders(cookieHeader()),
+      redirect: 'manual',
+    });
+    for (const raw of res.headers.getSetCookie?.() ?? []) {
+      const first = raw.split(';')[0];
+      const idx = first.indexOf('=');
+      if (idx > 0)
+        cookies.set(first.slice(0, idx).trim(), first.slice(idx + 1).trim());
+    }
+  } catch {
+    /* chart often works without this cookie */
+  }
+
+  let crumb = '';
+  try {
+    const res = await fetch(
+      'https://query2.finance.yahoo.com/v1/test/getcrumb',
+      {
+        headers: yahooHeaders(cookieHeader()),
+      },
+    );
+    const text = (await res.text()).trim();
+    if (
+      res.ok &&
+      text &&
+      text.length < 80 &&
+      !text.startsWith('<') &&
+      !text.startsWith('{')
+    ) {
+      crumb = text;
+    }
+  } catch {
+    /* chart often works without a crumb */
+  }
+
+  return { cookie: cookieHeader(), crumb };
+}
+
+let yahooSessionPromise;
+function yahooSession() {
+  if (!yahooSessionPromise) yahooSessionPromise = getYahooSession();
+  return yahooSessionPromise;
+}
+
+function parseYahooChart(json) {
+  const err = json?.chart?.error;
+  if (err) throw new Error(err.description || err.code || 'chart error');
+  const result = json?.chart?.result?.[0];
+  if (!result) throw new Error('empty chart result');
+  const timestamps = result.timestamp ?? [];
+  const adj = result.indicators?.adjclose?.[0]?.adjclose ?? [];
+  const close = result.indicators?.quote?.[0]?.close ?? [];
+  const rows = [];
+  for (let i = 0; i < timestamps.length; i++) {
+    const ts = timestamps[i];
+    const price = adj[i] ?? close[i];
+    if (ts == null || price == null || !isFinite(price) || price <= 0) continue;
+    rows.push({
+      date: new Date(ts * 1000).toISOString().slice(0, 10),
+      eod: price,
+    });
+  }
+  if (rows.length === 0) throw new Error('no usable chart closes');
+  return rows;
+}
+
+async function fetchYahooHistory(symbol) {
+  const p1 = twoYearsAgo();
+  const p2 = Math.floor(Date.now() / 1000);
+  const yahooSymbol = YAHOO_ALIASES[symbol] || symbol;
+  const session = await yahooSession();
+  const notes = [];
+
+  for (const host of ['query2.finance.yahoo.com', 'query1.finance.yahoo.com']) {
+    const url = new URL(`https://${host}/v8/finance/chart/${yahooSymbol}`);
+    url.searchParams.set('period1', String(p1));
+    url.searchParams.set('period2', String(p2));
+    url.searchParams.set('interval', '1d');
+    url.searchParams.set('events', 'history');
+    if (session.crumb) url.searchParams.set('crumb', session.crumb);
+    try {
+      const res = await fetch(url, { headers: yahooHeaders(session.cookie) });
+      const text = await res.text();
+      if (!res.ok) {
+        notes.push(`${host} HTTP ${res.status}: ${text.slice(0, 120)}`);
+        continue;
+      }
+      return parseYahooChart(JSON.parse(text)).sort((a, b) =>
+        a.date.localeCompare(b.date),
+      );
+    } catch (err) {
+      notes.push(`${host}: ${err.message}`);
+    }
+  }
+
+  throw new Error(
+    `Yahoo returned no history for ${symbol}${yahooSymbol !== symbol ? ` as ${yahooSymbol}` : ''} (${notes.join('; ')})`,
+  );
+}
+
+async function sleep(ms) {
+  return new Promise((r) => setTimeout(r, ms));
+}
 
 // ──────────────────────────────────────────────────────────────────────────────
 
@@ -137,11 +288,16 @@ async function main() {
     console.log(`\n→ ${symbol} (${companyName})`);
 
     try {
-      const yahooRows = await fetchYahooCsv(symbol);
-      if (yahooRows.length === 0) { console.warn(`  No Yahoo data for ${symbol}`); continue; }
+      const yahooRows = await fetchYahooHistory(symbol);
+      if (yahooRows.length === 0) {
+        console.warn(`  No Yahoo data for ${symbol}`);
+        continue;
+      }
 
       const history = getDataFromHistory(yahooRows);
-      console.log(`  ${yahooRows.length} raw rows → ${history.length} computed rows`);
+      console.log(
+        `  ${yahooRows.length} raw rows → ${history.length} computed rows`,
+      );
 
       // Upsert symbol
       await sql`
@@ -182,4 +338,7 @@ async function main() {
   console.log('\nSeed complete.');
 }
 
-main().catch((err) => { console.error(err); process.exit(1); });
+main().catch((err) => {
+  console.error(err);
+  process.exit(1);
+});

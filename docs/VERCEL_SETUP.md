@@ -35,16 +35,16 @@ Or via the Vercel dashboard: **New Project** → import from GitHub.
 
 In Vercel dashboard → Project Settings → Environment Variables, add:
 
-| Variable | Value |
-|---|---|
-| `POSTGRES_URL` | Neon connection string |
-| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth client ID |
-| `GOOGLE_OAUTH_CLIENT_ID` | Same as above |
-| `GOOGLE_SHEET_CSV_URL` | Public Google Sheet CSV URL |
-| `RESEND_API_KEY` | Resend API key |
-| `ERROR_EMAIL` | Where to send error emails |
-| `CRON_SECRET` | Random strong secret (e.g. `openssl rand -hex 32`) |
-| `SECRET_SAUCE_MODULE_B64` | Base64 of `lib/secretSauce.ts` (not in git) |
+| Variable                       | Value                                              |
+| ------------------------------ | -------------------------------------------------- |
+| `POSTGRES_URL`                 | Neon connection string                             |
+| `NEXT_PUBLIC_GOOGLE_CLIENT_ID` | Google OAuth client ID                             |
+| `GOOGLE_OAUTH_CLIENT_ID`       | Same as above                                      |
+| `GOOGLE_SHEET_CSV_URL`         | Public Google Sheet CSV URL                        |
+| `RESEND_API_KEY`               | Resend API key                                     |
+| `ERROR_EMAIL`                  | Where to send error emails                         |
+| `CRON_SECRET`                  | Random strong secret (e.g. `openssl rand -hex 32`) |
+| `SECRET_SAUCE_MODULE_B64`      | Base64 of `lib/secretSauce.ts` (not in git)        |
 
 ### Secret sauce (formulas stay out of GitHub)
 
@@ -109,7 +109,7 @@ cp .env.example .env.local
 pnpm seed
 ```
 
-This backfills up to 2 years of Yahoo Finance history for all CSV symbols.
+This backfills up to 2 years of Yahoo Finance history for all CSV symbols. See [Yahoo history import](../README.md#yahoo-history-import) in the README for chart-API details, `YAHOO_COOKIE`, and ticker aliases.
 
 ---
 
@@ -117,14 +117,15 @@ This backfills up to 2 years of Yahoo Finance history for all CSV symbols.
 
 Crons are defined in `vercel.json`:
 
-| Route | Schedule (UTC) | Local time |
-|---|---|---|
-| `/api/cron/backfill` | `0 0 * * 2-6` | 5 PM PT Mon–Fri |
-| `/api/cron/daily` | `0 1 * * 2-6` | 6 PM PT Mon–Fri |
+| Route                | Schedule (UTC) | Local time      |
+| -------------------- | -------------- | --------------- |
+| `/api/cron/backfill` | `0 0 * * 2-6`  | 5 PM PT Mon–Fri |
+| `/api/cron/daily`    | `0 1 * * 2-6`  | 6 PM PT Mon–Fri |
 
 **Note:** Vercel Hobby crons run at most once per day and timing is approximate (±30 min).
 
 Test manually:
+
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" https://stracker.visegripped.com/api/cron/daily
 ```
