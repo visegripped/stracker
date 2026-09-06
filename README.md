@@ -26,6 +26,25 @@ App: http://localhost:3000
 | `pnpm seed` | Backfill Yahoo history for CSV symbols |
 | `pnpm encode-secret-sauce` | Print `SECRET_SAUCE_MODULE_B64` for Vercel |
 
+## Yahoo history import
+
+`pnpm seed` and `/api/cron/backfill` load up to two years of daily closes from Yahoo Finance, then compute indicators.
+
+Yahoo retired anonymous CSV download (`/v7/finance/download`). That endpoint now returns `401 User is not logged in`. The importer uses the chart API instead. Logging in at finance.yahoo.com in a browser does **not** apply to Node.
+
+To send a logged-in session (needed if chart still 401s/404s):
+
+1. Sign in at [finance.yahoo.com](https://finance.yahoo.com).
+2. DevTools → Network → open any quote → click a `query1`/`query2.finance.yahoo.com` request.
+3. Copy the `Cookie` header into `.env.local` as `YAHOO_COOKIE=...` (see `.env.example`). Restart `pnpm dev` or re-run `pnpm seed`. Cookies expire; refresh them when import starts failing again.
+
+Ticker remaps (sheet symbol still stored in the DB):
+
+- `SGH` is requested as `PENG` (SMART Global Holdings → Penguin Solutions).
+- Extra remaps: `YAHOO_SYMBOL_ALIASES=TEF:TEF.MC` (comma-separated `SHEET:YAHOO` pairs).
+
+A 404 with “symbol may be delisted” is often a real ticker change, not an account ban.
+
 ## Crons (Vercel)
 
 Defined in `vercel.json`, Tuesday–Saturday UTC so they land Monday–Friday Pacific:
