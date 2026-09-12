@@ -45,6 +45,8 @@ Ticker remaps (sheet symbol still stored in the DB):
 
 A 404 with “symbol may be delisted” is often a real ticker change, not an account ban.
 
+Vercel Hobby caps this function at **60 seconds**. The cron therefore stops starting new symbols around 50s and returns JSON (`stoppedEarly: true`) instead of a 504. Hit `/api/cron/backfill` again (or wait for the next scheduled run) to continue. For a full sheet import, run `pnpm seed` locally.
+
 ## Crons (Vercel)
 
 Defined in `vercel.json`, Tuesday–Saturday UTC so they land Monday–Friday Pacific:

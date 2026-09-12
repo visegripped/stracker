@@ -14,6 +14,10 @@ const CHART_HOSTS = [
   'query1.finance.yahoo.com',
 ] as const;
 
+function isServerless(): boolean {
+  return Boolean(process.env.VERCEL);
+}
+
 /** Known ticker changes so backfill can still load history under the sheet symbol. */
 const DEFAULT_SYMBOL_ALIASES: Record<string, string> = {
   SGH: 'PENG', // SMART Global Holdings → Penguin Solutions
@@ -122,20 +126,25 @@ function isUsableCrumb(text: string): boolean {
 }
 
 async function fetchYahooSession(): Promise<YahooSession> {
-  const cookies = process.env.YAHOO_COOKIE?.trim()
-    ? cookieMapFromHeader(process.env.YAHOO_COOKIE)
+  const envCookie = process.env.YAHOO_COOKIE?.trim();
+  const cookies = envCookie
+    ? cookieMapFromHeader(envCookie)
     : new Map<string, string>();
+  const sessionTimeoutMs = isServerless() ? 8_000 : 10_000;
 
-  try {
-    const res = await fetch('https://fc.yahoo.com/', {
-      headers: yahooHeaders(cookieHeaderFromMap(cookies)),
-      redirect: 'manual',
-      cache: 'no-store',
-      signal: AbortSignal.timeout(10_000),
-    });
-    mergeSetCookies(cookies, res);
-  } catch {
-    // Chart often works without the consent cookie.
+  // A logged-in Cookie header already has the session; skip the extra handshake.
+  if (!envCookie) {
+    try {
+      const res = await fetch('https://fc.yahoo.com/', {
+        headers: yahooHeaders(cookieHeaderFromMap(cookies)),
+        redirect: 'manual',
+        cache: 'no-store',
+        signal: AbortSignal.timeout(sessionTimeoutMs),
+      });
+      mergeSetCookies(cookies, res);
+    } catch {
+      // Chart often works without the consent cookie.
+    }
   }
 
   let crumb: string | null = null;
@@ -145,7 +154,7 @@ async function fetchYahooSession(): Promise<YahooSession> {
       {
         headers: yahooHeaders(cookieHeaderFromMap(cookies)),
         cache: 'no-store',
-        signal: AbortSignal.timeout(10_000),
+        signal: AbortSignal.timeout(sessionTimeoutMs),
       },
     );
     mergeSetCookies(cookies, crumbRes);
@@ -173,19 +182,23 @@ async function yahooGet(url: string, session: YahooSession): Promise<Response> {
     parsed.searchParams.set('crumb', session.crumb);
   }
 
+  const timeoutMs = isServerless() ? 8_000 : 15_000;
+  const maxAttempts = isServerless() ? 2 : 3;
+  const retryBaseMs = isServerless() ? 400 : 2000;
+
   let last: Response | undefined;
-  for (let attempt = 0; attempt < 3; attempt++) {
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     last = await fetch(parsed, {
       headers: yahooHeaders(session.cookie),
       cache: 'no-store',
-      signal: AbortSignal.timeout(15_000),
+      signal: AbortSignal.timeout(timeoutMs),
     });
     if (last.status !== 429 && last.status !== 503) return last;
     const retryAfter = Number(last.headers.get('retry-after'));
     const waitMs =
       Number.isFinite(retryAfter) && retryAfter > 0
         ? retryAfter * 1000
-        : 2000 * (attempt + 1);
+        : retryBaseMs * (attempt + 1);
     await new Promise((r) => setTimeout(r, waitMs));
   }
   return last as Response;
@@ -262,8 +275,9 @@ async function fetchYahooChartApi(
   session: YahooSession,
 ): Promise<YahooRow[]> {
   const notes: string[] = [];
+  const hosts = isServerless() ? CHART_HOSTS.slice(0, 1) : CHART_HOSTS;
 
-  for (const host of CHART_HOSTS) {
+  for (const host of hosts) {
     const url =
       `https://${host}/v8/finance/chart/${encodeURIComponent(yahooSymbol)}` +
       `?period1=${period1}&period2=${period2}&interval=1d&events=history`;
@@ -347,9 +361,9 @@ export async function fetchYahooHistory(
     notes.push(formatUnknownError(err));
   }
 
-  // CSV download is retired for anonymous clients. Only try it when the caller
-  // supplied a logged-in Yahoo cookie (YAHOO_COOKIE).
-  if (process.env.YAHOO_COOKIE?.trim()) {
+  // CSV download is retired for anonymous clients. Skip it on Vercel so a
+  // 401/timeout cannot burn the remaining serverless budget.
+  if (process.env.YAHOO_COOKIE?.trim() && !isServerless()) {
     try {
       const rows = await fetchYahooCsvDownload(
         yahooSymbol,

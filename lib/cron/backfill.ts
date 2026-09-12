@@ -6,13 +6,17 @@ import { fetchYahooHistory, twoYearsAgo } from '../yahoo';
 import { fetchSheetCsv, selectUntrackedBatch } from './csv';
 import { logError } from '../reporting';
 import { formatBackfillFailure, formatUnknownError } from '../errors';
+import {
+  prependUnprocessedToPending,
+  shouldStopBackfill,
+} from './backfillDeadline';
 
 /** Insert a row into the symbols table (upsert — safe to re-run) */
 async function insertSymbol(
   symbol: string,
   name: string,
   sector: string | null,
-  industry: string | null
+  industry: string | null,
 ): Promise<void> {
   const db = getDb();
   await db
@@ -27,7 +31,7 @@ async function insertSymbol(
 /** Bulk-insert computed indicator rows for a symbol */
 async function bulkInsertHistory(
   symbol: string,
-  history: ReturnType<typeof getDataFromHistory>
+  history: ReturnType<typeof getDataFromHistory>,
 ): Promise<void> {
   if (history.length === 0) return;
   const db = getDb();
@@ -69,14 +73,24 @@ export interface BackfillResult {
   added: string[];
   failed: BackfillFailure[];
   pending: string[];
+  stoppedEarly: boolean;
+}
+
+export interface BackfillOptions {
+  /** Unix ms. Stop starting new symbols this far before the deadline. */
+  deadlineAt?: number;
 }
 
 /**
  * Backfill untracked symbols from the Google Sheet CSV.
  * Each run processes at most `batchCap` symbols that are not yet in `symbols`
  * (default 5), so successive runs walk the rest of the sheet.
+ * Pass `deadlineAt` on Vercel so the handler returns JSON instead of a 504.
  */
-export async function runBackfill(batchCap = 5): Promise<BackfillResult> {
+export async function runBackfill(
+  batchCap = 5,
+  options: BackfillOptions = {},
+): Promise<BackfillResult> {
   const csvRows = await fetchSheetCsv();
   const db = getDb();
 
@@ -87,16 +101,29 @@ export async function runBackfill(batchCap = 5): Promise<BackfillResult> {
 
   const { batch, pending } = selectUntrackedBatch(csvRows, existing, batchCap);
 
-  const result: BackfillResult = { added: [], failed: [], pending };
+  const result: BackfillResult = {
+    added: [],
+    failed: [],
+    pending,
+    stoppedEarly: false,
+  };
+  const serverless = Boolean(process.env.VERCEL);
 
   for (let i = 0; i < batch.length; i++) {
+    if (shouldStopBackfill(Date.now(), options.deadlineAt)) {
+      result.pending = prependUnprocessedToPending(batch, i, result.pending);
+      result.stoppedEarly = true;
+      break;
+    }
+
     const { symbol, companyName, sector, industry } = batch[i];
     try {
       const period1 = twoYearsAgo();
       const yahooRows = await fetchYahooHistory(symbol, period1);
 
       if (yahooRows.length === 0) {
-        const reason = 'Yahoo returned no data (empty series after CSV and chart fetch)';
+        const reason =
+          'Yahoo returned no data (empty series after CSV and chart fetch)';
         result.failed.push({ symbol, reason });
         await logError(formatBackfillFailure(symbol, reason), {
           symbol,
@@ -133,7 +160,7 @@ export async function runBackfill(batchCap = 5): Promise<BackfillResult> {
       });
     }
 
-    if (i < batch.length - 1) {
+    if (!serverless && i < batch.length - 1) {
       await new Promise((r) => setTimeout(r, 1500));
     }
   }

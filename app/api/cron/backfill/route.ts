@@ -4,7 +4,10 @@ import { sendErrorEmail } from '@/lib/email';
 import { logError } from '@/lib/reporting';
 import { formatBackfillFailure, formatUnknownError } from '@/lib/errors';
 
+/** Hobby/cron cap is 60s. Return before that so the client gets JSON, not a 504. */
 export const maxDuration = 60;
+
+const DEADLINE_BUDGET_MS = 50_000;
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -17,11 +20,13 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const result = await runBackfill(5);
+    const result = await runBackfill(5, {
+      deadlineAt: Date.now() + DEADLINE_BUDGET_MS,
+    });
 
     if (result.failed.length > 0) {
       const errors = result.failed.map((f) =>
-        formatBackfillFailure(f.symbol, f.reason)
+        formatBackfillFailure(f.symbol, f.reason),
       );
       await sendErrorEmail(errors);
     }
@@ -31,9 +36,13 @@ export async function GET(request: NextRequest) {
       added: result.added,
       failed: result.failed,
       pending: result.pending,
+      stoppedEarly: result.stoppedEarly,
     });
   } catch (error) {
-    const message = error instanceof Error ? formatUnknownError(error) : 'Backfill cron failed';
+    const message =
+      error instanceof Error
+        ? formatUnknownError(error)
+        : 'Backfill cron failed';
     console.error('Backfill cron error:', error);
 
     await logError(message, { source: 'cron/backfill' }).catch(() => {});

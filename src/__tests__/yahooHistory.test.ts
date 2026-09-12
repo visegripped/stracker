@@ -100,6 +100,7 @@ describe('fetchYahooHistory', () => {
     resetYahooSession();
     vi.stubEnv('YAHOO_COOKIE', '');
     vi.stubEnv('YAHOO_SYMBOL_ALIASES', '');
+    vi.stubEnv('VERCEL', '');
   });
 
   afterEach(() => {
@@ -145,17 +146,16 @@ describe('fetchYahooHistory', () => {
     expect(chartUrl).toContain('crumb=crumb123');
   });
 
-  it('sends YAHOO_COOKIE on chart requests', async () => {
+  it('sends YAHOO_COOKIE on chart requests without visiting fc.yahoo.com', async () => {
     vi.stubEnv('YAHOO_COOKIE', 'A1=login; A3=session');
     const fetchMock = vi.fn(
       async (input: RequestInfo | URL, init?: RequestInit) => {
         const url = String(input);
         const headers = new Headers(init?.headers);
-        if (url.includes('getcrumb') || url.includes('fc.yahoo.com')) {
+        expect(url.includes('fc.yahoo.com')).toBe(false);
+        if (url.includes('getcrumb')) {
           expect(headers.get('Cookie')).toContain('A1=login');
-          return new Response(url.includes('getcrumb') ? 'abc' : '', {
-            status: 200,
-          });
+          return new Response('abc', { status: 200 });
         }
         expect(headers.get('Cookie')).toContain('A1=login');
         return jsonResponse(chartBody([{ ts: 1704153600, adj: 1 }]));
@@ -245,5 +245,36 @@ describe('fetchYahooHistory', () => {
       String(url).includes('/v7/finance/download/'),
     );
     expect(csvCalls).toHaveLength(0);
+  });
+
+  it('skips CSV and the second chart host on Vercel', async () => {
+    vi.stubEnv('VERCEL', '1');
+    vi.stubEnv('YAHOO_COOKIE', 'A1=login');
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('getcrumb')) return new Response('c', { status: 200 });
+      if (url.includes('query2.finance.yahoo.com/v8/finance/chart/')) {
+        return jsonResponse({
+          chart: {
+            result: null,
+            error: { code: 'Not Found', description: 'No data found' },
+          },
+        });
+      }
+      return new Response('unexpected ' + url, { status: 500 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchYahooHistory('TEF', 1, 2)).rejects.toThrow(
+      /No data found/,
+    );
+    const urls = fetchMock.mock.calls.map(([url]) => String(url));
+    expect(urls.some((url) => url.includes('query1.finance.yahoo.com'))).toBe(
+      false,
+    );
+    expect(urls.some((url) => url.includes('/v7/finance/download/'))).toBe(
+      false,
+    );
+    expect(urls.some((url) => url.includes('fc.yahoo.com'))).toBe(false);
   });
 });

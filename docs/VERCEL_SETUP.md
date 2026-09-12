@@ -109,7 +109,7 @@ cp .env.example .env.local
 pnpm seed
 ```
 
-This backfills up to 2 years of Yahoo Finance history for all CSV symbols. See [Yahoo history import](../README.md#yahoo-history-import) in the README for chart-API details, `YAHOO_COOKIE`, and ticker aliases.
+This backfills up to 2 years of Yahoo Finance history for all CSV symbols. See [Yahoo history import](../README.md#yahoo-history-import) in the README for chart-API details, `YAHOO_COOKIE`, ticker aliases, and the 60s Vercel time budget.
 
 ---
 
