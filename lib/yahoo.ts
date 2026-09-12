@@ -1,5 +1,9 @@
 import 'server-only';
-import { formatUnknownError } from './errors';
+import {
+  formatUnknownError,
+  isYahooRateLimitError,
+  YahooRateLimitError,
+} from './errors';
 
 export interface YahooRow {
   date: string;
@@ -158,9 +162,16 @@ async function fetchYahooSession(): Promise<YahooSession> {
       },
     );
     mergeSetCookies(cookies, crumbRes);
+    if (crumbRes.status === 429 || crumbRes.status === 503) {
+      throw new YahooRateLimitError(
+        `Yahoo crumb HTTP ${crumbRes.status}: ${snippet(await crumbRes.text()) || crumbRes.statusText}`,
+        crumbRes.status,
+      );
+    }
     const text = await crumbRes.text();
     if (crumbRes.ok && isUsableCrumb(text)) crumb = text.trim();
-  } catch {
+  } catch (err) {
+    if (isYahooRateLimitError(err)) throw err;
     // Chart often works without a crumb.
   }
 
@@ -183,8 +194,8 @@ async function yahooGet(url: string, session: YahooSession): Promise<Response> {
   }
 
   const timeoutMs = isServerless() ? 8_000 : 15_000;
-  const maxAttempts = isServerless() ? 2 : 3;
-  const retryBaseMs = isServerless() ? 400 : 2000;
+  const maxAttempts = isServerless() ? 1 : 3;
+  const retryBaseMs = 2000;
 
   let last: Response | undefined;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
@@ -194,14 +205,23 @@ async function yahooGet(url: string, session: YahooSession): Promise<Response> {
       signal: AbortSignal.timeout(timeoutMs),
     });
     if (last.status !== 429 && last.status !== 503) return last;
+    if (attempt === maxAttempts - 1) {
+      throw new YahooRateLimitError(
+        `Yahoo HTTP ${last.status}: ${snippet(await last.text()) || last.statusText}`,
+        last.status,
+      );
+    }
     const retryAfter = Number(last.headers.get('retry-after'));
     const waitMs =
       Number.isFinite(retryAfter) && retryAfter > 0
-        ? retryAfter * 1000
+        ? Math.min(retryAfter * 1000, 8_000)
         : retryBaseMs * (attempt + 1);
     await new Promise((r) => setTimeout(r, waitMs));
   }
-  return last as Response;
+  throw new YahooRateLimitError(
+    `Yahoo HTTP ${last?.status ?? 429}: ${last?.statusText ?? 'Too Many Requests'}`,
+    last?.status ?? 429,
+  );
 }
 
 /** Parse Yahoo Finance CSV (header row: Date,Open,High,Low,Close,Adj Close,Volume). */
@@ -286,6 +306,12 @@ async function fetchYahooChartApi(
       const res = await yahooGet(url, session);
       const text = await res.text();
       if (!res.ok) {
+        if (res.status === 429 || res.status === 503) {
+          throw new YahooRateLimitError(
+            `${host} HTTP ${res.status}: ${snippet(text) || res.statusText}`,
+            res.status,
+          );
+        }
         notes.push(
           `${host} HTTP ${res.status}: ${snippet(text) || res.statusText}`,
         );
@@ -302,6 +328,7 @@ async function fetchYahooChartApi(
       }
       return parseYahooChart(json);
     } catch (err) {
+      if (isYahooRateLimitError(err)) throw err;
       notes.push(`${host} ${formatUnknownError(err)}`);
     }
   }
@@ -322,6 +349,12 @@ async function fetchYahooCsvDownload(
   const res = await yahooGet(csvUrl, session);
   const text = await res.text();
   if (!res.ok) {
+    if (res.status === 429 || res.status === 503) {
+      throw new YahooRateLimitError(
+        `csv HTTP ${res.status}: ${snippet(text) || res.statusText}`,
+        res.status,
+      );
+    }
     throw new Error(
       `csv HTTP ${res.status}: ${snippet(text) || res.statusText}`,
     );
@@ -358,6 +391,7 @@ export async function fetchYahooHistory(
     );
     return rows.sort((a, b) => a.date.localeCompare(b.date));
   } catch (err) {
+    if (isYahooRateLimitError(err)) throw err;
     notes.push(formatUnknownError(err));
   }
 
@@ -373,6 +407,7 @@ export async function fetchYahooHistory(
       );
       return rows.sort((a, b) => a.date.localeCompare(b.date));
     } catch (err) {
+      if (isYahooRateLimitError(err)) throw err;
       notes.push(formatUnknownError(err));
     }
   }

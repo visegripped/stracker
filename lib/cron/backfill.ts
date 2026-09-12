@@ -5,7 +5,11 @@ import { getDataFromHistory } from '../indicators';
 import { fetchYahooHistory, twoYearsAgo } from '../yahoo';
 import { fetchSheetCsv, selectUntrackedBatch } from './csv';
 import { logError } from '../reporting';
-import { formatBackfillFailure, formatUnknownError } from '../errors';
+import {
+  formatBackfillFailure,
+  formatUnknownError,
+  isYahooRateLimitError,
+} from '../errors';
 import {
   prependUnprocessedToPending,
   shouldStopBackfill,
@@ -74,6 +78,7 @@ export interface BackfillResult {
   failed: BackfillFailure[];
   pending: string[];
   stoppedEarly: boolean;
+  rateLimited: boolean;
 }
 
 export interface BackfillOptions {
@@ -106,6 +111,7 @@ export async function runBackfill(
     failed: [],
     pending,
     stoppedEarly: false,
+    rateLimited: false,
   };
   const serverless = Boolean(process.env.VERCEL);
 
@@ -150,6 +156,13 @@ export async function runBackfill(
 
       result.added.push(symbol);
     } catch (err) {
+      if (isYahooRateLimitError(err)) {
+        // Leave this symbol and the rest untracked so a later run can retry.
+        result.pending = prependUnprocessedToPending(batch, i, result.pending);
+        result.stoppedEarly = true;
+        result.rateLimited = true;
+        break;
+      }
       const reason = formatUnknownError(err);
       result.failed.push({ symbol, reason });
       await logError(formatBackfillFailure(symbol, reason), {
@@ -160,8 +173,8 @@ export async function runBackfill(
       });
     }
 
-    if (!serverless && i < batch.length - 1) {
-      await new Promise((r) => setTimeout(r, 1500));
+    if (i < batch.length - 1) {
+      await new Promise((r) => setTimeout(r, serverless ? 2500 : 1500));
     }
   }
 

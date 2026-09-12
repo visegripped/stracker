@@ -37,6 +37,10 @@ export async function GET(request: NextRequest) {
       failed: result.failed,
       pending: result.pending,
       stoppedEarly: result.stoppedEarly,
+      rateLimited: result.rateLimited,
+      hint: result.rateLimited
+        ? 'Yahoo rate-limited this Vercel IP. Wait before retrying, or run pnpm seed locally from a residential network.'
+        : undefined,
     });
   } catch (error) {
     const message =

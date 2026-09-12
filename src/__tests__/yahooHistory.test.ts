@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { YahooRateLimitError } from '../../lib/errors';
 import {
   fetchYahooHistory,
   parseYahooChart,
@@ -276,5 +277,27 @@ describe('fetchYahooHistory', () => {
       false,
     );
     expect(urls.some((url) => url.includes('fc.yahoo.com'))).toBe(false);
+  });
+
+  it('throws YahooRateLimitError on 429 without retrying on Vercel', async () => {
+    vi.stubEnv('VERCEL', '1');
+    vi.stubEnv('YAHOO_COOKIE', 'A1=login');
+    const fetchMock = vi.fn(async (input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('getcrumb')) return new Response('c', { status: 200 });
+      if (url.includes('/v8/finance/chart/')) {
+        return new Response('Too Many Requests', { status: 429 });
+      }
+      return new Response('unexpected ' + url, { status: 500 });
+    });
+    vi.stubGlobal('fetch', fetchMock);
+
+    await expect(fetchYahooHistory('INTC', 1, 2)).rejects.toBeInstanceOf(
+      YahooRateLimitError,
+    );
+    const chartCalls = fetchMock.mock.calls.filter(([url]) =>
+      String(url).includes('/v8/finance/chart/'),
+    );
+    expect(chartCalls).toHaveLength(1);
   });
 });

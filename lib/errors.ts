@@ -2,7 +2,9 @@
 export function formatUnknownError(err: unknown): string {
   if (err instanceof Error) {
     const head =
-      err.name && err.name !== 'Error' ? `${err.name}: ${err.message}` : err.message;
+      err.name && err.name !== 'Error'
+        ? `${err.name}: ${err.message}`
+        : err.message;
     if (err.cause !== undefined) {
       return `${head} (cause: ${formatUnknownError(err.cause)})`;
     }
@@ -13,4 +15,24 @@ export function formatUnknownError(err: unknown): string {
 
 export function formatBackfillFailure(symbol: string, reason: string): string {
   return `Backfill failed for ${symbol}: ${reason}`;
+}
+
+/** Yahoo asked us to back off. Not a permanent symbol failure. */
+export class YahooRateLimitError extends Error {
+  readonly status: number;
+
+  constructor(message = 'Yahoo rate limited (HTTP 429)', status = 429) {
+    super(message);
+    this.name = 'YahooRateLimitError';
+    this.status = status;
+  }
+}
+
+export function isYahooRateLimitError(
+  err: unknown,
+): err is YahooRateLimitError {
+  return (
+    err instanceof YahooRateLimitError ||
+    (err instanceof Error && err.name === 'YahooRateLimitError')
+  );
 }

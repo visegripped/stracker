@@ -17,13 +17,13 @@ App: http://localhost:3000
 
 ## Scripts
 
-| Command | Purpose |
-|---|---|
-| `pnpm dev` | Next.js dev server |
-| `pnpm build` | Production build |
-| `pnpm test:once` | Run Vitest once |
-| `pnpm db:push` | Push Drizzle schema to Neon |
-| `pnpm seed` | Backfill Yahoo history for CSV symbols |
+| Command                    | Purpose                                    |
+| -------------------------- | ------------------------------------------ |
+| `pnpm dev`                 | Next.js dev server                         |
+| `pnpm build`               | Production build                           |
+| `pnpm test:once`           | Run Vitest once                            |
+| `pnpm db:push`             | Push Drizzle schema to Neon                |
+| `pnpm seed`                | Backfill Yahoo history for CSV symbols     |
 | `pnpm encode-secret-sauce` | Print `SECRET_SAUCE_MODULE_B64` for Vercel |
 
 ## Yahoo history import
@@ -45,7 +45,9 @@ Ticker remaps (sheet symbol still stored in the DB):
 
 A 404 with “symbol may be delisted” is often a real ticker change, not an account ban.
 
-Vercel Hobby caps this function at **60 seconds**. The cron therefore stops starting new symbols around 50s and returns JSON (`stoppedEarly: true`) instead of a 504. Hit `/api/cron/backfill` again (or wait for the next scheduled run) to continue. For a full sheet import, run `pnpm seed` locally.
+Vercel Hobby caps this function at **60 seconds**. The cron therefore stops starting new symbols around 50s and returns JSON (`stoppedEarly: true`) instead of a 504.
+
+Yahoo often returns **HTTP 429** from Vercel datacenter IPs even with `YAHOO_COOKIE`. The cron then stops (`rateLimited: true`) and leaves those symbols in `pending` instead of marking them failed. Wait before hitting the endpoint again. For a full sheet import, run `pnpm seed` locally.
 
 ## Crons (Vercel)
 
