@@ -4,6 +4,8 @@ import {
   formatBackfillFailure,
   isYahooRateLimitError,
   YahooRateLimitError,
+  isTiingoRateLimitError,
+  TiingoRateLimitError,
 } from '../../lib/errors';
 
 describe('formatUnknownError', () => {
@@ -48,5 +50,13 @@ describe('YahooRateLimitError', () => {
     const err = new YahooRateLimitError('Yahoo HTTP 429: Too Many Requests');
     expect(isYahooRateLimitError(err)).toBe(true);
     expect(isYahooRateLimitError(new Error('Yahoo HTTP 429'))).toBe(false);
+  });
+});
+
+describe('TiingoRateLimitError', () => {
+  it('is detected by isTiingoRateLimitError', () => {
+    const err = new TiingoRateLimitError('Tiingo HTTP 429');
+    expect(isTiingoRateLimitError(err)).toBe(true);
+    expect(isTiingoRateLimitError(new Error('Tiingo HTTP 429'))).toBe(false);
   });
 });

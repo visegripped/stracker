@@ -2,13 +2,13 @@ import 'server-only';
 import { getDb } from '../db';
 import { schema } from '../db';
 import { getDataFromHistory } from '../indicators';
-import { fetchYahooHistory, twoYearsAgo } from '../yahoo';
+import { fetchTiingoHistory } from '../tiingo';
 import { fetchSheetCsv, selectUntrackedBatch } from './csv';
 import { logError } from '../reporting';
 import {
   formatBackfillFailure,
   formatUnknownError,
-  isYahooRateLimitError,
+  isTiingoRateLimitError,
 } from '../errors';
 import {
   prependUnprocessedToPending,
@@ -89,11 +89,11 @@ export interface BackfillOptions {
 /**
  * Backfill untracked symbols from the Google Sheet CSV.
  * Each run processes at most `batchCap` symbols that are not yet in `symbols`
- * (default 5), so successive runs walk the rest of the sheet.
+ * (default 10), so successive runs walk the rest of the sheet.
  * Pass `deadlineAt` on Vercel so the handler returns JSON instead of a 504.
  */
 export async function runBackfill(
-  batchCap = 5,
+  batchCap = 10,
   options: BackfillOptions = {},
 ): Promise<BackfillResult> {
   const csvRows = await fetchSheetCsv();
@@ -124,12 +124,10 @@ export async function runBackfill(
 
     const { symbol, companyName, sector, industry } = batch[i];
     try {
-      const period1 = twoYearsAgo();
-      const yahooRows = await fetchYahooHistory(symbol, period1);
+      const tiingoRows = await fetchTiingoHistory(symbol);
 
-      if (yahooRows.length === 0) {
-        const reason =
-          'Yahoo returned no data (empty series after CSV and chart fetch)';
+      if (tiingoRows.length === 0) {
+        const reason = 'Tiingo returned no data (empty series)';
         result.failed.push({ symbol, reason });
         await logError(formatBackfillFailure(symbol, reason), {
           symbol,
@@ -139,9 +137,9 @@ export async function runBackfill(
         continue;
       }
 
-      const history = getDataFromHistory(yahooRows);
+      const history = getDataFromHistory(tiingoRows);
       if (history.length === 0) {
-        const reason = `Computed 0 indicator rows from ${yahooRows.length} Yahoo bars`;
+        const reason = `Computed 0 indicator rows from ${tiingoRows.length} Tiingo bars`;
         result.failed.push({ symbol, reason });
         await logError(formatBackfillFailure(symbol, reason), {
           symbol,
@@ -156,7 +154,7 @@ export async function runBackfill(
 
       result.added.push(symbol);
     } catch (err) {
-      if (isYahooRateLimitError(err)) {
+      if (isTiingoRateLimitError(err)) {
         // Leave this symbol and the rest untracked so a later run can retry.
         result.pending = prependUnprocessedToPending(batch, i, result.pending);
         result.stoppedEarly = true;
@@ -174,7 +172,7 @@ export async function runBackfill(
     }
 
     if (i < batch.length - 1) {
-      await new Promise((r) => setTimeout(r, serverless ? 2500 : 1500));
+      await new Promise((r) => setTimeout(r, serverless ? 800 : 500));
     }
   }
 

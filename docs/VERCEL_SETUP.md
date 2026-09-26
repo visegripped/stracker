@@ -45,6 +45,7 @@ In Vercel dashboard → Project Settings → Environment Variables, add:
 | `ERROR_EMAIL`                  | Where to send error emails                         |
 | `CRON_SECRET`                  | Random strong secret (e.g. `openssl rand -hex 32`) |
 | `SECRET_SAUCE_MODULE_B64`      | Base64 of `lib/secretSauce.ts` (not in git)        |
+| `TIINGO_API_TOKEN`             | Tiingo API token (historical backfill only)        |
 
 ### Secret sauce (formulas stay out of GitHub)
 
@@ -109,7 +110,7 @@ cp .env.example .env.local
 pnpm seed
 ```
 
-This backfills up to 2 years of Yahoo Finance history for all CSV symbols. See [Yahoo history import](../README.md#yahoo-history-import) in the README for chart-API details, `YAHOO_COOKIE`, ticker aliases, and the 60s Vercel time budget.
+This backfills up to 2 years of Tiingo history for CSV symbols not yet in Neon. Daily EOD still comes from the Google Sheet. See [History import vs daily EOD](../README.md#history-import-vs-daily-eod).
 
 ---
 

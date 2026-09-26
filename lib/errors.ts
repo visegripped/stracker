@@ -36,3 +36,23 @@ export function isYahooRateLimitError(
     (err instanceof Error && err.name === 'YahooRateLimitError')
   );
 }
+
+/** Tiingo asked us to back off. Not a permanent symbol failure. */
+export class TiingoRateLimitError extends Error {
+  readonly status: number;
+
+  constructor(message = 'Tiingo rate limited (HTTP 429)', status = 429) {
+    super(message);
+    this.name = 'TiingoRateLimitError';
+    this.status = status;
+  }
+}
+
+export function isTiingoRateLimitError(
+  err: unknown,
+): err is TiingoRateLimitError {
+  return (
+    err instanceof TiingoRateLimitError ||
+    (err instanceof Error && err.name === 'TiingoRateLimitError')
+  );
+}

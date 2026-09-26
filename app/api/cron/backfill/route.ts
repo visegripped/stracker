@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const result = await runBackfill(5, {
+    const result = await runBackfill(10, {
       deadlineAt: Date.now() + DEADLINE_BUDGET_MS,
     });
 
@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
       stoppedEarly: result.stoppedEarly,
       rateLimited: result.rateLimited,
       hint: result.rateLimited
-        ? 'Yahoo rate-limited this Vercel IP. Wait before retrying, or run pnpm seed locally from a residential network.'
+        ? 'Tiingo rate-limited this run. Wait before retrying; remaining symbols stay pending.'
         : undefined,
     });
   } catch (error) {

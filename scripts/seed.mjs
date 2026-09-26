@@ -1,9 +1,10 @@
 /**
- * Seed script — backfills all CSV symbols with 2 years of Yahoo history.
+ * Seed script — backfills missing CSV symbols with 2 years of Tiingo history.
  * Run locally: pnpm seed
- * Reads POSTGRES_URL from .env.local (via --env-file flag in package.json)
+ * Reads POSTGRES_URL and TIINGO_API_TOKEN from .env.local (via --env-file).
  *
  * Avoids Vercel 60s function timeout since this runs as a plain Node script.
+ * Daily EOD updates still come from the Google Sheet, not this script.
  */
 
 import { neon } from '@neondatabase/serverless';
@@ -18,6 +19,12 @@ if (!POSTGRES_URL) {
 const GOOGLE_SHEET_CSV_URL = process.env.GOOGLE_SHEET_CSV_URL;
 if (!GOOGLE_SHEET_CSV_URL) {
   console.error('GOOGLE_SHEET_CSV_URL not set. Check .env.local.');
+  process.exit(1);
+}
+
+const TIINGO_API_TOKEN = process.env.TIINGO_API_TOKEN?.trim();
+if (!TIINGO_API_TOKEN) {
+  console.error('TIINGO_API_TOKEN not set. Check .env.local.');
   process.exit(1);
 }
 
@@ -134,143 +141,75 @@ async function fetchSheetCsv() {
   return rows;
 }
 
-function twoYearsAgo() {
-  return Math.floor((Date.now() - 2 * 365 * 24 * 60 * 60 * 1000) / 1000);
+function twoYearsAgoDate() {
+  return new Date(Date.now() - 2 * 365 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10);
 }
 
-const BROWSER_UA =
-  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
-const YAHOO_ALIASES = {
+const TIINGO_ALIASES = {
   SGH: 'PENG',
-  ...(process.env.YAHOO_SYMBOL_ALIASES || '').split(',').reduce((acc, pair) => {
-    const [from, to] = pair.split(':').map((s) => s.trim().toUpperCase());
-    if (from && to) acc[from] = to;
-    return acc;
-  }, {}),
+  ...(
+    process.env.TIINGO_SYMBOL_ALIASES ||
+    process.env.YAHOO_SYMBOL_ALIASES ||
+    ''
+  )
+    .split(',')
+    .reduce((acc, pair) => {
+      const [from, to] = pair.split(':').map((s) => s.trim().toUpperCase());
+      if (from && to) acc[from] = to;
+      return acc;
+    }, {}),
 };
 
-function yahooHeaders(cookie) {
-  const headers = {
-    'User-Agent': BROWSER_UA,
-    Accept: 'application/json,text/csv;q=0.9,*/*;q=0.8',
-    'Accept-Language': 'en-US,en;q=0.9',
-  };
-  if (cookie) headers.Cookie = cookie;
-  return headers;
+class TiingoRateLimitError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = 'TiingoRateLimitError';
+  }
 }
 
-async function getYahooSession() {
-  const cookies = new Map();
-  const envCookie = process.env.YAHOO_COOKIE?.trim();
-  if (envCookie) {
-    for (const part of envCookie.split(';')) {
-      const idx = part.indexOf('=');
-      if (idx > 0)
-        cookies.set(part.slice(0, idx).trim(), part.slice(idx + 1).trim());
-    }
+function parseTiingoPrices(json) {
+  if (!Array.isArray(json)) {
+    throw new Error('Tiingo response was not a price array');
   }
-  const cookieHeader = () =>
-    [...cookies.entries()].map(([k, v]) => `${k}=${v}`).join('; ');
-  try {
-    const res = await fetch('https://fc.yahoo.com/', {
-      headers: yahooHeaders(cookieHeader()),
-      redirect: 'manual',
-    });
-    for (const raw of res.headers.getSetCookie?.() ?? []) {
-      const first = raw.split(';')[0];
-      const idx = first.indexOf('=');
-      if (idx > 0)
-        cookies.set(first.slice(0, idx).trim(), first.slice(idx + 1).trim());
-    }
-  } catch {
-    /* chart often works without this cookie */
-  }
-
-  let crumb = '';
-  try {
-    const res = await fetch(
-      'https://query2.finance.yahoo.com/v1/test/getcrumb',
-      {
-        headers: yahooHeaders(cookieHeader()),
-      },
-    );
-    const text = (await res.text()).trim();
-    if (
-      res.ok &&
-      text &&
-      text.length < 80 &&
-      !text.startsWith('<') &&
-      !text.startsWith('{')
-    ) {
-      crumb = text;
-    }
-  } catch {
-    /* chart often works without a crumb */
-  }
-
-  return { cookie: cookieHeader(), crumb };
-}
-
-let yahooSessionPromise;
-function yahooSession() {
-  if (!yahooSessionPromise) yahooSessionPromise = getYahooSession();
-  return yahooSessionPromise;
-}
-
-function parseYahooChart(json) {
-  const err = json?.chart?.error;
-  if (err) throw new Error(err.description || err.code || 'chart error');
-  const result = json?.chart?.result?.[0];
-  if (!result) throw new Error('empty chart result');
-  const timestamps = result.timestamp ?? [];
-  const adj = result.indicators?.adjclose?.[0]?.adjclose ?? [];
-  const close = result.indicators?.quote?.[0]?.close ?? [];
   const rows = [];
-  for (let i = 0; i < timestamps.length; i++) {
-    const ts = timestamps[i];
-    const price = adj[i] ?? close[i];
-    if (ts == null || price == null || !isFinite(price) || price <= 0) continue;
-    rows.push({
-      date: new Date(ts * 1000).toISOString().slice(0, 10),
-      eod: price,
-    });
+  for (const item of json) {
+    const date = item.date?.slice(0, 10);
+    const price = item.adjClose ?? item.close;
+    if (!date || price == null || !isFinite(price) || price <= 0) continue;
+    rows.push({ date, eod: price });
   }
-  if (rows.length === 0) throw new Error('no usable chart closes');
-  return rows;
+  if (rows.length === 0) throw new Error('Tiingo returned no usable closes');
+  return rows.sort((a, b) => a.date.localeCompare(b.date));
 }
 
-async function fetchYahooHistory(symbol) {
-  const p1 = twoYearsAgo();
-  const p2 = Math.floor(Date.now() / 1000);
-  const yahooSymbol = YAHOO_ALIASES[symbol] || symbol;
-  const session = await yahooSession();
-  const notes = [];
+async function fetchTiingoHistory(symbol) {
+  const tiingoSymbol = TIINGO_ALIASES[symbol] || symbol;
+  const startDate = twoYearsAgoDate();
+  const endDate = new Date().toISOString().slice(0, 10);
+  const url =
+    `https://api.tiingo.com/tiingo/daily/${encodeURIComponent(tiingoSymbol)}/prices` +
+    `?startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
 
-  for (const host of ['query2.finance.yahoo.com', 'query1.finance.yahoo.com']) {
-    const url = new URL(`https://${host}/v8/finance/chart/${yahooSymbol}`);
-    url.searchParams.set('period1', String(p1));
-    url.searchParams.set('period2', String(p2));
-    url.searchParams.set('interval', '1d');
-    url.searchParams.set('events', 'history');
-    if (session.crumb) url.searchParams.set('crumb', session.crumb);
-    try {
-      const res = await fetch(url, { headers: yahooHeaders(session.cookie) });
-      const text = await res.text();
-      if (!res.ok) {
-        notes.push(`${host} HTTP ${res.status}: ${text.slice(0, 120)}`);
-        continue;
-      }
-      return parseYahooChart(JSON.parse(text)).sort((a, b) =>
-        a.date.localeCompare(b.date),
-      );
-    } catch (err) {
-      notes.push(`${host}: ${err.message}`);
-    }
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Token ${TIINGO_API_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  const text = await res.text();
+  if (res.status === 429 || res.status === 503) {
+    throw new TiingoRateLimitError(
+      `Tiingo HTTP ${res.status}: ${text.slice(0, 120)}`,
+    );
   }
-
-  throw new Error(
-    `Yahoo returned no history for ${symbol}${yahooSymbol !== symbol ? ` as ${yahooSymbol}` : ''} (${notes.join('; ')})`,
-  );
+  if (!res.ok) {
+    throw new Error(
+      `Tiingo returned no history for ${symbol}${tiingoSymbol !== symbol ? ` as ${tiingoSymbol}` : ''} (HTTP ${res.status}: ${text.slice(0, 120)})`,
+    );
+  }
+  return parseTiingoPrices(JSON.parse(text));
 }
 
 async function sleep(ms) {
@@ -284,19 +223,34 @@ async function main() {
   const csvRows = await fetchSheetCsv();
   console.log(`Found ${csvRows.length} symbols in CSV`);
 
-  for (const { symbol, companyName, sector, industry } of csvRows) {
-    console.log(`\n→ ${symbol} (${companyName})`);
+  const existingRows = await sql`SELECT symbol FROM symbols`;
+  const existing = new Set(existingRows.map((r) => r.symbol));
+  const toImport = csvRows.filter((row, i, all) => {
+    if (existing.has(row.symbol)) return false;
+    return all.findIndex((r) => r.symbol === row.symbol) === i;
+  });
+  console.log(
+    `Already in Neon: ${existing.size}. Remaining to import: ${toImport.length}`,
+  );
+  if (toImport.length === 0) {
+    console.log('Nothing to do.');
+    return;
+  }
+
+  for (let i = 0; i < toImport.length; i++) {
+    const { symbol, companyName, sector, industry } = toImport[i];
+    console.log(`\n→ ${symbol} (${companyName}) [${i + 1}/${toImport.length}]`);
 
     try {
-      const yahooRows = await fetchYahooHistory(symbol);
-      if (yahooRows.length === 0) {
-        console.warn(`  No Yahoo data for ${symbol}`);
+      const tiingoRows = await fetchTiingoHistory(symbol);
+      if (tiingoRows.length === 0) {
+        console.warn(`  No Tiingo data for ${symbol}`);
         continue;
       }
 
-      const history = getDataFromHistory(yahooRows);
+      const history = getDataFromHistory(tiingoRows);
       console.log(
-        `  ${yahooRows.length} raw rows → ${history.length} computed rows`,
+        `  ${tiingoRows.length} raw rows → ${history.length} computed rows`,
       );
 
       // Upsert symbol
@@ -309,8 +263,8 @@ async function main() {
       // Bulk-insert in chunks
       const CHUNK = 500;
       let inserted = 0;
-      for (let i = 0; i < history.length; i += CHUNK) {
-        const chunk = history.slice(i, i + CHUNK);
+      for (let j = 0; j < history.length; j += CHUNK) {
+        const chunk = history.slice(j, j + CHUNK);
         for (const row of chunk) {
           await sql`
             INSERT INTO symbol_data (symbol, date, eod, ma20, ma50, delta, delta_ma5, delta_ma10, delta_ma20, m1, m2, m3, p0, p1, p2)
@@ -328,11 +282,22 @@ async function main() {
       }
       console.log(`  Inserted ${inserted} rows`);
     } catch (err) {
+      if (err instanceof TiingoRateLimitError) {
+        console.error(`  Rate limited: ${err.message}`);
+        console.error(
+          `\nStopped. ${toImport.length - i} symbol(s) not imported (including ${symbol}).`,
+        );
+        console.error(
+          'Wait 15–30 minutes, then run pnpm seed again. Existing Neon rows were left as-is.',
+        );
+        process.exit(1);
+      }
       console.error(`  Failed: ${err.message}`);
     }
 
-    // Anti-rate-limit
-    await sleep(2000);
+    if (i < toImport.length - 1) {
+      await sleep(1500);
+    }
   }
 
   console.log('\nSeed complete.');

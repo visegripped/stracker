@@ -4,7 +4,7 @@ Private stock tracker. Next.js on Vercel, Postgres on Neon.
 
 ## Local development
 
-1. Copy `.env.example` to `.env.local` and fill in values (at minimum `POSTGRES_URL` and `GOOGLE_SHEET_CSV_URL`).
+1. Copy `.env.example` to `.env.local` and fill in values (at minimum `POSTGRES_URL`, `GOOGLE_SHEET_CSV_URL`, and `TIINGO_API_TOKEN`).
 2. Put formula source in `lib/secretSauce.local.ts` (gitignored; copy from `lib/secretSauce.template.ts`).
 3. Install and run:
 
@@ -17,37 +17,29 @@ App: http://localhost:3000
 
 ## Scripts
 
-| Command                    | Purpose                                    |
-| -------------------------- | ------------------------------------------ |
-| `pnpm dev`                 | Next.js dev server                         |
-| `pnpm build`               | Production build                           |
-| `pnpm test:once`           | Run Vitest once                            |
-| `pnpm db:push`             | Push Drizzle schema to Neon                |
-| `pnpm seed`                | Backfill Yahoo history for CSV symbols     |
-| `pnpm encode-secret-sauce` | Print `SECRET_SAUCE_MODULE_B64` for Vercel |
+| Command                    | Purpose                                                 |
+| -------------------------- | ------------------------------------------------------- |
+| `pnpm dev`                 | Next.js dev server                                      |
+| `pnpm build`               | Production build                                        |
+| `pnpm test:once`           | Run Vitest once                                         |
+| `pnpm db:push`             | Push Drizzle schema to Neon                             |
+| `pnpm seed`                | Backfill Tiingo history for CSV symbols not yet in Neon |
+| `pnpm encode-secret-sauce` | Print `SECRET_SAUCE_MODULE_B64` for Vercel              |
 
-## Yahoo history import
+## History import vs daily EOD
 
-`pnpm seed` and `/api/cron/backfill` load up to two years of daily closes from Yahoo Finance, then compute indicators.
+Daily cron (`/api/cron/daily`) still uses the published **Google Sheet** for each day's close. It does not call Tiingo.
 
-Yahoo retired anonymous CSV download (`/v7/finance/download`). That endpoint now returns `401 User is not logged in`. The importer uses the chart API instead. Logging in at finance.yahoo.com in a browser does **not** apply to Node.
+`pnpm seed` and `/api/cron/backfill` load up to two years of daily closes from **Tiingo**, then compute indicators. Set `TIINGO_API_TOKEN` locally and in Vercel.
 
-To send a logged-in session (needed if chart still 401s/404s):
-
-1. Sign in at [finance.yahoo.com](https://finance.yahoo.com).
-2. DevTools → Network → open any quote → click a `query1`/`query2.finance.yahoo.com` request.
-3. Copy the `Cookie` header into `.env.local` as `YAHOO_COOKIE=...` (see `.env.example`). Restart `pnpm dev` or re-run `pnpm seed`. Cookies expire; refresh them when import starts failing again.
+The backfill cron processes about **10** new sheet symbols per weekday. Remaining names stay in `pending` until later runs. Seed skips symbols already in Neon and stops on HTTP 429.
 
 Ticker remaps (sheet symbol still stored in the DB):
 
 - `SGH` is requested as `PENG` (SMART Global Holdings → Penguin Solutions).
-- Extra remaps: `YAHOO_SYMBOL_ALIASES=TEF:TEF.MC` (comma-separated `SHEET:YAHOO` pairs).
+- Extra remaps: `TIINGO_SYMBOL_ALIASES=TEF:TEF` (comma-separated `SHEET:TIINGO` pairs).
 
-A 404 with “symbol may be delisted” is often a real ticker change, not an account ban.
-
-Vercel Hobby caps this function at **60 seconds**. The cron therefore stops starting new symbols around 50s and returns JSON (`stoppedEarly: true`) instead of a 504.
-
-Yahoo often returns **HTTP 429** from Vercel datacenter IPs even with `YAHOO_COOKIE`. The cron then stops (`rateLimited: true`) and leaves those symbols in `pending` instead of marking them failed. Wait before hitting the endpoint again. For a full sheet import, run `pnpm seed` locally.
+Vercel Hobby caps the backfill function at **60 seconds**. It stops starting new symbols around 50s (`stoppedEarly: true`) instead of returning a 504.
 
 ## Crons (Vercel)
 
