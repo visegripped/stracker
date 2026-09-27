@@ -21,7 +21,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "seed": "node --env-file=.env.local scripts/seed.mjs"
+    "seed": "node --env-file=.env.local scripts/seed.mjs",
+    "fill-gaps": "node --env-file=.env.local scripts/fill-gaps.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

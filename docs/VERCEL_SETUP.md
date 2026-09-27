@@ -116,17 +116,25 @@ This backfills up to 2 years of Tiingo history for CSV symbols not yet in Neon. 
 
 ## 9. Verify Cron Jobs
 
-Crons are defined in `vercel.json`:
+Crons are defined in `vercel.json` and run only on the **Production** deployment (not Preview URLs such as `stracker-beta.vercel.app`).
 
-| Route                | Schedule (UTC) | Local time      |
-| -------------------- | -------------- | --------------- |
-| `/api/cron/backfill` | `0 0 * * 2-6`  | 5 PM PT Mon–Fri |
-| `/api/cron/daily`    | `0 1 * * 2-6`  | 6 PM PT Mon–Fri |
+| Route                | Schedule (UTC) | Local time      | What it does                                      |
+| -------------------- | -------------- | --------------- | ------------------------------------------------- |
+| `/api/cron/backfill` | `0 0 * * 2-6`  | 5 PM PT Mon–Fri | Tiingo catch-up of missed days, then new symbols  |
+| `/api/cron/daily`    | `0 1 * * 2-6`  | 6 PM PT Mon–Fri | Today's Google Sheet close for every tracked ticker |
 
-**Note:** Vercel Hobby crons run at most once per day and timing is approximate (±30 min).
+**Hobby limits:** at most one run per path per day; timing is approximate (± about an hour). Weekend UTC days `0`/`1` are skipped so Pacific Friday close is Saturday 01:00 UTC, not Sunday.
 
-Test manually:
+Checklist if a job looks idle:
+
+1. Vercel → this project (production, not a Preview) → **Cron Jobs** — both paths should be listed.
+2. Production env: `CRON_SECRET`, `GOOGLE_SHEET_CSV_URL`, `TIINGO_API_TOKEN`, `POSTGRES_URL`.
+3. Redeploy **Production** after changing `vercel.json`.
+4. Manual trigger (expect JSON, not `401`):
 
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" https://stracker.visegripped.com/api/cron/daily
+curl -H "Authorization: Bearer $CRON_SECRET" https://stracker.visegripped.com/api/cron/backfill
 ```
+
+Catch-up fills about 10 stale symbols per backfill run (Tiingo free tier is ~50 requests/hour). To drain a large gap: `pnpm fill-gaps`.

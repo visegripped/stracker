@@ -10,10 +10,19 @@ export interface CsvSymbolRow {
 }
 
 /**
+ * Last CSV row wins when a ticker appears more than once.
+ */
+export function uniqueSheetRows(rows: CsvSymbolRow[]): CsvSymbolRow[] {
+  const map = new Map<string, CsvSymbolRow>();
+  for (const row of rows) map.set(row.symbol, row);
+  return [...map.values()];
+}
+
+/**
  * Fetch and parse the published Google Sheet CSV.
  * Columns: [0]=symbol [1]=eod [2]=tradeDate [3]=companyName [4]=sector [5]=industry
- * When `limit` is set, returns only the last `limit` rows (daily cron uses 10).
- * Omit `limit` to return every parsed row (backfill walks the full sheet).
+ * When `limit` is set, returns only the last `limit` rows.
+ * Omit `limit` to return every parsed row.
  */
 export async function fetchSheetCsv(limit?: number): Promise<CsvSymbolRow[]> {
   const url = process.env.GOOGLE_SHEET_CSV_URL;

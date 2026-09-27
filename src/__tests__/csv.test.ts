@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { selectUntrackedBatch, type CsvSymbolRow } from '../../lib/cron/csv';
+import {
+  selectUntrackedBatch,
+  uniqueSheetRows,
+  type CsvSymbolRow,
+} from '../../lib/cron/csv';
 
 const row = (symbol: string): CsvSymbolRow => ({
   symbol,
@@ -30,5 +34,16 @@ describe('selectUntrackedBatch', () => {
     const { batch, pending } = selectUntrackedBatch(csv, ['AAA', 'BBB'], 5);
     expect(batch).toEqual([]);
     expect(pending).toEqual([]);
+  });
+});
+
+describe('uniqueSheetRows', () => {
+  it('keeps the last row when a ticker is duplicated', () => {
+    const first = row('AAA');
+    const later = { ...row('AAA'), eod: 9, tradeDate: '2026-09-12' };
+    expect(uniqueSheetRows([first, row('BBB'), later])).toEqual([
+      later,
+      row('BBB'),
+    ]);
   });
 });

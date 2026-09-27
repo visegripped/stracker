@@ -1,9 +1,9 @@
 import 'server-only';
-import { eq, and, sql, lt } from 'drizzle-orm';
+import { eq, sql, lt, inArray } from 'drizzle-orm';
 import { getDb } from '../db';
 import { schema } from '../db';
 import { getDataFromHistory, signalAlignment } from '../indicators';
-import { fetchSheetCsv } from './csv';
+import { fetchSheetCsv, uniqueSheetRows } from './csv';
 import { logError } from '../reporting';
 import type { EodRow } from '../indicators';
 
@@ -109,9 +109,11 @@ export interface DailyUpdateResult {
 /**
  * Main daily update logic.
  * Handles EXISTING symbols only — new symbols are handled by backfill cron.
+ * Processes every unique ticker on the sheet (today's close only). Missed
+ * prior days are filled by Tiingo catch-up on `/api/cron/backfill`.
  */
 export async function runDailyUpdate(): Promise<DailyUpdateResult> {
-  const csvRows = await fetchSheetCsv(10);
+  const csvRows = uniqueSheetRows(await fetchSheetCsv());
   const db = getDb();
 
   await pruneOldData();
@@ -123,34 +125,34 @@ export async function runDailyUpdate(): Promise<DailyUpdateResult> {
     errors: [],
   };
 
+  if (csvRows.length === 0) return result;
+
+  const trackedRows = await db
+    .select({ symbol: schema.symbols.symbol })
+    .from(schema.symbols);
+  const tracked = new Set(trackedRows.map((r) => r.symbol));
+
+  const tradeDates = [...new Set(csvRows.map((r) => r.tradeDate))];
+  const existingBars = await db
+    .select({
+      symbol: schema.symbolData.symbol,
+      date: schema.symbolData.date,
+    })
+    .from(schema.symbolData)
+    .where(inArray(schema.symbolData.date, tradeDates));
+  const haveBar = new Set(
+    existingBars.map((r) => `${r.symbol}|${r.date}`),
+  );
+
   for (const row of csvRows) {
     const { symbol, eod, tradeDate, companyName, sector, industry } = row;
 
-    // Check if symbol exists in our DB
-    const [existingSymbol] = await db
-      .select({ symbol: schema.symbols.symbol })
-      .from(schema.symbols)
-      .where(eq(schema.symbols.symbol, symbol))
-      .limit(1);
-
-    if (!existingSymbol) {
+    if (!tracked.has(symbol)) {
       result.skipped.push(symbol);
       continue;
     }
 
-    // Idempotency: skip if this date is already processed
-    const [existing] = await db
-      .select({ date: schema.symbolData.date })
-      .from(schema.symbolData)
-      .where(
-        and(
-          eq(schema.symbolData.symbol, symbol),
-          eq(schema.symbolData.date, tradeDate)
-        )
-      )
-      .limit(1);
-
-    if (existing) {
+    if (haveBar.has(`${symbol}|${tradeDate}`)) {
       result.skipped.push(symbol);
       continue;
     }
