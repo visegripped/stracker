@@ -3,6 +3,12 @@ import { isValidGoogleAccessToken } from '@/lib/auth';
 import { getDb } from '@/lib/db';
 import { schema } from '@/lib/db';
 import { eq, and, between, desc, sql, inArray } from 'drizzle-orm';
+import {
+  buildSymbolListRows,
+  pickLatestAlerts,
+  withPriceSnapshot,
+  type PriceSnapshot,
+} from '@utilities/quoteGrid';
 
 // ─── validation ──────────────────────────────────────────────────────────────
 
@@ -115,10 +121,50 @@ async function getAlertHistory(limit: number, alertTypes: string[]) {
   return query;
 }
 
-async function getAlertHistoryList(limit: number, alertTypes: string[]) {
+async function getPriceSnapshots(symbols: string[]): Promise<Record<string, PriceSnapshot>> {
+  if (symbols.length === 0) return {};
+
   const db = getDb();
   const currentYear = new Date().getFullYear();
   const yearStart = `${currentYear}-01-02`;
+
+  const priceRows = await db
+    .select({
+      symbol: schema.symbolData.symbol,
+      yearStartEOD: sql<string>`MAX(CASE WHEN ${schema.symbolData.date} = ${yearStart} THEN ${schema.symbolData.eod} END)`,
+      lastEOD: sql<string>`MAX(CASE WHEN ${schema.symbolData.date} = (SELECT MAX(date) FROM symbol_data sd2 WHERE sd2.symbol = ${schema.symbolData.symbol}) THEN ${schema.symbolData.eod} END)`,
+      previousDayEOD: sql<string>`MAX(CASE WHEN ${schema.symbolData.date} = (SELECT MAX(date) FROM symbol_data sd3 WHERE sd3.symbol = ${schema.symbolData.symbol} AND sd3.date < (SELECT MAX(date) FROM symbol_data sd4 WHERE sd4.symbol = ${schema.symbolData.symbol})) THEN ${schema.symbolData.eod} END)`,
+    })
+    .from(schema.symbolData)
+    .where(inArray(schema.symbolData.symbol, symbols))
+    .groupBy(schema.symbolData.symbol);
+
+  const priceMap: Record<string, PriceSnapshot> = {};
+  for (const r of priceRows) {
+    priceMap[r.symbol] = {
+      yearStartEOD: r.yearStartEOD,
+      lastEOD: r.lastEOD,
+      previousDayEOD: r.previousDayEOD,
+    };
+  }
+  return priceMap;
+}
+
+async function getLatestAlertsBySymbol(): Promise<Record<string, { type: string; date: string }>> {
+  const db = getDb();
+  const rows = await db
+    .select({
+      symbol: schema.alerts.symbol,
+      type: schema.alerts.type,
+      date: schema.alerts.date,
+    })
+    .from(schema.alerts)
+    .orderBy(desc(schema.alerts.date), desc(schema.alerts.id));
+  return pickLatestAlerts(rows);
+}
+
+async function getAlertHistoryList(limit: number, alertTypes: string[]) {
+  const db = getDb();
 
   let baseQuery = db
     .select({
@@ -141,36 +187,15 @@ async function getAlertHistoryList(limit: number, alertTypes: string[]) {
 
   const alertRows = await baseQuery;
   const alertSymbols = [...new Set(alertRows.map((r) => r.symbol))];
+  const priceMap = await getPriceSnapshots(alertSymbols);
+  return withPriceSnapshot(alertRows, priceMap);
+}
 
-  if (alertSymbols.length === 0) return alertRows;
-
-  // Single join query to get yearStartEOD, lastEOD, previousDayEOD for all symbols
-  const priceRows = await db
-    .select({
-      symbol: schema.symbolData.symbol,
-      yearStartEOD: sql<string>`MAX(CASE WHEN ${schema.symbolData.date} = ${yearStart} THEN ${schema.symbolData.eod} END)`,
-      lastEOD: sql<string>`MAX(CASE WHEN ${schema.symbolData.date} = (SELECT MAX(date) FROM symbol_data sd2 WHERE sd2.symbol = ${schema.symbolData.symbol}) THEN ${schema.symbolData.eod} END)`,
-      previousDayEOD: sql<string>`MAX(CASE WHEN ${schema.symbolData.date} = (SELECT MAX(date) FROM symbol_data sd3 WHERE sd3.symbol = ${schema.symbolData.symbol} AND sd3.date < (SELECT MAX(date) FROM symbol_data sd4 WHERE sd4.symbol = ${schema.symbolData.symbol})) THEN ${schema.symbolData.eod} END)`,
-    })
-    .from(schema.symbolData)
-    .where(inArray(schema.symbolData.symbol, alertSymbols))
-    .groupBy(schema.symbolData.symbol);
-
-  const priceMap: Record<string, { yearStartEOD: string | null; lastEOD: string | null; previousDayEOD: string | null }> = {};
-  for (const r of priceRows) {
-    priceMap[r.symbol] = {
-      yearStartEOD: r.yearStartEOD,
-      lastEOD: r.lastEOD,
-      previousDayEOD: r.previousDayEOD,
-    };
-  }
-
-  return alertRows.map((r) => ({
-    ...r,
-    yearStartEOD: priceMap[r.symbol]?.yearStartEOD ?? null,
-    lastEOD: priceMap[r.symbol]?.lastEOD ?? null,
-    previousDayEOD: priceMap[r.symbol]?.previousDayEOD ?? null,
-  }));
+async function getSymbolList() {
+  const symbolRows = await getSymbols();
+  const priceMap = await getPriceSnapshots(symbolRows.map((row) => row.symbol));
+  const latestAlerts = await getLatestAlertsBySymbol();
+  return buildSymbolListRows(symbolRows, priceMap, latestAlerts);
 }
 
 async function trackSymbol(symbol: string, userId: string) {
@@ -277,6 +302,8 @@ export async function POST(request: NextRequest) {
       data = await getAlertHistory(limit, alertTypes as string[]);
     } else if (task === 'getAlertHistoryList') {
       data = await getAlertHistoryList(limit, alertTypes as string[]);
+    } else if (task === 'getSymbolList') {
+      data = await getSymbolList();
     } else if (task === 'track' && isValidSymbol(symbol) && isValidEmail(userId)) {
       data = await trackSymbol(symbol, userId);
     } else if (task === 'untrack' && isValidSymbol(symbol) && isValidEmail(userId)) {

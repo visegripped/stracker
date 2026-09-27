@@ -9,6 +9,7 @@ import Notification from '@components/Notification';
 import { NotificationsContext } from '@context/NotificationsContext';
 import { ErrorBoundary } from 'react-error-boundary';
 import ThemeToggle from '@components/ThemeToggle/ThemeToggle';
+import { navIsActive } from '@utilities/nav';
 
 function fallbackRender({ error }: { error: Error }) {
   return (
@@ -33,12 +34,9 @@ const Notifications = () => {
 const NAV = [
   { href: '/symbol', label: 'Symbol' },
   { href: '/macd', label: 'MACD' },
+  { href: '/symbols', label: 'Symbols' },
   { href: '/alerts', label: 'Alert History' },
 ];
-
-function navIsActive(pathname: string, href: string) {
-  return pathname === href || pathname.startsWith(`${href}/`);
-}
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const { accessToken } = useContext(AuthContext as React.Context<{ accessToken: string }>);

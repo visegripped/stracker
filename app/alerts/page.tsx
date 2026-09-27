@@ -3,52 +3,23 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import apiPost from '@utilities/apiPost';
-import { AgGridReact } from 'ag-grid-react';
-import type { ColDef, GridApi, GridReadyEvent } from 'ag-grid-community';
-import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-quartz.css';
+import type { GridApi, GridReadyEvent } from 'ag-grid-community';
 import '@views/Alerts.css';
-import { useTheme } from '@context/ThemeContext';
-import { agGridThemeClass } from '@utilities/chartTheme';
 import {
   ALERT_TYPE_FILTERS,
   alertTypeColumnFilterModel,
   matchesAlertTypeFilter,
   type AlertTypeFilter,
 } from '@utilities/alertTypeFilter';
+import type { QuoteGridRow } from '@utilities/quoteGrid';
+import { QuoteGrid, alertHistoryColumnDefs } from '@components/QuoteGrid';
 import AppShell from '../AppShell';
 
-type AlertRow = {
+type AlertRow = QuoteGridRow & {
   id?: number;
-  symbol: string;
-  name?: string;
-  type: string;
-  date: string;
-  lastEOD?: string | number | null;
-  yearStartEOD?: string | number | null;
-  previousDayEOD?: string | number | null;
-  sector?: string | null;
-  industry?: string | null;
-  dayOverDay?: string | number | null;
 };
 
-const getSpanFromDiff = (eod: string | number | null | undefined, earlier: string | number | null | undefined) => {
-  const a = parseFloat(String(eod));
-  const b = parseFloat(String(earlier));
-  if (isNaN(a) || isNaN(b) || !earlier || !eod) return '';
-  const diff = a - b;
-  const cls = diff >= 0 ? 'positive' : 'negative';
-  return <span className={`price-${cls}`}>{diff.toFixed(2)}</span>;
-};
-
-const LinkedSymbol = (props: { value: string }) => (
-  <Link href={`/symbol/${props.value}`}>{props.value}</Link>
-);
-
-const YTDCell = (props: { data: AlertRow }) => getSpanFromDiff(props.data.lastEOD, props.data.yearStartEOD);
-const DODCell = (props: { data: AlertRow }) => getSpanFromDiff(props.data.lastEOD, props.data.previousDayEOD);
-
-function applyTypeColumnFilter(api: GridApi<AlertRow> | null, filter: AlertTypeFilter) {
+function applyTypeColumnFilter(api: GridApi<QuoteGridRow> | null, filter: AlertTypeFilter) {
   if (!api) return;
   void api.setColumnFilterModel('type', alertTypeColumnFilterModel(filter)).then(() => {
     api.onFilterChanged();
@@ -56,11 +27,10 @@ function applyTypeColumnFilter(api: GridApi<AlertRow> | null, filter: AlertTypeF
 }
 
 function AlertsContent() {
-  const { resolvedTheme } = useTheme();
   const [alertHistory, setAlertHistory] = useState<AlertRow[]>([]);
   const [typeFilter, setTypeFilter] = useState<AlertTypeFilter>('all');
   const [groupBySector, setGroupBySector] = useState(false);
-  const gridApiRef = useRef<GridApi<AlertRow> | null>(null);
+  const gridApiRef = useRef<GridApi<QuoteGridRow> | null>(null);
 
   useEffect(() => {
     apiPost({ task: 'getAlertHistoryList', limit: 200 })
@@ -68,7 +38,7 @@ function AlertsContent() {
       .catch((err) => { console.error('Error fetching alert history:', err); setAlertHistory([]); });
   }, []);
 
-  const onGridReady = useCallback((event: GridReadyEvent<AlertRow>) => {
+  const onGridReady = useCallback((event: GridReadyEvent<QuoteGridRow>) => {
     gridApiRef.current = event.api;
     applyTypeColumnFilter(event.api, typeFilter);
   }, [typeFilter]);
@@ -77,18 +47,6 @@ function AlertsContent() {
     setTypeFilter(next);
     applyTypeColumnFilter(gridApiRef.current, next);
   };
-
-  const colDefs: ColDef<AlertRow>[] = [
-    { field: 'symbol', sortable: true, cellRenderer: LinkedSymbol },
-    { field: 'name', flex: 2 },
-    { field: 'sector' },
-    { field: 'industry', flex: 2 },
-    { field: 'type', filter: 'agTextColumnFilter' },
-    { field: 'lastEOD', headerName: 'EOD' },
-    { field: 'yearStartEOD', cellRenderer: YTDCell, headerName: 'Year to EOD' },
-    { field: 'dayOverDay', cellRenderer: DODCell },
-    { field: 'date', sort: 'asc' },
-  ];
 
   const visibleAlerts = alertHistory.filter((a) => matchesAlertTypeFilter(a.type, typeFilter));
 
@@ -113,22 +71,24 @@ function AlertsContent() {
         </label>
       </div>
 
-      <section className={`table-container ${agGridThemeClass(resolvedTheme)}`}>
-        {alertHistory.length ? (
-          groupBySector ? (
+      {groupBySector ? (
+        alertHistory.length ? (
+          <section className="table-container">
             <SectorGroupedView alerts={visibleAlerts} />
-          ) : (
-            <AgGridReact<AlertRow>
-              rowData={alertHistory}
-              columnDefs={colDefs}
-              onGridReady={onGridReady}
-              onGridPreDestroyed={() => { gridApiRef.current = null; }}
-            />
-          )
+          </section>
         ) : (
-          <h3>Fetching data...</h3>
-        )}
-      </section>
+          <section className="table-container">
+            <h3>Fetching data...</h3>
+          </section>
+        )
+      ) : (
+        <QuoteGrid
+          rowData={alertHistory}
+          columnDefs={alertHistoryColumnDefs()}
+          onGridReady={onGridReady}
+          onGridPreDestroyed={() => { gridApiRef.current = null; }}
+        />
+      )}
     </>
   );
 }
