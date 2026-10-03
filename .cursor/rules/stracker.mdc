@@ -10,8 +10,10 @@ Alerts are measured by P0, P1 and P2 where P0 is a must buy and the other two ar
 A public Google Sheet CSV lists tracked symbols and is used as the source of daily close prices (`GOOGLE_SHEET_CSV_URL`).
 
 Hosting is Vercel (Next.js). Postgres is Neon. Crons are defined in `vercel.json`:
-- `/api/cron/backfill` at `0 0 * * 2-6` UTC (5 PM PT Mon–Fri)
-- `/api/cron/daily` at `0 1 * * 2-6` UTC (6 PM PT Mon–Fri)
+- `/api/cron/backfill` at `0 0 * * 2-6` UTC (5 PM PT Mon–Fri) — new sheet symbols only
+- `/api/cron/daily` at `0 1 * * 2-6` UTC (6 PM PT Mon–Fri) — Google Sheet EOD for every tracked ticker
+
+Missed-day Tiingo catch-up (`lib/cron/catchup.ts`, `runCatchup`) is **disabled by default**. The scheduled backfill cron must not run it. Opt in with `GET /api/cron/backfill?catchup=1` (also `true`/`yes`) or `pnpm fill-gaps`. Daily EOD still comes from the Google Sheet.
 
 The contents of the secret sauce formulas must always remain secret. Local formulas live in `lib/secretSauce.local.ts` (gitignored). Production uses `SECRET_SAUCE_MODULE_B64`. If unit tests cover formulas, those tests should also stay out of git.
 

@@ -4,6 +4,7 @@ import {
   selectStaleSymbols,
   toIsoDate,
 } from '../../lib/cron/catchup';
+import { isCatchupRequested } from '../../lib/cron/catchupRequest';
 
 describe('nextIsoDay', () => {
   it('advances within the same month', () => {
@@ -49,5 +50,20 @@ describe('selectStaleSymbols', () => {
     );
     expect(batch).toEqual([]);
     expect(pending).toEqual([]);
+  });
+});
+
+describe('isCatchupRequested', () => {
+  it('is off unless catchup is an explicit truthy query value', () => {
+    expect(isCatchupRequested(new URLSearchParams())).toBe(false);
+    expect(isCatchupRequested(new URLSearchParams('catchup='))).toBe(false);
+    expect(isCatchupRequested(new URLSearchParams('catchup=0'))).toBe(false);
+    expect(isCatchupRequested(new URLSearchParams('catchup=false'))).toBe(false);
+  });
+
+  it('accepts 1, true, and yes', () => {
+    expect(isCatchupRequested(new URLSearchParams('catchup=1'))).toBe(true);
+    expect(isCatchupRequested(new URLSearchParams('catchup=true'))).toBe(true);
+    expect(isCatchupRequested(new URLSearchParams('catchup=YES'))).toBe(true);
   });
 });

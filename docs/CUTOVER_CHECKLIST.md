@@ -35,7 +35,7 @@ Complete these steps in order on cutover day.
    - [ ] Login with Google
    - [ ] Symbol page loads with chart data
    - [ ] Alerts page loads grid
-   - [ ] Trigger `/api/cron/backfill` — verify JSON includes `catchup` and `added` (or empty pending)
+   - [ ] Trigger `/api/cron/backfill` — new symbols only (`catchup.enabled` should be false)
    - [ ] Trigger `/api/cron/daily` — verify it returns processed symbols (full sheet, not last 10)
 
 5. **Disable SiteGround cron**

@@ -1,9 +1,10 @@
 import 'server-only';
-import { eq, and } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { getDb } from '../db';
 import { schema } from '../db';
 import { sendAlertEmail, sendSectorSummaryEmail } from '../email';
 import type { AlertMatch, TodaysAlerts } from '../email';
+import { pacificTradingDate } from '@utilities/tradingDate';
 
 /** Load all alerts for a given date, keyed by symbol */
 async function getAlertsByDate(date: string): Promise<TodaysAlerts> {
@@ -68,7 +69,7 @@ export interface AlertsResult {
 export async function runAlertEmails(
   alertsForToday: Record<string, string>
 ): Promise<AlertsResult> {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = pacificTradingDate();
 
   const todaysAlerts: TodaysAlerts =
     Object.keys(alertsForToday).length > 0

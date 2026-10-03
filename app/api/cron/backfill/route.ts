@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { runBackfill } from '@/lib/cron/backfill';
-import { runCatchup } from '@/lib/cron/catchup';
+import { runCatchup, type CatchupResult } from '@/lib/cron/catchup';
+import { isCatchupRequested } from '@/lib/cron/catchupRequest';
 import { shouldStopBackfill } from '@/lib/cron/backfillDeadline';
 import { sendErrorEmail } from '@/lib/email';
 import { logError } from '@/lib/reporting';
@@ -10,6 +11,17 @@ import { formatBackfillFailure, formatUnknownError } from '@/lib/errors';
 export const maxDuration = 60;
 
 const DEADLINE_BUDGET_MS = 50_000;
+
+const CATCHUP_OFF: CatchupResult & { enabled: false } = {
+  enabled: false,
+  filled: [],
+  skipped: [],
+  failed: [],
+  pending: [],
+  targetDate: null,
+  stoppedEarly: false,
+  rateLimited: false,
+};
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get('authorization');
@@ -23,9 +35,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const deadlineAt = Date.now() + DEADLINE_BUDGET_MS;
+    const catchupEnabled = isCatchupRequested(request.nextUrl.searchParams);
 
-    // Gaps first: the sheet only has today's close, so missed days need Tiingo.
-    const catchup = await runCatchup(10, { deadlineAt });
+    // Missed-day catch-up is opt-in: GET /api/cron/backfill?catchup=1
+    // The scheduled Vercel cron has no query string, so it only imports new symbols.
+    const catchup = catchupEnabled
+      ? { enabled: true as const, ...(await runCatchup(10, { deadlineAt })) }
+      : CATCHUP_OFF;
 
     const backfillEmpty = {
       added: [] as string[],
@@ -49,15 +65,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      catchup: {
-        filled: catchup.filled,
-        skipped: catchup.skipped,
-        failed: catchup.failed,
-        pending: catchup.pending,
-        targetDate: catchup.targetDate,
-        stoppedEarly: catchup.stoppedEarly,
-        rateLimited: catchup.rateLimited,
-      },
+      catchup,
       added: backfill.added,
       failed: backfill.failed,
       pending: backfill.pending,
@@ -65,8 +73,8 @@ export async function GET(request: NextRequest) {
       rateLimited,
       hint: rateLimited
         ? 'Tiingo rate-limited this run. Wait before retrying; remaining symbols stay pending.'
-        : catchup.pending.length > 0
-          ? `${catchup.pending.length} symbol(s) still behind ${catchup.targetDate}. Re-run or wait for the next backfill cron.`
+        : catchupEnabled && catchup.pending.length > 0
+          ? `${catchup.pending.length} symbol(s) still behind ${catchup.targetDate}. Re-run with ?catchup=1 or pnpm fill-gaps.`
           : undefined,
     });
   } catch (error) {

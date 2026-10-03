@@ -1,9 +1,10 @@
 import 'server-only';
-import { eq, sql, lt, inArray } from 'drizzle-orm';
+import { eq, sql, lt } from 'drizzle-orm';
 import { getDb } from '../db';
 import { schema } from '../db';
 import { getDataFromHistory, signalAlignment } from '../indicators';
 import { fetchSheetCsv, uniqueSheetRows } from './csv';
+import { applySheetClose } from './applySheetClose';
 import { logError } from '../reporting';
 import type { EodRow } from '../indicators';
 
@@ -76,13 +77,15 @@ async function upsertLatestDay(
     });
 }
 
-/** Upsert alert (idempotent via unique constraint on date+symbol+type) */
-async function recordAlert(date: string, symbol: string, type: string): Promise<void> {
+/** Insert alert; returns true when a new row was written. */
+async function recordAlert(date: string, symbol: string, type: string): Promise<boolean> {
   const db = getDb();
-  await db
+  const inserted = await db
     .insert(schema.alerts)
     .values({ date, symbol, type })
-    .onConflictDoNothing();
+    .onConflictDoNothing()
+    .returning({ id: schema.alerts.id });
+  return inserted.length > 0;
 }
 
 /** Refresh symbol name/sector/industry from CSV data */
@@ -109,8 +112,8 @@ export interface DailyUpdateResult {
 /**
  * Main daily update logic.
  * Handles EXISTING symbols only — new symbols are handled by backfill cron.
- * Processes every unique ticker on the sheet (today's close only). Missed
- * prior days are filled by Tiingo catch-up on `/api/cron/backfill`.
+ * Always applies the sheet close (even if catch-up already wrote today's bar)
+ * so signal transitions still produce alerts and emails.
  */
 export async function runDailyUpdate(): Promise<DailyUpdateResult> {
   const csvRows = uniqueSheetRows(await fetchSheetCsv());
@@ -132,18 +135,6 @@ export async function runDailyUpdate(): Promise<DailyUpdateResult> {
     .from(schema.symbols);
   const tracked = new Set(trackedRows.map((r) => r.symbol));
 
-  const tradeDates = [...new Set(csvRows.map((r) => r.tradeDate))];
-  const existingBars = await db
-    .select({
-      symbol: schema.symbolData.symbol,
-      date: schema.symbolData.date,
-    })
-    .from(schema.symbolData)
-    .where(inArray(schema.symbolData.date, tradeDates));
-  const haveBar = new Set(
-    existingBars.map((r) => `${r.symbol}|${r.date}`),
-  );
-
   for (const row of csvRows) {
     const { symbol, eod, tradeDate, companyName, sector, industry } = row;
 
@@ -152,35 +143,27 @@ export async function runDailyUpdate(): Promise<DailyUpdateResult> {
       continue;
     }
 
-    if (haveBar.has(`${symbol}|${tradeDate}`)) {
-      result.skipped.push(symbol);
-      continue;
-    }
-
     try {
-      // Load recent history and append today's price
-      const recentHistory = await getRecentHistory(symbol, 75);
-      recentHistory.push({ date: tradeDate, eod: String(eod) });
+      const recentHistory = applySheetClose(
+        await getRecentHistory(symbol, 75),
+        tradeDate,
+        String(eod),
+      );
 
-      // Compute all indicators
       const history = getDataFromHistory(recentHistory);
       if (history.length === 0) {
         result.errors.push(`No indicator data computed for ${symbol}`);
         continue;
       }
 
-      // Upsert only the most recent day
       const latestDay = history[history.length - 1];
       await upsertLatestDay(symbol, latestDay);
-
-      // Refresh meta from CSV
       await refreshSymbolMeta(symbol, companyName, sector, industry);
 
-      // Check for buy/sell signal transition
       const alertType = signalAlignment(history);
       if (alertType) {
-        await recordAlert(tradeDate, symbol, alertType);
-        result.alerts[symbol] = alertType;
+        const created = await recordAlert(tradeDate, symbol, alertType);
+        if (created) result.alerts[symbol] = alertType;
       }
 
       result.processed.push(symbol);

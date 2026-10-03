@@ -113,6 +113,9 @@ export interface CatchupOptions {
 /**
  * Fill missing EOD days after each symbol's latest stored bar, using Tiingo.
  * Daily sheet updates only insert "today"; this repairs days the cron missed.
+ *
+ * Not run by the scheduled `/api/cron/backfill` job. Call runCatchup only when
+ * the request includes `?catchup=1` (see `isCatchupRequested`).
  */
 export async function runCatchup(
   batchCap = 10,

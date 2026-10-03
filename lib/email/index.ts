@@ -82,7 +82,9 @@ export async function sendAlertEmail(
   });
 
   if (error) {
-    console.error(`Failed to send alert email to ${to}:`, error);
+    throw new Error(
+      `Failed to send alert email to ${to}: ${error.message ?? JSON.stringify(error)}`,
+    );
   }
 }
 
@@ -127,6 +129,8 @@ export async function sendSectorSummaryEmail(
   });
 
   if (error) {
-    console.error('Failed to send sector summary email:', error);
+    throw new Error(
+      `Failed to send sector summary email: ${error.message ?? JSON.stringify(error)}`,
+    );
   }
 }

@@ -120,7 +120,7 @@ Crons are defined in `vercel.json` and run only on the **Production** deployment
 
 | Route                | Schedule (UTC) | Local time      | What it does                                      |
 | -------------------- | -------------- | --------------- | ------------------------------------------------- |
-| `/api/cron/backfill` | `0 0 * * 2-6`  | 5 PM PT Mon–Fri | Tiingo catch-up of missed days, then new symbols  |
+| `/api/cron/backfill` | `0 0 * * 2-6`  | 5 PM PT Mon–Fri | New sheet symbols only (not missed-day catch-up) |
 | `/api/cron/daily`    | `0 1 * * 2-6`  | 6 PM PT Mon–Fri | Today's Google Sheet close for every tracked ticker |
 
 **Hobby limits:** at most one run per path per day; timing is approximate (± about an hour). Weekend UTC days `0`/`1` are skipped so Pacific Friday close is Saturday 01:00 UTC, not Sunday.
@@ -137,4 +137,11 @@ curl -H "Authorization: Bearer $CRON_SECRET" https://stracker.visegripped.com/ap
 curl -H "Authorization: Bearer $CRON_SECRET" https://stracker.visegripped.com/api/cron/backfill
 ```
 
-Catch-up fills about 10 stale symbols per backfill run (Tiingo free tier is ~50 requests/hour). To drain a large gap: `pnpm fill-gaps`.
+Missed-day catch-up is **opt-in** (`lib/cron/catchup.ts`). The scheduled cron does not pass a query string, so it skips catch-up. To fill gaps:
+
+```bash
+curl -H "Authorization: Bearer $CRON_SECRET" \
+  'https://stracker.visegripped.com/api/cron/backfill?catchup=1'
+```
+
+About 10 stale symbols per run (Tiingo free tier is ~50 requests/hour). To drain a large gap: `pnpm fill-gaps`.
