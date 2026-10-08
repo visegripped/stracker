@@ -147,7 +147,7 @@ CRON_SECRET=
 
 ## Google OAuth
 
-Reuse the same Google Cloud OAuth client as giftmanager. Only change needed: add new Vercel deployment URL (and custom subdomain e.g. `stracker.visegripped.com`) to **Authorized JavaScript Origins** in Google Cloud Console.
+Reuse the same Google Cloud OAuth client as giftmanager. Add `https://visegripped.com` (production) and `https://stracker.vicegripped.com` (preproduction, `dev` branch) to **Authorized JavaScript Origins** in Google Cloud Console.
 
 Auth validation pattern copied from `giftmanager/lib/auth/index.ts` (tokeninfo endpoint + audience check).
 
@@ -167,7 +167,7 @@ Ported to `lib/secretSauce.ts` as a server-only module (never bundled client-sid
 
 - **Yahoo fragility**: keep the scrape fallback ported to TypeScript `fetch` (no `fopen`). If Yahoo blocks further, Alpha Vantage has a free tier (5 calls/min, 500/day) as a longer-term replacement.
 - **`getAlertHistoryList` simplification**: the current PHP does N dynamic subqueries (one per alert row) hitting per-symbol tables. With `symbol_data`, this becomes a single join — significant cleanup.
-- **Deploy subdomain**: `stracker.visegripped.com` (parallel to `gm.visegripped.com`), configured as a custom domain in Vercel dashboard.
+- **Domains**: production `visegripped.com`; branch `dev` is preproduction at `stracker.vicegripped.com` (spelled vice, not vise).
 - **No data migration needed**: fresh `symbol_data` table; Yahoo backfill handles history on first daily run for each active symbol.
 - **`secretSauce` gitignore**: add `lib/secretSauce.ts` to `.gitignore` (same pattern as the PHP version).
 - **Max function duration**: Vercel Hobby allows 10s for API routes and 60s for cron routes (Pro allows 300s). With 10 symbols and Yahoo fetches only for new ones, the cron should complete well within 60s under normal conditions.

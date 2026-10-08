@@ -1,5 +1,7 @@
 # Cutover Checklist — Stracker (PHP → Next.js)
 
+Current hosts (cutover is done): production is `https://visegripped.com`. Branch `dev` is preproduction at `https://stracker.vicegripped.com` (spelled **vice**, not vise).
+
 Complete these steps in order on cutover day.
 
 ---
@@ -20,15 +22,15 @@ Complete these steps in order on cutover day.
 ## Cutover day
 
 1. **Set production domain**
-   - Vercel dashboard → Domains → Add `stracker.visegripped.com`
-   - Update DNS: CNAME `stracker` → `cname.vercel-dns.com`
+   - Vercel dashboard → Domains → Add `visegripped.com`
+   - Point the apex `visegripped.com` at Vercel (A records). Preproduction `stracker.vicegripped.com` is a CNAME to Vercel for the `dev` branch.
 
 2. **Add OAuth origin**
-   - Google Console → OAuth Client → add `https://stracker.visegripped.com` to Authorized JavaScript origins
+   - Google Console → OAuth Client → add `https://visegripped.com` to Authorized JavaScript origins
 
 3. **Verify DNS propagation**
    ```bash
-   dig stracker.visegripped.com CNAME
+   dig visegripped.com A
    ```
 
 4. **Smoke-test production**

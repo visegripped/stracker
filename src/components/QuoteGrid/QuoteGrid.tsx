@@ -12,6 +12,7 @@ import {
   formatRecentSignal,
   type QuoteGridRow,
 } from '@utilities/quoteGrid';
+import { SymbolChartButton } from '@components/HistoryChart/SymbolChartButton';
 
 export function getSpanFromDiff(
   eod: string | number | null | undefined,
@@ -28,6 +29,22 @@ export function getSpanFromDiff(
 export const LinkedSymbol = (props: { value: string }) => (
   <Link href={`/symbol/${props.value}`}>{props.value}</Link>
 );
+
+export function NameWithChart({
+  value,
+  data,
+}: {
+  value?: string | null;
+  data?: QuoteGridRow;
+}) {
+  const symbol = data?.symbol;
+  return (
+    <span className="name-with-chart">
+      <span className="name-with-chart__label">{value ?? ''}</span>
+      {symbol ? <SymbolChartButton symbol={symbol} /> : null}
+    </span>
+  );
+}
 
 export const YTDCell = (props: { data?: QuoteGridRow }) =>
   getSpanFromDiff(props.data?.lastEOD, props.data?.yearStartEOD);
@@ -48,7 +65,7 @@ function textCol(
 export function alertHistoryColumnDefs(): ColDef<QuoteGridRow>[] {
   return [
     { field: 'symbol', sortable: true, cellRenderer: LinkedSymbol },
-    textCol('name', { flex: 2 }),
+    textCol('name', { flex: 2, cellRenderer: NameWithChart }),
     textCol('sector'),
     textCol('industry', { flex: 2 }),
     textCol('type'),
@@ -62,7 +79,7 @@ export function alertHistoryColumnDefs(): ColDef<QuoteGridRow>[] {
 export function symbolsColumnDefs(): ColDef<QuoteGridRow>[] {
   return [
     { field: 'symbol', sortable: true, sort: 'asc', cellRenderer: LinkedSymbol },
-    textCol('name', { flex: 2 }),
+    textCol('name', { flex: 2, cellRenderer: NameWithChart }),
     textCol('sector'),
     textCol('industry', { flex: 2 }),
     { field: 'lastEOD', headerName: 'EOD' },

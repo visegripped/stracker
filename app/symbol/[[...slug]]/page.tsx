@@ -14,53 +14,42 @@ import ChartLoading from '@components/ChartLoading/ChartLoading';
 import '@views/Symbol.css';
 import apiPost from '@utilities/apiPost';
 import { resolveSymbolFromSlug } from '@utilities/symbolParam';
-import {
-  applyFlagToggle,
-  DEFAULT_SYMBOL_DATA_POINTS,
-  readPersistedFlags,
-} from '@utilities/chartFlags';
+import { applyFlagToggle } from '@utilities/chartFlags';
+import { readSymbolChartSettings, SYMBOL_CHART_STORAGE } from '@utilities/chartSettings';
 import AppShell from '../../AppShell';
 
 type HistoryRow = { date: string; EOD: string | number; [key: string]: unknown };
 type AlertRow = { id?: string | number; date: string; type: string };
 
 function SymbolContent({ symbol }: { symbol: string }) {
-  const defaultDataPoints = (() =>
-    readPersistedFlags(localStorage.getItem('dataPoints'), DEFAULT_SYMBOL_DATA_POINTS)
-  )();
-
-  const parseLS = (key: string, fallback: Date): Date => {
-    const v = localStorage.getItem(key) ?? '';
-    if (!v || v === 'null') return fallback;
-    const d = new Date(v);
-    return isNaN(d.getTime()) ? fallback : d;
-  };
-
-  const defaultStart = (() => {
-    const d = new Date(); d.setDate(d.getDate() - 35); return d;
-  })();
-
+  const [initialChart] = useState(() => readSymbolChartSettings(localStorage));
   const [history, setHistory] = useState<HistoryRow[]>([]);
   const [historyLoading, setHistoryLoading] = useState(true);
   const [alertHistory, setAlertHistory] = useState<AlertRow[]>([]);
-  const [startDate, setStartDate] = useState<Date>(() => parseLS('startDate', defaultStart));
-  const [endDate, setEndDate] = useState<Date>(() => parseLS('endDate', new Date()));
-  const [dataPoints, setDataPoints] = useState<Record<string, boolean>>(defaultDataPoints);
+  const [startDate, setStartDate] = useState<Date>(initialChart.startDate);
+  const [endDate, setEndDate] = useState<Date>(initialChart.endDate);
+  const [dataPoints, setDataPoints] = useState<Record<string, boolean>>(initialChart.dataPoints);
 
   const updateDataPoint = (id: string, val: boolean) => {
     const updated = applyFlagToggle(dataPoints, id, val);
     setDataPoints(updated);
-    localStorage.setItem('dataPoints', JSON.stringify(updated));
+    localStorage.setItem(SYMBOL_CHART_STORAGE.dataPoints, JSON.stringify(updated));
   };
 
   const updateStartDate = (date: Date) => {
     setStartDate(date);
-    localStorage.setItem('startDate', date instanceof Date ? date.toISOString() : String(date));
+    localStorage.setItem(
+      SYMBOL_CHART_STORAGE.startDate,
+      date instanceof Date ? date.toISOString() : String(date),
+    );
   };
 
   const updateEndDate = (date: Date) => {
     setEndDate(date);
-    localStorage.setItem('endDate', date instanceof Date ? date.toISOString() : String(date));
+    localStorage.setItem(
+      SYMBOL_CHART_STORAGE.endDate,
+      date instanceof Date ? date.toISOString() : String(date),
+    );
   };
 
   useEffect(() => {

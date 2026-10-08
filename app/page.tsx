@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useContext } from 'react';
-import Link from 'next/link';
 import apiPost from '@utilities/apiPost';
+import { StockNameLink } from '@components/HistoryChart/SymbolChartButton';
 import { ProfileContext } from '@context/ProfileContext';
 import AppShell from './AppShell';
 
@@ -37,7 +37,7 @@ function BySector({ items, title }: { items: Array<{ symbol: string; name?: stri
           <h4 className="sector-label">{sector}</h4>
           {sItems.map((data, i) => (
             <div key={`${data.symbol}-${i}`}>
-              <Link href={`/symbol/${data.symbol}`}>{data.name ?? data.symbol}</Link>
+              <StockNameLink symbol={data.symbol} label={data.name ?? data.symbol} />
               {data.type ? `: ${data.type} on ${data.date}` : ''}
             </div>
           ))}
@@ -106,7 +106,7 @@ function HomeContent() {
             <h4 className="sector-label">{sector}</h4>
             {items.map((data) => (
               <div key={data.symbol}>
-                <Link href={`/symbol/${data.symbol}`}>{data.name ?? data.symbol}</Link>
+                <StockNameLink symbol={data.symbol} label={data.name ?? data.symbol} />
               </div>
             ))}
           </div>
@@ -120,7 +120,7 @@ function HomeContent() {
         <h2>Most recent signals:</h2>
         {recent20Signals.map((data, i) => (
           <div key={`${data.symbol}-${i}`}>
-            <Link href={`/symbol/${data.symbol}`}>{data.name ?? data.symbol}</Link>
+            <StockNameLink symbol={data.symbol} label={data.name ?? data.symbol} />
             {data.type ? `: ${data.type} on ${data.date}` : ''}
           </div>
         ))}

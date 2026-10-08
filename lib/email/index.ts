@@ -45,7 +45,7 @@ export interface TodaysAlerts {
 function buildAlertEmailHtml(
   matched: AlertMatch[],
   todaysAlerts: TodaysAlerts,
-  baseUrl = 'https://stracker.visegripped.com'
+  baseUrl = 'https://visegripped.com'
 ): string {
   const matchedHtml = matched
     .map((a) => `<a href="${baseUrl}/symbol/${a.symbol}">${a.symbol}</a> — ${a.type}`)
@@ -90,7 +90,7 @@ export async function sendAlertEmail(
 
 function buildSectorSummaryHtml(
   alertsBySector: Record<string, { symbol: string; type: string; industry: string | null }[]>,
-  baseUrl = 'https://stracker.visegripped.com'
+  baseUrl = 'https://visegripped.com'
 ): string {
   const sections = Object.entries(alertsBySector)
     .map(([sector, items]) => {

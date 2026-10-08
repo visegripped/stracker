@@ -10,6 +10,7 @@ import { NotificationsContext } from '@context/NotificationsContext';
 import { ErrorBoundary } from 'react-error-boundary';
 import ThemeToggle from '@components/ThemeToggle/ThemeToggle';
 import { navIsActive } from '@utilities/nav';
+import { HistoryChartProvider } from '@components/HistoryChart/HistoryChartProvider';
 
 function fallbackRender({ error }: { error: Error }) {
   return (
@@ -45,7 +46,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname() ?? '';
 
   return (
-    <>
+    <HistoryChartProvider>
       <header>
         <h1 className="logo">
           <Link href="/">
@@ -92,6 +93,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         <ThemeToggle />
         {version && <div className="version">v{version}</div>}
       </footer>
-    </>
+    </HistoryChartProvider>
   );
 }

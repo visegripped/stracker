@@ -9,7 +9,13 @@ Alerts are measured by P0, P1 and P2 where P0 is a must buy and the other two ar
 
 A public Google Sheet CSV lists tracked symbols and is used as the source of daily close prices (`GOOGLE_SHEET_CSV_URL`).
 
-Hosting is Vercel (Next.js). Postgres is Neon. Crons are defined in `vercel.json`:
+Hosting is Vercel (Next.js). Postgres is Neon.
+
+Environments:
+- Production is `https://visegripped.com` (Vercel Production; crons run only here).
+- Branch `dev` is preproduction at `https://stracker.vicegripped.com` (spelled **vice**, not vise). `stracker.visegripped.com` is not a live host.
+
+Crons are defined in `vercel.json`:
 - `/api/cron/backfill` at `0 0 * * 2-6` UTC (5 PM PT Mon–Fri) — new sheet symbols only
 - `/api/cron/daily` at `0 1 * * 2-6` UTC (6 PM PT Mon–Fri) — Google Sheet EOD for every tracked ticker
 

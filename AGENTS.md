@@ -8,6 +8,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
+## Environments
+
+- Production: `https://visegripped.com`
+- Branch `dev` → preproduction: `https://stracker.vicegripped.com` (spelled **vice**, not vise)
+
 ## Stracker cron notes
 
 - `/api/cron/backfill` scheduled job imports **new symbols only**.

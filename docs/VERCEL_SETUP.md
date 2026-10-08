@@ -62,17 +62,27 @@ TypeScript from `SECRET_SAUCE_MODULE_B64` (or local `lib/secretSauce.local.ts`).
 
 ---
 
-## 4. Google OAuth Setup
+## 4. Domains
+
+| Environment    | Host                              | Git branch |
+| -------------- | --------------------------------- | ---------- |
+| Production     | `https://visegripped.com`         | Production branch (crons run here only) |
+| Preproduction  | `https://stracker.vicegripped.com` | `dev` |
+
+The preproduction hostname is spelled **vice** (`vicegripped`), not `visegripped`. `stracker.visegripped.com` does not resolve.
+
+## 5. Google OAuth Setup
 
 1. [console.cloud.google.com](https://console.cloud.google.com) → API & Services → Credentials
 2. Edit the existing OAuth client (shared with giftmanager)
 3. Add to **Authorized JavaScript origins**:
-   - `https://stracker.visegripped.com`
+   - `https://visegripped.com`
+   - `https://stracker.vicegripped.com`
 4. Add to **Authorized redirect URIs** (not needed for implicit flow)
 
 ---
 
-## 5. Resend Setup
+## 6. Resend Setup
 
 1. [resend.com](https://resend.com) → Domains → Add domain `visegripped.com`
 2. Verify DNS records (TXT, DKIM)
@@ -80,17 +90,17 @@ TypeScript from `SECRET_SAUCE_MODULE_B64` (or local `lib/secretSauce.local.ts`).
 
 ---
 
-## 6. Deploy
+## 7. Deploy
 
 ```bash
 vercel deploy --prod
 ```
 
-Or push to `main` (Vercel auto-deploys on push).
+Or push to `main` (Vercel auto-deploys Production at `https://visegripped.com`). Pushing `dev` deploys preproduction at `https://stracker.vicegripped.com`.
 
 ---
 
-## 7. Run Database Migration on Neon
+## 8. Run Database Migration on Neon
 
 With environment variables available locally:
 
@@ -100,7 +110,7 @@ pnpm db:push
 
 ---
 
-## 8. Seed Initial Data
+## 9. Seed Initial Data
 
 After the database is ready and environment variables are set:
 
@@ -114,7 +124,7 @@ This backfills up to 2 years of Tiingo history for CSV symbols not yet in Neon. 
 
 ---
 
-## 9. Verify Cron Jobs
+## 10. Verify Cron Jobs
 
 Crons are defined in `vercel.json` and run only on the **Production** deployment (not Preview URLs such as `stracker-beta.vercel.app`).
 
@@ -133,15 +143,15 @@ Checklist if a job looks idle:
 4. Manual trigger (expect JSON, not `401`):
 
 ```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://stracker.visegripped.com/api/cron/daily
-curl -H "Authorization: Bearer $CRON_SECRET" https://stracker.visegripped.com/api/cron/backfill
+curl -H "Authorization: Bearer $CRON_SECRET" https://visegripped.com/api/cron/daily
+curl -H "Authorization: Bearer $CRON_SECRET" https://visegripped.com/api/cron/backfill
 ```
 
 Missed-day catch-up is **opt-in** (`lib/cron/catchup.ts`). The scheduled cron does not pass a query string, so it skips catch-up. To fill gaps:
 
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" \
-  'https://stracker.visegripped.com/api/cron/backfill?catchup=1'
+  'https://visegripped.com/api/cron/backfill?catchup=1'
 ```
 
 About 10 stale symbols per run (Tiingo free tier is ~50 requests/hour). To drain a large gap: `pnpm fill-gaps`.
