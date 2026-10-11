@@ -7,7 +7,11 @@ import {
   pickLatestAlerts,
   withPriceSnapshot,
 } from '../utilities/quoteGrid';
-import { alertHistoryColumnDefs, symbolsColumnDefs } from '../components/QuoteGrid/QuoteGrid';
+import {
+  alertHistoryColumnDefs,
+  NameWithChart,
+  symbolsColumnDefs,
+} from '../components/QuoteGrid/QuoteGrid';
 
 describe('formatRecentSignal', () => {
   it('joins type and date', () => {
@@ -81,6 +85,7 @@ describe('quote grid column filters', () => {
       expect(byField[field]?.filter).toBe(TEXT_COLUMN_FILTER);
     }
     expect(byField.type?.filter).toBe(TEXT_COLUMN_FILTER);
+    expect(byField.name?.cellRenderer).toBe(NameWithChart);
   });
 
   it('defaults Symbols to alphabetical symbol order and a recent-signal column', () => {
@@ -93,5 +98,6 @@ describe('quote grid column filters', () => {
     for (const field of QUOTE_TEXT_FILTER_FIELDS) {
       expect(cols.find((col) => col.field === field)?.filter).toBe(TEXT_COLUMN_FILTER);
     }
+    expect(cols.find((col) => col.field === 'name')?.cellRenderer).toBe(NameWithChart);
   });
 });

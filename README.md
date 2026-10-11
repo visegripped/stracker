@@ -2,6 +2,9 @@
 
 Private stock tracker. Next.js on Vercel, Postgres on Neon.
 
+- **Production:** https://visegripped.com (crons run only on this deployment)
+- **Preproduction:** https://stracker.vicegripped.com — Vercel deployment for the `dev` branch (hostname is spelled **vice**, not vise)
+
 ## Local development
 
 1. Copy `.env.example` to `.env.local` and fill in values (at minimum `POSTGRES_URL`, `GOOGLE_SHEET_CSV_URL`, and `TIINGO_API_TOKEN`).
@@ -37,7 +40,7 @@ Missed-day **catch-up** still lives in `lib/cron/catchup.ts`, but it is **off by
 
 ```bash
 curl -H "Authorization: Bearer $CRON_SECRET" \
-  'https://stracker.visegripped.com/api/cron/backfill?catchup=1'
+  'https://visegripped.com/api/cron/backfill?catchup=1'
 ```
 
 That fills days after each symbol's `max(date)` from Tiingo (about **10** stale tickers per run). `pnpm fill-gaps` loops that same URL until `catchup.pending` is empty, or until Tiingo returns 429.
@@ -63,10 +66,10 @@ Vercel only runs these on the **Production** deployment, not Preview (for exampl
 Confirm they are scheduled: Vercel dashboard → project → **Cron Jobs**. Trigger a run:
 
 ```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://stracker.visegripped.com/api/cron/daily
-curl -H "Authorization: Bearer $CRON_SECRET" https://stracker.visegripped.com/api/cron/backfill
+curl -H "Authorization: Bearer $CRON_SECRET" https://visegripped.com/api/cron/daily
+curl -H "Authorization: Bearer $CRON_SECRET" https://visegripped.com/api/cron/backfill
 # missed-day catch-up (opt-in; not used by the scheduled cron):
-curl -H "Authorization: Bearer $CRON_SECRET" 'https://stracker.visegripped.com/api/cron/backfill?catchup=1'
+curl -H "Authorization: Bearer $CRON_SECRET" 'https://visegripped.com/api/cron/backfill?catchup=1'
 ```
 
 A `401` means Production `CRON_SECRET` does not match. Empty Cron Jobs after a git push usually means the latest `vercel.json` is not on Production — redeploy Production.

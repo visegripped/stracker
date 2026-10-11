@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import Link from 'next/link';
 import apiPost from '@utilities/apiPost';
+import { StockNameLink } from '@components/HistoryChart/SymbolChartButton';
 import type { GridApi, GridReadyEvent } from 'ag-grid-community';
 import '@views/Alerts.css';
 import {
@@ -113,7 +113,7 @@ function SectorGroupedView({ alerts }: { alerts: AlertRow[] }) {
               <h4>{industry}</h4>
               {items.map((a, i) => (
                 <div key={`${a.symbol}-${i}`} className="alert-row">
-                  <Link href={`/symbol/${a.symbol}`}>{a.symbol}</Link>
+                  <StockNameLink symbol={a.symbol} label={a.symbol} />
                   &nbsp;— {a.type} on {a.date}
                 </div>
               ))}

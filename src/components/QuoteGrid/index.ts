@@ -1,6 +1,7 @@
 export {
   QuoteGrid,
   LinkedSymbol,
+  NameWithChart,
   YTDCell,
   DODCell,
   RecentSignalCell,

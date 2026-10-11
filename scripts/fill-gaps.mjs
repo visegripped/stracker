@@ -12,7 +12,7 @@
 const CRON_SECRET = process.env.CRON_SECRET;
 const BASE_URL =
   process.env.FILL_GAPS_URL ||
-  'https://stracker.visegripped.com/api/cron/backfill';
+  'https://visegripped.com/api/cron/backfill';
 
 if (!CRON_SECRET) {
   console.error('CRON_SECRET not set. Copy .env.example to .env.local first.');

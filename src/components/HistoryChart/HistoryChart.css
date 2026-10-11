@@ -1,0 +1,79 @@
+.name-with-chart {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 100%;
+  vertical-align: middle;
+}
+
+.name-with-chart__label {
+  min-width: 0;
+}
+
+button.chart-peek {
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border-radius: 4px;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  box-shadow: none;
+  flex: none;
+}
+
+button.chart-peek:hover {
+  background: var(--color-bg-muted);
+  color: var(--color-text);
+  box-shadow: none;
+  transform: none;
+}
+
+.history-chart-modal {
+  width: min(52rem, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  margin: auto;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: var(--color-bg-elevated);
+  color: var(--color-text);
+  box-shadow: var(--color-shadow);
+}
+
+.history-chart-modal::backdrop {
+  background: color-mix(in srgb, #161417 55%, transparent);
+}
+
+.history-chart-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px 0;
+}
+
+.history-chart-modal__header h2 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.history-chart-modal__body {
+  padding: 8px 16px 16px;
+}
+
+button.history-chart-modal__close {
+  padding: 0.35em 0.9em;
+  font-size: 0.85rem;
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-text);
+  box-shadow: none;
+}
+
+button.history-chart-modal__close:hover {
+  background: var(--color-bg-muted);
+  color: var(--color-text);
+  box-shadow: none;
+}
